@@ -1,40 +1,76 @@
-import zlib, struct, sys
-def png(path, N, maskable=False):
-    SS=3; bg=(42,67,196); fg=(255,255,255)
-    # bolt polygon in 24-unit space (lucide bolt)
-    bolt=[(13,2),(3,14),(12,14),(11,22),(21,10),(12,10),(13,2)]
-    scale = 0.52 if maskable else 0.62
-    def inside(x,y,poly):
-        c=False
-        for i in range(len(poly)-1):
-            x1,y1=poly[i]; x2,y2=poly[i+1]
-            if (y1>y)!=(y2>y) and x < (x2-x1)*(y-y1)/(y2-y1)+x1: c=not c
-        return c
-    rad = 0 if maskable else 0.22*N
-    rows=[]
+"""Catchall app icon: a yellow sticky note pinned with a red thumbtack on ink blue. Pure Python (no PIL)."""
+import zlib, struct, math, os
+
+BG = (42, 67, 196)
+NOTE = (255, 214, 72); NOTE_LINE = (226, 184, 46); FOLD = (226, 178, 40)
+SHADOW = (14, 24, 80, 0.38)
+PIN = (229, 72, 77); PIN_HI = (255, 150, 150); PIN_DARK = (168, 38, 46)
+
+def over(dst, src, a):
+    return tuple(dst[i] * (1 - a) + src[i] * a for i in range(3))
+
+def sample(u, v, maskable):
+    """u,v in 0..1 icon space -> (rgb, alpha)."""
+    s = 0.8 if maskable else 1.0                     # keep inside Android safe zone
+    x = (u - 0.5) / s + 0.5; y = (v - 0.5) / s + 0.5
+    col = BG
+    th = math.radians(-7)
+    def note_local(px, py, cx=0.5, cy=0.55):
+        dx, dy = px - cx, py - cy
+        return dx * math.cos(-th) - dy * math.sin(-th), dx * math.sin(-th) + dy * math.cos(-th)
+    h = 0.31; fold = 0.11
+    def in_note(lx, ly):
+        if abs(lx) > h or abs(ly) > h: return False
+        return (lx - (h - fold)) + (ly - (h - fold)) <= fold  # bottom-right corner is cut off
+    # shadow of note
+    lx, ly = note_local(x - 0.018, y - 0.03)
+    if in_note(lx, ly): col = over(col, SHADOW[:3], SHADOW[3])
+    # note
+    lx, ly = note_local(x, y)
+    if in_note(lx, ly):
+        col = NOTE
+        for ry in (-0.02, 0.07, 0.16):              # ruled lines
+            if abs(ly - ry) < 0.011 and -0.22 < lx < (0.22 if ry < 0.1 else 0.08): col = NOTE_LINE
+    # folded corner flap: the triangle cut off the bottom-right corner
+    fx, fy = lx - (h - fold), ly - (h - fold)
+    if fx >= 0 and fy >= 0 and fx + fy <= fold: col = FOLD
+    # thumbtack (in icon space, sits on top edge of note)
+    pcx, pcy = 0.5, 0.29
+    r = math.hypot(x - pcx - 0.012, y - pcy - 0.022)
+    if r < 0.095: col = over(col, SHADOW[:3], 0.35)   # pin shadow
+    r = math.hypot(x - pcx, y - pcy)
+    if r < 0.088:
+        col = PIN
+        if math.hypot(x - pcx + 0.004, y - pcy - 0.004) > 0.074 and (y - pcy) > 0: col = PIN_DARK  # rim
+        if math.hypot(x - pcx + 0.03, y - pcy + 0.03) < 0.026: col = PIN_HI
+    return col
+
+def png(path, N, rounded, maskable=False):
+    SS = 4 if N <= 64 else 3
+    rad = 0.22 * N if rounded else 0
+    raw = bytearray()
     for py in range(N):
-        row=bytearray([0])
+        raw.append(0)
         for px in range(N):
-            cov_bg=0; cov_fg=0
+            acc = [0.0, 0.0, 0.0]; cov = 0
             for sy in range(SS):
                 for sx in range(SS):
-                    x=px+(sx+.5)/SS; y=py+(sy+.5)/SS
-                    # rounded square
-                    dx=max(rad-x,0,x-(N-rad)); dy=max(rad-y,0,y-(N-rad))
-                    if rad and dx*dx+dy*dy>rad*rad: continue
-                    cov_bg+=1
-                    u=(x/N-0.5)/scale*24+12; v=(y/N-0.5)/scale*24+12
-                    if inside(u,v,bolt): cov_fg+=1
-            t=SS*SS; a=cov_bg/t; f=cov_fg/max(cov_bg,1)
-            col=[round(bg[i]*(1-f)+fg[i]*f) for i in range(3)]
-            row+=bytes(col+[round(a*255)])
-        rows.append(bytes(row))
-    raw=b''.join(rows)
-    def chunk(t,d): return struct.pack('>I',len(d))+t+d+struct.pack('>I',zlib.crc32(t+d)&0xffffffff)
-    data=b'\x89PNG\r\n\x1a\n'+chunk(b'IHDR',struct.pack('>IIBBBBB',N,N,8,6,0,0,0))+chunk(b'IDAT',zlib.compress(raw,9))+chunk(b'IEND',b'')
-    open(path,'wb').write(data)
-png('catchall-site/icon-180.png',180,True)  # iOS rounds corners itself
-png('catchall-site/icon-192.png',192)
-png('catchall-site/icon-512.png',512)
-png('catchall-site/icon-maskable-512.png',512,True)
-png('catchall-site/favicon-32.png',32)
+                    X = px + (sx + .5) / SS; Y = py + (sy + .5) / SS
+                    if rad:
+                        dx = max(rad - X, 0, X - (N - rad)); dy = max(rad - Y, 0, Y - (N - rad))
+                        if dx * dx + dy * dy > rad * rad: continue
+                    c = sample(X / N, Y / N, maskable); cov += 1
+                    for i in range(3): acc[i] += c[i]
+            if cov: raw += bytes([round(acc[0] / cov), round(acc[1] / cov), round(acc[2] / cov), round(255 * cov / (SS * SS))])
+            else: raw += bytes([0, 0, 0, 0])
+    def chunk(t, d): return struct.pack('>I', len(d)) + t + d + struct.pack('>I', zlib.crc32(t + d) & 0xffffffff)
+    open(path, 'wb').write(b'\x89PNG\r\n\x1a\n' + chunk(b'IHDR', struct.pack('>IIBBBBB', N, N, 8, 6, 0, 0, 0)) + chunk(b'IDAT', zlib.compress(bytes(raw), 9)) + chunk(b'IEND', b''))
+
+if __name__ == '__main__':
+    d = os.path.dirname(os.path.abspath(__file__))
+    png(os.path.join(d, 'icon-512.png'), 512, True)
+    png(os.path.join(d, 'icon-180.png'), 180, False)          # iOS rounds the corners itself
+    png(os.path.join(d, 'icon-192.png'), 192, True)
+    png(os.path.join(d, 'icon-maskable-512.png'), 512, False, True)
+    png(os.path.join(d, 'favicon-32.png'), 32, True)
+    print('icons written')
