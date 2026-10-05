@@ -1,0 +1,102 @@
+"""Wrap the Catchall artifact fragment into a standalone GitHub Pages app.
+Usage: python3 build_catchall.py <artifact.html> <site_dir> <version>
+Writes index.html, version.json, manifest.webmanifest (icons are made by make_icon.py)."""
+import sys, json, re, os
+src, site, version = sys.argv[1], sys.argv[2], sys.argv[3]
+frag = open(src).read()
+title = re.search(r'<title>(.*?)</title>', frag).group(1)
+frag = re.sub(r'<title>.*?</title>\n?', '', frag, count=1)
+head = f'''<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>{title}</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="{title}">
+<meta name="theme-color" content="#eaeef4" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0d1119" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="favicon-32.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<style>
+:root{{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}}
+body{{margin:0}}
+img{{max-width:100%}}
+[hidden]{{display:none!important}}
+</style>
+</head>
+<body>
+'''
+banner = '''
+<div id="__update-banner" style="display:none;position:fixed;left:0;right:0;bottom:0;z-index:99999;background:#101820;color:#e7eef5;font:600 14px/1.4 -apple-system,BlinkMacSystemFont,sans-serif;padding:12px 16px;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));align-items:center;justify-content:space-between;gap:12px;box-shadow:0 -2px 12px rgba(0,0,0,.4);">
+  <span>A newer version of __APP__ is available.</span>
+  <span style="display:flex;gap:8px;flex-shrink:0;">
+    <button id="__update-btn" style="font:700 13px/1 -apple-system,sans-serif;background:#ff7a33;color:#1c0d04;border:0;border-radius:4px;padding:8px 14px;cursor:pointer;">Update</button>
+    <button id="__dismiss-btn" style="font:600 13px/1 -apple-system,sans-serif;background:transparent;color:#93a6b8;border:1px solid #324459;border-radius:4px;padding:8px 14px;cursor:pointer;">Later</button>
+  </span>
+</div>
+<script>
+(function () {
+  var CURRENT_VERSION = "__VERSION__";
+  var banner = document.getElementById('__update-banner');
+  var updateBtn = document.getElementById('__update-btn');
+  var dismissBtn = document.getElementById('__dismiss-btn');
+
+  function checkVersion() {
+    fetch('./version.json?_=' + Date.now(), { cache: 'no-store' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (data) {
+        if (data && data.version && data.version !== CURRENT_VERSION) {
+          banner.style.display = 'flex';
+        }
+      })
+      .catch(function () { /* offline or blocked -- say nothing */ });
+  }
+
+  updateBtn.addEventListener('click', function () {
+    updateBtn.textContent = 'Updating…';
+    updateBtn.disabled = true;
+    fetch('./?_=' + Date.now(), { cache: 'no-store' })
+      .then(function (r) { return r.text(); })
+      .then(function (freshHtml) {
+        // No location.href / reload / pushState anywhere in this path --
+        // that navigation is what wiped local data on a prior mirror.
+        document.open();
+        document.write(freshHtml);
+        document.close();
+      })
+      .catch(function () {
+        updateBtn.textContent = 'Update';
+        updateBtn.disabled = false;
+      });
+  });
+
+  dismissBtn.addEventListener('click', function () {
+    banner.style.display = 'none';
+  });
+
+  if (document.readyState === 'complete') {
+    checkVersion();
+  } else {
+    addEventListener('load', checkVersion);
+  }
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) checkVersion(); });
+})();
+</script>
+</body>
+</html>
+'''.replace('__APP__', title).replace('__VERSION__', version)
+open(os.path.join(site, 'index.html'), 'w').write(head + frag + banner)
+json.dump({'version': version}, open(os.path.join(site, 'version.json'), 'w'), indent=2)
+manifest = {
+  'name': title, 'short_name': title, 'start_url': './', 'scope': './', 'display': 'standalone',
+  'background_color': '#eaeef4', 'theme_color': '#2a43c4',
+  'icons': [
+    {'src': 'icon-192.png', 'sizes': '192x192', 'type': 'image/png'},
+    {'src': 'icon-512.png', 'sizes': '512x512', 'type': 'image/png'},
+    {'src': 'icon-maskable-512.png', 'sizes': '512x512', 'type': 'image/png', 'purpose': 'maskable'}]}
+json.dump(manifest, open(os.path.join(site, 'manifest.webmanifest'), 'w'), indent=2)
+print('built', title, 'v' + version)
