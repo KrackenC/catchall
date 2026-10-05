@@ -136,6 +136,10 @@ main{max-width:1200px;margin:0 auto;padding:18px 16px 80px}
 .cbox .i{width:13px;height:13px;stroke-width:3}
 .cbox[aria-checked="true"]{background:var(--accent);border-color:var(--accent)}
 .items li.done span{text-decoration:line-through;color:var(--muted)}
+.items li .n-body{flex:1;min-width:0}
+.item-x{padding:2px;margin-left:auto}
+.item-x .i{width:15px;height:15px}
+@media (hover:hover){ .item-x{opacity:0} .items li:hover .item-x,.item-x:focus-visible{opacity:1} }
 .n-imgs{display:flex;gap:6px;flex-wrap:wrap}
 .n-imgs button{border:0;padding:0;background:none;border-radius:8px;overflow:hidden;width:min(220px,100%);aspect-ratio:4/3;max-width:100%}
 .n-imgs img{width:100%;height:100%;object-fit:cover;display:block}
@@ -476,14 +480,14 @@ function initGist(){
 document.addEventListener('visibilitychange', () => { if (!IN_ARTIFACT && !document.hidden && gist.id) syncNow(); });
 window.addEventListener('focus', () => { if (!IN_ARTIFACT && gist.id && Date.now() - gist.last > 10000) syncNow(); });
 window.addEventListener('pagehide', () => { if (!IN_ARTIFACT && gist.dirty) { clearTimeout(gist.timer); syncNow(); } });
-async function showQR(){
-  const box = $('#qrBox'); if (!box) return;
+async function showQR(text = gist.token, boxId = 'qrBox', caption){
+  const box = $('#' + boxId); if (!box) return;
   if (!window.qrcode){
     await new Promise((res, rej) => { const sc = document.createElement('script'); sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js'; sc.onload = res; sc.onerror = rej; document.head.appendChild(sc); }).catch(() => {});
   }
-  if (!window.qrcode){ box.innerHTML = '<p class="small">Could not load the QR code. Copy the token instead.</p>'; return; }
-  const q = qrcode(0, 'M'); q.addData(gist.token); q.make();
-  box.innerHTML = `<div style="background:#fff;padding:10px;border-radius:10px;width:max-content;max-width:100%">${q.createSvgTag({ cellSize:5, margin:2 })}</div><p class="small">Scan with your phone's camera, copy the text it shows, then paste it into Settings → Sync in Catchall on the phone. This code is a password for your notes, so don't share it.</p>`;
+  if (!window.qrcode){ box.innerHTML = '<p class="small">Could not load the QR code. Check your connection and try again.</p>'; return; }
+  const q = qrcode(0, 'M'); q.addData(text); q.make();
+  box.innerHTML = `<div style="background:#fff;padding:10px;border-radius:10px;width:max-content;max-width:100%">${q.createSvgTag({ cellSize:5, margin:2 })}</div><p class="small">${caption || "Scan with your phone's camera, copy the text it shows, then paste it into Settings → Sync in Catchall on the phone. This code is a password for your notes, so don't share it."}</p>`;
 }
 function syncSectionHTML(){
   if (IN_ARTIFACT) return `<div class="set-sec"><h3>Phone and PC</h3><p class="small">For one notebook that syncs between your phone and computer, use the standalone copy at <a href="https://krackenc.github.io/catchall/" target="_blank" rel="noopener">krackenc.github.io/catchall</a>. To move notes over, export a JSON backup here and restore it there.</p></div>`;
@@ -749,7 +753,8 @@ function noteBody(n){
   let h = '';
   if (n.kind === 'list'){
     if (n.text) h += `<div class="n-body n-title">${rich(n.text)}</div>`;
-    h += `<ul class="items">${(n.items || []).map((it, i) => `<li class="${it.done ? 'done' : ''}"><button type="button" class="cbox" role="checkbox" aria-checked="${!!it.done}" aria-label="${esc(it.t)}" data-act="item" data-id="${n.id}" data-i="${i}">${it.done ? icon('check') : ''}</button><span class="n-body">${rich(it.t)}</span></li>`).join('')}</ul>`;
+    h += `<ul class="items">${(n.items || []).map((it, i) => `<li class="${it.done ? 'done' : ''}"><button type="button" class="cbox" role="checkbox" aria-checked="${!!it.done}" aria-label="${esc(it.t)}" data-act="item" data-id="${n.id}" data-i="${i}">${it.done ? icon('check') : ''}</button><span class="n-body">${rich(it.t)}</span><button type="button" class="ghost item-x" data-act="itemdel" data-id="${n.id}" data-i="${i}" aria-label="Remove ${esc(it.t)}" title="Remove item">${icon('x')}</button></li>`).join('')}</ul>`;
+    if ((n.items || []).some(it => it.done)) h += `<div><button type="button" class="btn" data-act="cleardone" data-id="${n.id}" style="font-size:13px;padding:4px 10px">${icon('check')}Remove checked items</button></div>`;
   } else if (n.text) h += `<div class="n-body">${rich(n.text)}</div>`;
   const v = videoLink(n); if (v) h += `<div>${v}</div>`;
   if ((n.images || []).length) h += `<div class="n-imgs">${n.images.map((src, i) => `<button type="button" data-act="zoom" data-id="${n.id}" data-i="${i}" aria-label="Open image"><img src="${esc(src)}" alt="" loading="lazy"></button>`).join('')}</div>`;
@@ -1053,11 +1058,12 @@ function toast(msg, opt = {}){
   el.querySelector('.msg').textContent = msg;
   const btn = (label, fn) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = label; b.onclick = () => { fn(); el.remove(); }; el.appendChild(b); };
   if (opt.undo) btn('Undo', () => { delNote(opt.undo); render(); });
+  if (opt.restore) btn('Undo', () => { putNote(clone(opt.restore)); render(); toast('Note restored'); });
   if (opt.alarm){ btn('Snooze 10 min', () => completeReminder(opt.alarm, 10)); btn('Done', () => completeReminder(opt.alarm)); }
   else btn('Dismiss', () => {});
   box.appendChild(el);
   while (box.children.length > 4) box.firstChild.remove();
-  if (!opt.alarm) setTimeout(() => el.remove(), opt.undo ? 5000 : 4000);
+  if (!opt.alarm) setTimeout(() => el.remove(), opt.undo || opt.restore ? 7000 : 4000);
 }
 
 /* ---------- editor ---------- */
@@ -1142,6 +1148,9 @@ function openSettings(){
       <div id="tagRows" style="display:flex;flex-direction:column;gap:6px"></div>
       <div class="row"><button type="button" class="btn" data-set="newtag">${icon('plus')}New tag</button></div>
     </div>
+    <div class="set-sec"><h3>On your phone</h3>
+      <p class="small">Open <b>krackenc.github.io/catchall</b> on your phone, or scan a code from this screen with the phone's camera.</p>
+      <div class="row"><button type="button" class="btn" data-set="phoneqr">Show QR code</button></div><div id="phoneQr"></div></div>
     ${syncSectionHTML()}
     ${pushSectionHTML()}
     <div class="set-sec"><h3>Your data · ${total} note${total === 1 ? '' : 's'}</h3>
@@ -1245,10 +1254,14 @@ document.addEventListener('click', e => {
     case 'pin': putNote({ ...n, pinned: !n.pinned }); render(); break;
     case 'archive': putNote({ ...n, archived: !n.archived }); render(); toast(n.archived ? 'Moved back to the feed' : 'Archived'); break;
     case 'edit': openEditor(id); break;
-    case 'del':
-      if (t.dataset.armed){ delNote(id); render(); toast('Deleted'); }
-      else { t.dataset.armed = '1'; t.classList.add('on'); t.style.color = 'var(--danger)'; t.title = 'Click again to delete'; t.setAttribute('aria-label', 'Confirm delete'); setTimeout(() => { if (t.isConnected){ delete t.dataset.armed; t.style.color = ''; t.title = 'Delete'; } }, 3000); }
+    case 'del': { const before = clone(n); delNote(id); render(); toast('Note deleted', { restore: before }); break; }
+    case 'itemdel': case 'cleardone': {
+      const before = clone(n);
+      const items = d.act === 'itemdel' ? n.items.filter((_, i) => i !== +d.i) : n.items.filter(x => !x.done);
+      putNote({ ...n, items, kind: items.length ? 'list' : 'note' }); render();
+      toast(d.act === 'itemdel' ? 'Item removed' : 'Checked items removed', { restore: before });
       break;
+    }
     case 'item': { const items = n.items.map((x, i) => i === +d.i ? { ...x, done: !x.done } : x); putNote({ ...n, items }); render(); break; }
     case 'zoom': $('#lbImg').src = n.images[+d.i]; $('#lbDlg').showModal(); break;
     case 'mv': { const tags = (n.tags || []).filter(x => x !== d.from); tags.push(d.to); putNote({ ...n, tags }); render(); break; }
@@ -1265,8 +1278,8 @@ function edAction(a, t){
   else if (a === 'rmimg'){ edState.images.splice(+t.dataset.i, 1); renderEdImgs(); }
   else if (a === 'newtag'){ const name = $('#edText').value; $('#edDlg').close(); openNewTag(tag => { openEditor(edState.id); $('#edText').value = name; edState.tags.push(tag.id); renderEdTags(); }); }
   else if (a === 'delete'){
-    if (edState.armed){ delNote(edState.id); $('#edDlg').close(); render(); toast('Deleted'); }
-    else { edState.armed = true; t.classList.add('armed'); t.innerHTML = icon('trash') + 'Click again to delete'; }
+    const before = clone(S.notes.get(edState.id));
+    delNote(edState.id); $('#edDlg').close(); render(); toast('Note deleted', { restore: before });
   }
 }
 function setAction(a, t){
@@ -1330,6 +1343,7 @@ function setAction(a, t){
   }
   if (a === 'syncnow'){ syncNow().then(openSettings); return; }
   if (a === 'qr'){ showQR(); return; }
+  if (a === 'phoneqr'){ showQR(APP_URL, 'phoneQr', 'Point your phone camera at this and tap the link. On iPhone, then tap Share → Add to Home Screen. On Android, tap ⋮ → Add to Home screen. Open Catchall from the new icon, then set up sync in its Settings.'); return; }
   if (a === 'disconnect'){
     if (!t.classList.contains('armed')){ t.classList.add('armed'); t.textContent = 'Stop syncing here? Click again'; return; }
     disconnectGist(); openSettings(); toast('This device no longer syncs. Its notes stay here.'); return;
@@ -1436,7 +1450,7 @@ window.__catchallTest = { parseReminder, parseCapture, parseStructure, nextOccur
 </div>
 <script>
 (function () {
-  var CURRENT_VERSION = "3";
+  var CURRENT_VERSION = "4";
   var banner = document.getElementById('__update-banner');
   var updateBtn = document.getElementById('__update-btn');
   var dismissBtn = document.getElementById('__dismiss-btn');
