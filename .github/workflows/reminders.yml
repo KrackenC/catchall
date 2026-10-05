@@ -35,7 +35,7 @@ jobs:
           GIST_OWNER: ${{ github.repository_owner }}
         run: node scripts/schedule-reminders.mjs
       - name: Remember what was queued
-        if: always()
+        if: always() && hashFiles('.push-state/state.json') != ''
         uses: actions/cache/save@v4
         with:
           path: .push-state
