@@ -293,9 +293,10 @@ const S = {
 };
 for (const n of LS.get('notes', [])) if (n && n.id) S.notes.set(n.id, n);
 S.tags = LS.get('tags', []); S.tagsUpdatedAt = LS.get('tagsUpdatedAt', 0);
+S.push = Object.assign({ topic:'', enabled:false, showText:true, updatedAt:0 }, LS.get('push', {}));
 let localWarned = false;
 function saveLocal(){
-  const ok = LS.set('notes', [...S.notes.values()]) && LS.set('tags', S.tags) && LS.set('tagsUpdatedAt', S.tagsUpdatedAt);
+  const ok = LS.set('notes', [...S.notes.values()]) && LS.set('tags', S.tags) && LS.set('tagsUpdatedAt', S.tagsUpdatedAt) && LS.set('push', S.push);
   if (!ok && !localWarned && sync.state !== 'synced'){ localWarned = true; toast('This browser is out of room for notes. Export a backup from Settings, or remove some images.'); }
 }
 const saveSettings = () => LS.set('settings', S.settings);
@@ -378,13 +379,16 @@ async function gh(path, opts = {}){
 function snapshotData(){
   const cutoff = Date.now() - 120 * 864e5;
   for (const [id, n] of S.notes) if (n.deleted && n.updatedAt < cutoff) S.notes.delete(id);
-  return { app:'Catchall', v:1, savedAt: Date.now(), tags: S.tags, tagsUpdatedAt: S.tagsUpdatedAt, notes: [...S.notes.values()] };
+  return { app:'Catchall', v:1, savedAt: Date.now(), tags: S.tags, tagsUpdatedAt: S.tagsUpdatedAt, push: S.push, notes: [...S.notes.values()] };
 }
 function mergeRemote(data){
   let changed = false, localNewer = false;
   if (!data || !Array.isArray(data.notes)) return { changed, localNewer: true };
   if ((data.tagsUpdatedAt || 0) > S.tagsUpdatedAt){ S.tags = data.tags || []; S.tagsUpdatedAt = data.tagsUpdatedAt; changed = true; }
   else if (S.tagsUpdatedAt > (data.tagsUpdatedAt || 0)) localNewer = true;
+  const rp = data.push || {};
+  if ((rp.updatedAt || 0) > S.push.updatedAt){ S.push = Object.assign({}, S.push, rp); changed = true; }
+  else if (S.push.updatedAt > (rp.updatedAt || 0)) localNewer = true;
   const seen = new Set();
   for (const n of data.notes){
     if (!n || !n.id) continue; seen.add(n.id);
@@ -479,8 +483,57 @@ function syncSectionHTML(){
 }
 
 /* ---------- mutations ---------- */
-function putNote(n){ n.updatedAt = Date.now(); S.notes.set(n.id, n); saveLocal(); push(n.id); }
-function delNote(id){ S.notes.set(id, { id, deleted:true, updatedAt: Date.now() }); saveLocal(); push(id); }
+function putNote(n){ const prev = S.notes.get(n.id); n.updatedAt = Date.now(); S.notes.set(n.id, n); saveLocal(); push(n.id); notifyChange(prev, n); }
+function delNote(id){ const prev = S.notes.get(id); S.notes.set(id, { id, deleted:true, updatedAt: Date.now() }); saveLocal(); push(id); notifyChange(prev, S.notes.get(id)); }
+
+/* ---------- phone push notifications (standalone copy, via the ntfy app) ----------
+   ntfy.sh can't take back a queued message, so a reminder is only queued in the
+   45 minutes before it's due: by any open copy of Catchall, or by the repo's GitHub
+   Action (every 15 min). remind.queued records the time already queued, so the other
+   side skips it. The note id is the ntfy sequence id, so a repeat shows as one notification. */
+const NTFY = 'https://ntfy.sh/', APP_URL = 'https://krackenc.github.io/catchall/', PUSH_AHEAD = 45 * 60e3;
+const pushReady = () => !IN_ARTIFACT && S.push.enabled && !!S.push.topic;
+const activeRem = n => !!(n && !n.deleted && !n.archived && n.remind && !n.remind.sent);
+const remKey = n => activeRem(n) ? [n.remind.at, n.remind.repeat || '', n.text || '', (n.items || []).length].join('|') : '';
+const notifyLabel = n => n.kind === 'list' ? (n.text || (n.items || []).map(i => i.t).join(', ') || 'List') : (n.text || 'Reminder');
+function ntfy(id, opts){ return fetch(NTFY + encodeURIComponent(S.push.topic) + (id ? '/' + id : ''), opts); }
+const queuing = new Set();
+function notifySchedule(n){
+  if (!pushReady() || !activeRem(n)) return;
+  const now = Date.now(); let at = n.remind.at;
+  if (at <= now + 15e3 && n.remind.repeat) at = nextOccurrence(at, n.remind.repeat, now);
+  if (at <= now + 15e3 || at - now > PUSH_AHEAD || n.remind.queued === at || queuing.has(n.id + '@' + at)) return;
+  queuing.add(n.id + '@' + at);
+  ntfy(n.id, { method:'POST', body: S.push.showText ? notifyLabel(n) : 'Open Catchall to see it.',
+    headers: { Title:'Catchall reminder', At: String(Math.floor(at / 1000)), Tags:'pushpin', Priority:'4', Click: APP_URL } })
+    .then(r => {
+      if (!r.ok) { queuing.delete(n.id + '@' + at); return; }
+      const cur = S.notes.get(n.id);
+      if (activeRem(cur)){ cur.remind = { ...cur.remind, queued: at }; cur.updatedAt = Date.now(); saveLocal(); push(cur.id); }
+    })
+    .catch(() => queuing.delete(n.id + '@' + at));
+}
+function notifyChange(prev, n){ if (pushReady() && remKey(prev) !== remKey(n) && activeRem(n)) notifySchedule(n); }
+function notifyAll(){ if (pushReady()) for (const n of liveNotes()) notifySchedule(n); }
+function setPush(patch){ Object.assign(S.push, patch, { updatedAt: Date.now() }); saveLocal(); schedulePush(); }
+function pushSectionHTML(){
+  if (IN_ARTIFACT) return '';
+  if (!S.push.enabled) return `<div class="set-sec"><h3>Phone notifications</h3>
+    <p class="small">Get reminders as push notifications on your phone, even when Catchall is closed. This uses the free ntfy app.</p>
+    <div class="row"><button type="button" class="btn primary" data-set="pushon">${icon('bell')}Turn on</button></div></div>`;
+  return `<div class="set-sec"><h3>Phone notifications · on</h3>
+    <ol class="small" style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px">
+      <li>On your phone, install the free <b>ntfy</b> app: <a href="https://apps.apple.com/app/ntfy/id1625396347" target="_blank" rel="noopener">iPhone</a> · <a href="https://play.google.com/store/apps/details?id=io.heckel.ntfy" target="_blank" rel="noopener">Android</a>.</li>
+      <li>In ntfy, tap <b>+</b>, paste this topic name, leave the server as ntfy.sh, and tap Subscribe:<br>
+        <span class="row" style="margin-top:4px"><code id="pushTopic" style="font:13px var(--font-mono);background:var(--surface-2);padding:4px 8px;border-radius:6px;user-select:all;overflow-wrap:anywhere">${esc(S.push.topic)}</code><button type="button" class="btn" data-set="pushcopy">Copy</button></span></li>
+      <li>Allow notifications when ntfy asks, then tap <b>Send test</b> below.</li>
+    </ol>
+    <div class="row"><button type="button" class="btn" data-set="pushtest">Send test</button>
+      <button type="button" class="btn" data-set="pushtext">Reminder text in notification: ${S.push.showText ? 'shown' : 'hidden'}</button>
+      <button type="button" class="btn danger" data-set="pushoff">Turn off</button></div>
+    <p class="small">Each reminder is handed to ntfy in the 45 minutes before it's due, by a background job that runs every 15 minutes even when no device has Catchall open (or sooner, by any open copy of Catchall). If you change or delete a reminder in those last 45 minutes, the original may still arrive. Treat the topic name like a password: anyone who has it can see these notifications.</p>
+    ${gist.id ? '' : '<p class="small"><b>Turn on Sync across devices too.</b> The background job reads your reminders from the synced copy.</p>'}</div>`;
+}
 function commitTags(){ S.tagsUpdatedAt = Date.now(); saveLocal(); pushTags(); }
 function ensureTag(name){
   const clean = name.replace(/^#/, '').trim(); if (!clean) return null;
@@ -946,6 +999,7 @@ function chime(){
 }
 const alerted = new Set();
 function tick(){
+  if (!document.hidden) notifyAll();
   const now = Date.now(); let any = false;
   for (const n of liveNotes()){
     const r = n.remind;
@@ -1067,6 +1121,7 @@ function openSettings(){
       <div class="row"><button type="button" class="btn" data-set="newtag">${icon('plus')}New tag</button></div>
     </div>
     ${syncSectionHTML()}
+    ${pushSectionHTML()}
     <div class="set-sec"><h3>Your data · ${total} note${total === 1 ? '' : 's'}</h3>
       <p class="small">${sync.state === 'synced' ? (IN_ARTIFACT ? 'Synced to your Claude account. Only you can see these notes.' : 'Saved on this device and in your private gist.') : 'Saved on this device.'} Export a backup now and then.</p>
       <div class="row"><label class="sr" for="expScope">Which notes</label><select id="expScope" class="fsel"><option value="all">All notes</option><option value="view">Only what the feed is showing</option><option value="pinned">Pinned notes</option></select>
@@ -1228,6 +1283,27 @@ function setAction(a, t){
     connectGist(tok).then(() => { initGist(); openSettings(); toast('Sync is on for this device'); })
       .catch(e => { gist.token = ''; t.disabled = false; t.textContent = 'Connect';
         msg.textContent = e && e.code === 'auth' ? 'GitHub did not accept that token. Check you copied all of it.' : e && e.code === 'scope' ? 'That token cannot use gists. Make a new one with the gist box ticked.' : 'Could not reach GitHub. Check your connection and try again.'; });
+    return;
+  }
+  if (a === 'pushon'){
+    let topic = S.push.topic;
+    if (!topic){ const b = new Uint8Array(12); crypto.getRandomValues(b); topic = 'catchall-' + [...b].map(x => x.toString(36).padStart(2, '0')).join('').slice(0, 20); }
+    setPush({ topic, enabled:true }); notifyAll(); openSettings(); return;
+  }
+  if (a === 'pushoff'){
+    if (!t.classList.contains('armed')){ t.classList.add('armed'); t.textContent = 'Stop phone notifications? Click again'; return; }
+    setPush({ enabled:false }); openSettings(); toast('Phone notifications are off'); return;
+  }
+  if (a === 'pushtext'){ setPush({ showText: !S.push.showText }); notifyAll(); openSettings(); return; }
+  if (a === 'pushcopy'){
+    navigator.clipboard?.writeText(S.push.topic).then(() => toast('Topic copied'), () => { const r = document.createRange(); r.selectNodeContents($('#pushTopic')); getSelection().removeAllRanges(); getSelection().addRange(r); });
+    return;
+  }
+  if (a === 'pushtest'){
+    t.disabled = true;
+    ntfy('', { method:'POST', body:'Notifications from Catchall are working.', headers:{ Title:'Catchall test', Tags:'pushpin', Click: APP_URL } })
+      .then(r => { t.disabled = false; toast(r.ok ? 'Test sent. It should appear on your phone within a few seconds.' : 'ntfy refused the test (' + r.status + '). Try again in a minute.'); })
+      .catch(() => { t.disabled = false; toast('Could not reach ntfy.sh. Check your connection.'); });
     return;
   }
   if (a === 'syncnow'){ syncNow().then(openSettings); return; }

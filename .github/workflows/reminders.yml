@@ -1,0 +1,52 @@
+name: Queue phone reminders
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: reminders
+  cancel-in-progress: false
+
+jobs:
+  queue:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Restore what was already queued
+        uses: actions/cache/restore@v4
+        with:
+          path: .push-state
+          key: push-state-${{ github.run_id }}
+          restore-keys: push-state-
+      - name: Queue reminders with ntfy
+        env:
+          GIST_ID: ${{ secrets.GIST_ID }}
+          GIST_OWNER: ${{ github.repository_owner }}
+        run: node scripts/schedule-reminders.mjs
+      - name: Remember what was queued
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: .push-state
+          key: push-state-${{ github.run_id }}
+      # GitHub pauses scheduled workflows after 60 days without a commit. This keeps it alive.
+      - name: Keep the schedule alive
+        run: |
+          last=$(git log -1 --format=%ct)
+          if [ $(( $(date +%s) - last )) -gt $(( 45 * 86400 )) ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898+github-actions[bot]@users.noreply.github.com"
+            git commit --allow-empty -m "Keep reminder schedule active"
+            git push
+          fi
