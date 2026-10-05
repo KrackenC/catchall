@@ -52,6 +52,7 @@ button{cursor:pointer}
 
 main{max-width:1200px;margin:0 auto;padding:18px 16px 80px}
 .col{max-width:740px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+.col .col{width:100%}
 
 /* composer */
 .composer{background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:12px 12px 10px;transition:border-color .15s}
@@ -104,6 +105,12 @@ main{max-width:1200px;margin:0 auto;padding:18px 16px 80px}
 .note{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:var(--pad) var(--pad) 10px;display:flex;flex-direction:column;gap:8px;position:relative;min-width:0}
 .note.pinned{background:color-mix(in srgb,var(--hi) 11%,var(--surface));border-color:color-mix(in srgb,var(--hi) 55%,var(--line))}
 .note.arch{opacity:.7}
+.note.colored{background:color-mix(in srgb,var(--nc) 22%,var(--surface));border-color:color-mix(in srgb,var(--nc) 60%,var(--line))}
+.swatches{display:flex;flex-wrap:wrap;gap:6px;padding:4px 0}
+.nswatch{width:28px;height:28px;border-radius:50%;border:2px solid var(--line);background:var(--nc);padding:0}
+.nswatch.none{background:linear-gradient(135deg,transparent 45%,var(--danger) 45% 55%,transparent 55%),var(--surface)}
+.nswatch[aria-pressed="true"]{border-color:var(--fg);box-shadow:0 0 0 2px var(--surface) inset}
+.n-actions .ghost.del:hover{color:var(--danger)}
 .note.dragging{opacity:.4}
 .n-body{white-space:pre-wrap;overflow-wrap:anywhere;min-width:0}
 .n-body a{color:var(--accent);text-decoration-thickness:1px;text-underline-offset:2px}
@@ -134,7 +141,7 @@ main{max-width:1200px;margin:0 auto;padding:18px 16px 80px}
 .n-actions{display:flex;gap:2px;justify-content:flex-end;margin:-4px -6px -4px 0}
 .n-actions .ghost .i{width:16px;height:16px}
 .n-actions .ghost.on{color:var(--accent)}
-@media (hover:hover){ .note .n-actions{opacity:0;transition:opacity .12s} .note:hover .n-actions,.note:focus-within .n-actions{opacity:1} }
+@media (hover:hover){ .note .n-actions .ghost{opacity:.65} .note:hover .n-actions .ghost,.n-actions .ghost:focus-visible{opacity:1} }
 .pin-flag{position:absolute;top:10px;right:10px;color:color-mix(in srgb,var(--hi) 70%,var(--fg))}
 .pin-flag .i{width:15px;height:15px}
 .note.pinned .n-body{padding-right:20px}
@@ -269,7 +276,8 @@ const P = {
   repeat:'<path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/>',
   plus:'<path d="M5 12h14"/><path d="M12 5v14"/>',
   send:'<path d="m5 12 7-7 7 7"/><path d="M12 19V5"/>',
-  bolt:'<path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/>'
+  bolt:'<path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/>',
+  palette:'<circle cx="13.5" cy="6.5" r="1.2" fill="currentColor" stroke="none"/><circle cx="17.5" cy="10.5" r="1.2" fill="currentColor" stroke="none"/><circle cx="8.5" cy="7.5" r="1.2" fill="currentColor" stroke="none"/><circle cx="6.5" cy="12.5" r="1.2" fill="currentColor" stroke="none"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/>'
 };
 const icon = (n, cls='') => `<svg class="i ${cls}" viewBox="0 0 24 24" aria-hidden="true">${P[n]}</svg>`;
 const $ = (s, r=document) => r.querySelector(s);
@@ -287,6 +295,10 @@ const COLORS = [
   ['Red','#e5484d'],['Orange','#f0731c'],['Amber','#d9a12c'],['Green','#30a46c'],['Teal','#12a594'],
   ['Cyan','#0796bd'],['Blue','#3e63dd'],['Violet','#6e56cf'],['Pink','#d6409f'],['Brown','#a87a54'],['Gray','#868c99']
 ];
+const NOTE_COLORS = [['none','No color',''],['yellow','Yellow','#f2cf3a'],['orange','Orange','#f0731c'],['red','Red','#e5484d'],['pink','Pink','#d6409f'],
+  ['purple','Purple','#6e56cf'],['blue','Blue','#3e63dd'],['teal','Teal','#12a594'],['green','Green','#30a46c'],['gray','Gray','#868c99']];
+const noteHex = key => (NOTE_COLORS.find(c => c[0] === key) || [])[2] || '';
+const swatchRow = (cur, attrs) => NOTE_COLORS.map(([k, label, hex]) => `<button type="button" class="nswatch ${k === 'none' ? 'none' : ''}" style="--nc:${hex || 'transparent'}" ${attrs} data-c="${k}" aria-pressed="${(cur || 'none') === k}" aria-label="${label}" title="${label}"></button>`).join('');
 const DEFAULT_SETTINGS = { theme:'system', font:'legible', density:'comfy', boardTags:[], sound:true, view:'feed' };
 const S = {
   notes: new Map(), tags: [], tagsUpdatedAt: 0,
@@ -739,16 +751,21 @@ function noteBody(n){
   return h;
 }
 function noteCard(n, board, moves = ''){
+  const colorBtn = `<button class="ghost" data-act="colorpick" data-id="${n.id}" aria-label="Change color" title="Change color" aria-expanded="false">${icon('palette')}</button>`;
+  const delBtn = `<button class="ghost del" data-act="del" data-id="${n.id}" aria-label="Delete" title="Delete">${icon('trash')}</button>`;
   const acts = board
-    ? `<button class="ghost" data-act="edit" data-id="${n.id}" aria-label="Edit" title="Edit">${icon('edit')}</button>`
+    ? `${colorBtn}<button class="ghost" data-act="edit" data-id="${n.id}" aria-label="Edit" title="Edit">${icon('edit')}</button>${delBtn}`
     : `<button class="ghost ${n.pinned ? 'on' : ''}" data-act="pin" data-id="${n.id}" aria-label="${n.pinned ? 'Unpin' : 'Pin'}" title="${n.pinned ? 'Unpin' : 'Pin'}">${icon('pin')}</button>
        <button class="ghost" data-act="edit" data-id="${n.id}" aria-label="Edit, tag or set a reminder" title="Edit, tag, remind">${icon('edit')}</button>
+       ${colorBtn}
        <button class="ghost" data-act="archive" data-id="${n.id}" aria-label="${n.archived ? 'Unarchive' : 'Archive'}" title="${n.archived ? 'Unarchive' : 'Archive'}">${icon('archive')}</button>
-       <button class="ghost" data-act="del" data-id="${n.id}" aria-label="Delete" title="Delete">${icon('trash')}</button>`;
-  return `<article class="note ${n.pinned ? 'pinned' : ''} ${n.archived ? 'arch' : ''}" data-id="${n.id}" ${board ? 'draggable="true"' : ''}>
+       ${delBtn}`;
+  const hex = noteHex(n.color);
+  return `<article class="note ${n.pinned ? 'pinned' : ''} ${n.archived ? 'arch' : ''} ${hex ? 'colored' : ''}" data-id="${n.id}" ${hex ? `style="--nc:${hex}"` : ''} ${board ? 'draggable="true"' : ''}>
     ${n.pinned ? `<span class="pin-flag" title="Pinned">${icon('pin')}</span>` : ''}
     ${noteBody(n)}
     <div class="n-meta"><time datetime="${new Date(n.createdAt).toISOString()}">${board ? esc(fDay(n.createdAt)) + ' · ' : ''}${esc(fTime(n.createdAt))}</time>${tagChips(n)}${remPill(n)}</div>
+    <div class="swatches" data-for="${n.id}" hidden>${swatchRow(n.color, `data-act="setcolor" data-id="${n.id}"`)}</div>
     <div class="n-actions ${board ? 'mv' : ''}">${board ? `<span style="display:flex">${moves}</span>` : ''}${acts}</div>
   </article>`;
 }
@@ -1049,12 +1066,13 @@ let edState = null;
 const toLocalInput = t => { const d = new Date(t); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 16); };
 function openEditor(id, opts = {}){
   const n = S.notes.get(id); if (!n) return;
-  edState = { id, tags: [...(n.tags || [])], images: [...(n.images || [])], armed:false };
+  edState = { id, tags: [...(n.tags || [])], images: [...(n.images || [])], color: n.color || '' };
   const text = n.kind === 'list' ? [n.text, ...n.items.map(i => `- [${i.done ? 'x' : ' '}] ${i.t}`)].filter(s => s !== '').join('\n') : n.text;
   const r = n.remind;
   $('#edForm').innerHTML = `<h2 id="edH">Edit note <button type="button" class="ghost" data-ed="close" aria-label="Close">${icon('x')}</button></h2>
     <label class="f">Text<textarea id="edText">${esc(text)}</textarea></label>
     <p class="small">Lines that start with “- ” become checklist items; “- [x] ” marks one done.</p>
+    <div class="set-sec"><h3>Color</h3><div class="swatches" id="edColors">${swatchRow(edState.color, 'data-ed="color"')}</div></div>
     <div class="set-sec"><h3>Tags</h3><div class="picker" id="edTags"></div></div>
     <div class="set-sec"><h3>Reminder</h3>
       <div class="row"><label class="sr" for="edAt">Remind at</label><input type="datetime-local" id="edAt" value="${r ? toLocalInput(r.at) : ''}" style="flex:1 1 200px">
@@ -1089,7 +1107,7 @@ function saveEditor(){
     const was = n.remind;
     remind = { at, repeat: rep, sent: was && was.at === at && was.sent && was.repeat === rep ? true : false };
   }
-  putNote({ ...n, kind: st.kind, text: st.text, items: st.items, tags, images: edState.images, remind });
+  putNote({ ...n, kind: st.kind, text: st.text, items: st.items, tags, images: edState.images, remind, color: edState.color });
   $('#edDlg').close(); render(); toast('Saved');
 }
 
@@ -1233,6 +1251,13 @@ document.addEventListener('click', e => {
     case 'archive': putNote({ ...n, archived: !n.archived }); render(); toast(n.archived ? 'Moved back to the feed' : 'Archived'); break;
     case 'edit': openEditor(id); break;
     case 'del': { const before = clone(n); delNote(id); render(); toast('Note deleted', { restore: before }); break; }
+    case 'colorpick': {
+      const row = t.closest('.note').querySelector('.swatches');
+      row.hidden = !row.hidden; t.setAttribute('aria-expanded', String(!row.hidden));
+      if (!row.hidden) row.querySelector('[aria-pressed="true"]')?.focus();
+      break;
+    }
+    case 'setcolor': putNote({ ...n, color: d.c === 'none' ? '' : d.c }); render(); break;
     case 'itemdel': case 'cleardone': {
       const before = clone(n);
       const items = d.act === 'itemdel' ? n.items.filter((_, i) => i !== +d.i) : n.items.filter(x => !x.done);
@@ -1252,6 +1277,7 @@ document.addEventListener('click', e => {
 });
 function edAction(a, t){
   if (a === 'close') $('#edDlg').close();
+  else if (a === 'color'){ edState.color = t.dataset.c === 'none' ? '' : t.dataset.c; document.querySelectorAll('#edColors .nswatch').forEach(b => b.setAttribute('aria-pressed', String(b === t))); }
   else if (a === 'clearrem'){ $('#edAt').value = ''; $('#edRep').value = ''; }
   else if (a === 'rmimg'){ edState.images.splice(+t.dataset.i, 1); renderEdImgs(); }
   else if (a === 'newtag'){ const name = $('#edText').value; $('#edDlg').close(); openNewTag(tag => { openEditor(edState.id); $('#edText').value = name; edState.tags.push(tag.id); renderEdTags(); }); }
