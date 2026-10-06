@@ -149,6 +149,9 @@ main{max-width:1200px;margin:0 auto;padding:18px 16px 80px}
 .act .i{width:15px;height:15px}
 .act:hover{border-color:var(--muted)}
 .act[aria-pressed="true"]{color:var(--accent);border-color:var(--accent)}
+.tagsel{padding:0 0 0 9px;position:relative}
+.tagsel select{border:0;background:none;color:inherit;font:inherit;padding:5px 6px 5px 0;max-width:160px;cursor:pointer;outline:none}
+.tagsel:focus-within{outline:2px solid var(--accent);outline-offset:2px}
 .act.del{color:var(--danger);border-color:color-mix(in srgb,var(--danger) 40%,var(--line))}
 .act.del:hover{background:var(--danger);color:#fff;border-color:var(--danger)}
 .note.colored .act{background:color-mix(in srgb,var(--surface) 80%,transparent)}
@@ -765,13 +768,38 @@ function noteBody(n){
   return h;
 }
 const actBtn = (n, act, ic, label, extra = '') => `<button type="button" class="act ${act === 'del' ? 'del' : ''}" data-act="${act}" data-id="${n.id}" ${extra}>${icon(ic)}<span>${label}</span></button>`;
+/* The Tag dropdown swaps the note's main tag (the one it shows here) for another; any other tags stay. */
+const mainTag = n => (n.tags || []).find(id => S.settings.boardTags.includes(id) && tagById(id)) || (n.tags || []).find(tagById) || '';
+function tagSelect(n){
+  const cur = mainTag(n);
+  return `<label class="act tagsel" title="Choose a tag. Each tag is a column on the Board.">${icon('tag')}<span class="sr">Tag for this note</span><select data-tagset="${n.id}">
+    <option value="" ${cur ? '' : 'selected'}>No tag</option>
+    ${S.tags.map(t => `<option value="${t.id}" ${t.id === cur ? 'selected' : ''}>${esc(t.name)}</option>`).join('')}
+    <option value="__new">+ New tag…</option></select></label>`;
+}
+function applyTag(id, tid){
+  const n = S.notes.get(id); if (!n) return;
+  if (tid === '__new'){ render(); openNewTag(tag => applyTag(id, tag.id)); return; }
+  const cur = mainTag(n);
+  let tags = (n.tags || []).filter(x => x !== cur && tagById(x));
+  if (!tid) tags = [];
+  else if (!tags.includes(tid)) tags.unshift(tid);
+  putNote({ ...n, tags });
+  const t = tid && tagById(tid), b = S.settings.boardTags;
+  let msg = t ? `Tagged “${t.name}”` : 'Tag removed';
+  if (t && !b.includes(t.id)){
+    if (b.length < 5){ b.push(t.id); saveSettings(); msg += ', and added it as a column on the Board'; }
+    else msg += '. The Board already has 5 columns, so pick it there to show it';
+  }
+  render(); toast(msg + '.');
+}
 function noteCard(n, board, moves = ''){
   const btn = (...a) => actBtn(n, ...a);
   const colorBtn = btn('colorpick', 'palette', 'Color', 'aria-expanded="false"');
   const delBtn = btn('del', 'trash', 'Delete');
   const acts = board
-    ? colorBtn + btn('edit', 'edit', 'Edit') + delBtn
-    : btn('pin', 'pin', n.pinned ? 'Unpin' : 'Pin', n.pinned ? 'aria-pressed="true"' : '') + btn('edit', 'edit', 'Edit') + colorBtn
+    ? tagSelect(n) + colorBtn + btn('edit', 'edit', 'Edit') + delBtn
+    : tagSelect(n) + btn('pin', 'pin', n.pinned ? 'Unpin' : 'Pin', n.pinned ? 'aria-pressed="true"' : '') + btn('edit', 'edit', 'Edit') + colorBtn
       + btn('archive', 'archive', n.archived ? 'Unarchive' : 'Archive') + delBtn;
   const hex = noteHex(n.color);
   return `<article class="note ${n.pinned ? 'pinned' : ''} ${n.archived ? 'arch' : ''} ${hex ? 'colored' : ''}" data-id="${n.id}" ${hex ? `style="--nc:${hex}"` : ''} ${board ? 'draggable="true"' : ''}>
@@ -919,7 +947,7 @@ function reminderRow(n){
     <span class="what">${rich(label || '(image)')}</span>
     <div class="n-actions">
       ${r.sent ? '' : actBtn(n, 'rdone', 'check', r.repeat ? 'Skip this one' : 'Done')}
-      ${actBtn(n, 'edit', 'edit', 'Edit')}${actBtn(n, 'colorpick', 'palette', 'Color', 'aria-expanded="false"')}
+      ${tagSelect(n)}${actBtn(n, 'edit', 'edit', 'Edit')}${actBtn(n, 'colorpick', 'palette', 'Color', 'aria-expanded="false"')}
       ${actBtn(n, 'rclear', 'bell', 'Remove reminder')}${actBtn(n, 'del', 'trash', 'Delete')}
     </div>
     <div class="swatches" hidden>${swatchRow(n.color, `data-act="setcolor" data-id="${n.id}"`)}</div>
@@ -1318,8 +1346,8 @@ function setAction(a, t){
     const tag = { id: uid('t'), name: name.toLowerCase(), color, keyword: $('#ntKey').value.trim().replace(/\s+/g, '') };
     S.tags.push(tag); commitTags();
     const after = openNewTag.after; openNewTag.after = null;
-    $('#setDlg').close(); render(); toast(`Tag “${tag.name}” created`);
-    if (after) after(tag);
+    $('#setDlg').close(); render();
+    if (after) after(tag); else toast(`Tag “${tag.name}” created`);
     return;
   }
   if (a === 'cycle'){
@@ -1394,6 +1422,7 @@ function setAction(a, t){
 document.addEventListener('change', e => {
   const t = e.target;
   if (t.id === 'range'){ S.ui.range = t.value; render(); }
+  else if (t.dataset.tagset){ applyTag(t.dataset.tagset, t.value); }
   else if (t.id === 'fileImg'){ addImages(t.files); t.value = ''; }
   else if (t.id === 'fileImport'){ if (t.files[0]) importFile(t.files[0]); t.value = ''; }
   else if (t.dataset.tf){
