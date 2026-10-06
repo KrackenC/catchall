@@ -1171,6 +1171,7 @@ function openSettings(){
       <div class="row"><button type="button" class="btn" data-set="phoneqr">Show QR code</button></div><div id="phoneQr"></div></div>
     ${syncSectionHTML()}
     ${pushSectionHTML()}
+    ${!IN_ARTIFACT && window.__appVersion ? `<div class="set-sec"><h3>App version</h3><div class="row"><span class="small">You're on version ${esc(window.__appVersion)}.</span><button type="button" class="btn" data-set="checkupd">Check for updates</button></div></div>` : ''}
     <div class="set-sec"><h3>Your data · ${total} note${total === 1 ? '' : 's'}</h3>
       <p class="small">${sync.state === 'synced' ? (IN_ARTIFACT ? 'Synced to your Claude account. Only you can see these notes.' : 'Saved on this device and in your private gist.') : 'Saved on this device.'} Export a backup now and then.</p>
       <div class="row"><label class="sr" for="expScope">Which notes</label><select id="expScope" class="fsel"><option value="all">All notes</option><option value="view">Only what the feed is showing</option><option value="pinned">Pinned notes</option></select>
@@ -1367,6 +1368,15 @@ function setAction(a, t){
       .catch(() => { t.disabled = false; toast('Could not reach ntfy.sh. Check your connection.'); });
     return;
   }
+  if (a === 'checkupd'){
+    t.disabled = true;
+    Promise.resolve(window.__checkForUpdate && window.__checkForUpdate()).then(newer => {
+      t.disabled = false;
+      if (newer){ $('#setDlg').close(); toast('A new version is ready. Click Update at the bottom of the screen.'); }
+      else toast(newer === false ? "You're on the latest version." : "Couldn't check for updates. Check your connection.");
+    });
+    return;
+  }
   if (a === 'syncnow'){ syncNow().then(openSettings); return; }
   if (a === 'qr'){ showQR(); return; }
   if (a === 'phoneqr'){ showQR(APP_URL, 'phoneQr', 'Point your phone camera at this and tap the link. On iPhone, then tap Share → Add to Home Screen. On Android, tap ⋮ → Add to Home screen. Open Catchall from the new icon, then set up sync in its Settings.'); return; }
@@ -1476,21 +1486,25 @@ window.__catchallTest = { parseReminder, parseCapture, parseStructure, nextOccur
 </div>
 <script>
 (function () {
-  var CURRENT_VERSION = "5";
+  var CURRENT_VERSION = "6";
   var banner = document.getElementById('__update-banner');
   var updateBtn = document.getElementById('__update-btn');
   var dismissBtn = document.getElementById('__dismiss-btn');
 
+  var lastCheck = 0;
   function checkVersion() {
-    fetch('./version.json?_=' + Date.now(), { cache: 'no-store' })
+    lastCheck = Date.now();
+    return fetch('./version.json?_=' + Date.now(), { cache: 'no-store' })
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (data) {
-        if (data && data.version && data.version !== CURRENT_VERSION) {
-          banner.style.display = 'flex';
-        }
+        var newer = !!(data && data.version && data.version !== CURRENT_VERSION);
+        if (newer) banner.style.display = 'flex';
+        return newer;
       })
-      .catch(function () { /* offline or blocked -- say nothing */ });
+      .catch(function () { return null; /* offline or blocked -- say nothing */ });
   }
+  window.__appVersion = CURRENT_VERSION;
+  window.__checkForUpdate = checkVersion;
 
   updateBtn.addEventListener('click', function () {
     updateBtn.textContent = 'Updating…';
@@ -1519,7 +1533,11 @@ window.__catchallTest = { parseReminder, parseCapture, parseStructure, nextOccur
   } else {
     addEventListener('load', checkVersion);
   }
+  // A desktop app window never becomes "hidden" when you click another window, so also check on focus and every 15 minutes.
   document.addEventListener('visibilitychange', function () { if (!document.hidden) checkVersion(); });
+  addEventListener('focus', function () { if (Date.now() - lastCheck > 60000) checkVersion(); });
+  clearInterval(window.__updateTimer);
+  window.__updateTimer = setInterval(checkVersion, 15 * 60 * 1000);
 })();
 </script>
 </body>

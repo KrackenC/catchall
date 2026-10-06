@@ -45,16 +45,20 @@ banner = '''
   var updateBtn = document.getElementById('__update-btn');
   var dismissBtn = document.getElementById('__dismiss-btn');
 
+  var lastCheck = 0;
   function checkVersion() {
-    fetch('./version.json?_=' + Date.now(), { cache: 'no-store' })
+    lastCheck = Date.now();
+    return fetch('./version.json?_=' + Date.now(), { cache: 'no-store' })
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (data) {
-        if (data && data.version && data.version !== CURRENT_VERSION) {
-          banner.style.display = 'flex';
-        }
+        var newer = !!(data && data.version && data.version !== CURRENT_VERSION);
+        if (newer) banner.style.display = 'flex';
+        return newer;
       })
-      .catch(function () { /* offline or blocked -- say nothing */ });
+      .catch(function () { return null; /* offline or blocked -- say nothing */ });
   }
+  window.__appVersion = CURRENT_VERSION;
+  window.__checkForUpdate = checkVersion;
 
   updateBtn.addEventListener('click', function () {
     updateBtn.textContent = 'Updating…';
@@ -83,7 +87,11 @@ banner = '''
   } else {
     addEventListener('load', checkVersion);
   }
+  // A desktop app window never becomes "hidden" when you click another window, so also check on focus and every 15 minutes.
   document.addEventListener('visibilitychange', function () { if (!document.hidden) checkVersion(); });
+  addEventListener('focus', function () { if (Date.now() - lastCheck > 60000) checkVersion(); });
+  clearInterval(window.__updateTimer);
+  window.__updateTimer = setInterval(checkVersion, 15 * 60 * 1000);
 })();
 </script>
 </body>

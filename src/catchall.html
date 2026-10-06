@@ -1149,6 +1149,7 @@ function openSettings(){
       <div class="row"><button type="button" class="btn" data-set="phoneqr">Show QR code</button></div><div id="phoneQr"></div></div>
     ${syncSectionHTML()}
     ${pushSectionHTML()}
+    ${!IN_ARTIFACT && window.__appVersion ? `<div class="set-sec"><h3>App version</h3><div class="row"><span class="small">You're on version ${esc(window.__appVersion)}.</span><button type="button" class="btn" data-set="checkupd">Check for updates</button></div></div>` : ''}
     <div class="set-sec"><h3>Your data · ${total} note${total === 1 ? '' : 's'}</h3>
       <p class="small">${sync.state === 'synced' ? (IN_ARTIFACT ? 'Synced to your Claude account. Only you can see these notes.' : 'Saved on this device and in your private gist.') : 'Saved on this device.'} Export a backup now and then.</p>
       <div class="row"><label class="sr" for="expScope">Which notes</label><select id="expScope" class="fsel"><option value="all">All notes</option><option value="view">Only what the feed is showing</option><option value="pinned">Pinned notes</option></select>
@@ -1343,6 +1344,15 @@ function setAction(a, t){
     ntfy('', { method:'POST', body:'Notifications from Catchall are working.', headers:{ Title:'Catchall test', Tags:'pushpin', Click: APP_URL } })
       .then(r => { t.disabled = false; toast(r.ok ? 'Test sent. It should appear on your phone within a few seconds.' : 'ntfy refused the test (' + r.status + '). Try again in a minute.'); })
       .catch(() => { t.disabled = false; toast('Could not reach ntfy.sh. Check your connection.'); });
+    return;
+  }
+  if (a === 'checkupd'){
+    t.disabled = true;
+    Promise.resolve(window.__checkForUpdate && window.__checkForUpdate()).then(newer => {
+      t.disabled = false;
+      if (newer){ $('#setDlg').close(); toast('A new version is ready. Click Update at the bottom of the screen.'); }
+      else toast(newer === false ? "You're on the latest version." : "Couldn't check for updates. Check your connection.");
+    });
     return;
   }
   if (a === 'syncnow'){ syncNow().then(openSettings); return; }
