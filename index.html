@@ -89,6 +89,7 @@ main{max-width:1200px;margin:0 auto;padding:18px 16px 80px}
 .pv.rem{background:color-mix(in srgb,var(--hi) 30%,var(--surface));color:var(--fg)}
 .ghost{border:0;background:none;color:var(--muted);padding:6px;border-radius:7px;display:grid;place-items:center}
 .ghost:hover{color:var(--fg);background:var(--surface-2)}
+.act.mic[aria-pressed="true"]{background:var(--danger);border-color:var(--danger);color:#fff}
 .btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:7px 12px;font-size:14px;display:inline-flex;align-items:center;gap:6px}
 .btn:hover{border-color:var(--muted)}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-fg);font-weight:700}
@@ -813,7 +814,7 @@ function composerHTML(){
     <div class="comp-row">
       <div class="preview" id="preview"></div>
       <button type="button" class="ghost" data-act="attach" aria-label="Attach image" title="Attach image (or paste / drop one)">${icon('image')}</button>
-      ${(!IN_ARTIFACT && (window.SpeechRecognition || window.webkitSpeechRecognition)) ? `<button type="button" class="ghost" data-act="mic" id="micBtn" aria-label="Dictate" title="Dictate">${icon('mic')}</button>` : ''}
+      ${(!IN_ARTIFACT && (window.SpeechRecognition || window.webkitSpeechRecognition)) ? `<button type="button" class="act mic" data-act="mic" id="micBtn" aria-pressed="false" title="Talk instead of typing">${icon('mic')}<span>Dictate</span></button>` : ''}
       <button type="button" class="btn primary" data-act="save" id="saveBtn">${icon('send')}Save</button>
     </div>
   </section>`;
@@ -968,7 +969,8 @@ function render(){
     if (keep){ cap.value = keep.v; if (keep.f){ cap.focus(); try { cap.setSelectionRange(keep.s, keep.s); } catch(e){} } }
     else { try { const d = sessionStorage.getItem('catchall.draft'); if (d) cap.value = d; } catch(e){} }
     autosize(); updatePreview(); renderThumbs();
-  }
+  } else stopDictation();
+  micUI();
   if (qf != null && $('#q')){ $('#q').focus(); $('#q').setSelectionRange(qf, qf); }
   const due = liveNotes().filter(n => n.remind && !n.remind.sent && n.remind.at <= Date.now()).length;
   document.title = due ? `(${due}) Catchall` : 'Catchall';
@@ -996,6 +998,7 @@ function renderThumbs(){
 }
 function capture(){
   const c = $('#cap'); if (!c) return;
+  stopDictation();
   const raw = c.value;
   if (!raw.trim() && !S.ui.pending.length) { c.focus(); return; }
   const r = parseCapture(raw);
@@ -1090,7 +1093,7 @@ function toast(msg, opt = {}){
   else btn('Dismiss', () => {});
   box.appendChild(el);
   while (box.children.length > 4) box.firstChild.remove();
-  if (!opt.alarm) setTimeout(() => el.remove(), opt.undo || opt.restore ? 7000 : 4000);
+  if (!opt.alarm) setTimeout(() => el.remove(), opt.ms || (opt.undo || opt.restore ? 7000 : 4000));
 }
 
 /* ---------- editor ---------- */
@@ -1460,17 +1463,49 @@ document.addEventListener('drop', e => {
 });
 
 /* dictation (works on the standalone copy; the Claude viewer blocks the microphone) */
-let rec = null;
+/* The composer is redrawn on every render (saving, syncing), so always look up the live
+   textarea and button instead of holding on to the ones that existed when dictation began. */
+let rec = null, recBase = '', recTimer = 0;
+const MIC_ERRORS = {
+  'not-allowed': 'The microphone is blocked for Catchall. Click the icon at the left of the address bar (in the app window: the ⋮ menu → Site settings), set Microphone to Allow, then press Dictate again.',
+  'service-not-allowed': 'The microphone is blocked for Catchall. Click the icon at the left of the address bar (in the app window: the ⋮ menu → Site settings), set Microphone to Allow, then press Dictate again.',
+  'audio-capture': 'No microphone was found. Check that one is plugged in and selected in System Settings → Sound → Input.',
+  'network': 'Dictation needs an internet connection. Try again once you\'re online.'
+};
+function micUI(){
+  const b = $('#micBtn'); if (!b) return;
+  b.setAttribute('aria-pressed', rec ? 'true' : 'false');
+  b.querySelector('span').textContent = rec ? 'Stop' : 'Dictate';
+}
+function stopDictation(){
+  if (!rec) return;
+  const r = rec; rec = null; clearTimeout(recTimer);
+  try { r.abort(); } catch(e){}
+  micUI();
+}
 function dictate(){
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition; if (!SR) return;
-  const btn = $('#micBtn');
-  if (rec){ rec.stop(); return; }
-  rec = new SR(); rec.interimResults = true; rec.lang = navigator.language || 'en-US';
-  const c = $('#cap'), base = c.value ? c.value.replace(/\s*$/, ' ') : '';
-  rec.onresult = ev => { let s = ''; for (const r of ev.results) s += r[0].transcript; c.value = base + s; autosize(); updatePreview(); };
-  rec.onerror = ev => { toast(ev.error === 'not-allowed' ? 'Microphone access is blocked for this page.' : 'Dictation stopped.'); };
-  rec.onend = () => { rec = null; btn?.classList.remove('on'); c.focus(); };
-  btn?.classList.add('on'); rec.start();
+  if (rec){
+    const r = rec;
+    try { r.stop(); } catch(e){}
+    // if the browser never reports the end, release it anyway so the button works again
+    clearTimeout(recTimer); recTimer = setTimeout(() => { if (rec === r){ rec = null; micUI(); } }, 1500);
+    return;
+  }
+  const c = $('#cap'); if (!c) return;
+  recBase = c.value ? c.value.replace(/\s*$/, ' ') : '';
+  const r = new SR(); r.interimResults = true; r.continuous = true; r.lang = navigator.language || 'en-US';
+  r.onresult = ev => {
+    if (rec !== r) return;
+    const c = $('#cap'); if (!c) return;
+    let t = ''; for (const x of ev.results) t += x[0].transcript;
+    c.value = recBase + t.trimStart(); autosize(); updatePreview();
+  };
+  r.onerror = ev => { if (rec === r && MIC_ERRORS[ev.error]) toast(MIC_ERRORS[ev.error], { ms: 12000 }); };
+  r.onend = () => { if (rec === r){ rec = null; clearTimeout(recTimer); micUI(); $('#cap')?.focus(); } };
+  rec = r;
+  try { r.start(); } catch(e){ rec = null; toast('Dictation couldn\'t start. Press Dictate to try again.'); }
+  micUI();
 }
 
 /* ---------- boot ---------- */
@@ -1496,7 +1531,7 @@ window.__catchallTest = { parseReminder, parseCapture, parseStructure, nextOccur
 </div>
 <script>
 (function () {
-  var CURRENT_VERSION = "9";
+  var CURRENT_VERSION = "10";
   var banner = document.getElementById('__update-banner');
   var updateBtn = document.getElementById('__update-btn');
   var dismissBtn = document.getElementById('__dismiss-btn');
