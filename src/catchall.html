@@ -139,9 +139,15 @@ main{max-width:1200px;margin:0 auto;padding:18px 16px 80px}
 .linkchip{display:inline-flex;align-items:center;gap:6px;font-size:13px;border:1px solid var(--line);border-radius:8px;padding:4px 9px;color:var(--fg);text-decoration:none;max-width:100%}
 .linkchip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .n-actions{display:flex;gap:2px;justify-content:flex-end;margin:-4px -6px -4px 0}
-.n-actions .ghost .i{width:16px;height:16px}
-.n-actions .ghost.on{color:var(--accent)}
-@media (hover:hover){ .note .n-actions .ghost{opacity:.65} .note:hover .n-actions .ghost,.n-actions .ghost:focus-visible{opacity:1} }
+
+.n-actions{flex-wrap:wrap;gap:6px;margin:2px 0 0;justify-content:flex-start}
+.act{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:7px;padding:5px 9px;font-size:13px;line-height:1}
+.act .i{width:15px;height:15px}
+.act:hover{border-color:var(--muted)}
+.act[aria-pressed="true"]{color:var(--accent);border-color:var(--accent)}
+.act.del{color:var(--danger);border-color:color-mix(in srgb,var(--danger) 40%,var(--line))}
+.act.del:hover{background:var(--danger);color:#fff;border-color:var(--danger)}
+.note.colored .act{background:color-mix(in srgb,var(--surface) 80%,transparent)}
 .pin-flag{position:absolute;top:10px;right:10px;color:color-mix(in srgb,var(--hi) 70%,var(--fg))}
 .pin-flag .i{width:15px;height:15px}
 .note.pinned .n-body{padding-right:20px}
@@ -166,7 +172,7 @@ main{max-width:1200px;margin:0 auto;padding:18px 16px 80px}
 .bcol h3 .n{font:400 12px var(--font-mono);color:var(--muted);margin-left:auto}
 .bcol.archive{background:none;border:1.5px dashed var(--line);justify-content:center;align-items:center;color:var(--muted);font-size:14px;text-align:center}
 .bcol .note{cursor:grab}
-.mv{display:flex;justify-content:space-between}
+.n-actions.mv{justify-content:flex-start}
 .picker{display:flex;gap:6px;flex-wrap:wrap}
 
 /* calendar */
@@ -751,15 +757,13 @@ function noteBody(n){
   return h;
 }
 function noteCard(n, board, moves = ''){
-  const colorBtn = `<button class="ghost" data-act="colorpick" data-id="${n.id}" aria-label="Change color" title="Change color" aria-expanded="false">${icon('palette')}</button>`;
-  const delBtn = `<button class="ghost del" data-act="del" data-id="${n.id}" aria-label="Delete" title="Delete">${icon('trash')}</button>`;
+  const btn = (act, ic, label, extra = '') => `<button type="button" class="act ${act === 'del' ? 'del' : ''}" data-act="${act}" data-id="${n.id}" ${extra}>${icon(ic)}<span>${label}</span></button>`;
+  const colorBtn = btn('colorpick', 'palette', 'Color', 'aria-expanded="false"');
+  const delBtn = btn('del', 'trash', 'Delete');
   const acts = board
-    ? `${colorBtn}<button class="ghost" data-act="edit" data-id="${n.id}" aria-label="Edit" title="Edit">${icon('edit')}</button>${delBtn}`
-    : `<button class="ghost ${n.pinned ? 'on' : ''}" data-act="pin" data-id="${n.id}" aria-label="${n.pinned ? 'Unpin' : 'Pin'}" title="${n.pinned ? 'Unpin' : 'Pin'}">${icon('pin')}</button>
-       <button class="ghost" data-act="edit" data-id="${n.id}" aria-label="Edit, tag or set a reminder" title="Edit, tag, remind">${icon('edit')}</button>
-       ${colorBtn}
-       <button class="ghost" data-act="archive" data-id="${n.id}" aria-label="${n.archived ? 'Unarchive' : 'Archive'}" title="${n.archived ? 'Unarchive' : 'Archive'}">${icon('archive')}</button>
-       ${delBtn}`;
+    ? colorBtn + btn('edit', 'edit', 'Edit') + delBtn
+    : btn('pin', 'pin', n.pinned ? 'Unpin' : 'Pin', n.pinned ? 'aria-pressed="true"' : '') + btn('edit', 'edit', 'Edit') + colorBtn
+      + btn('archive', 'archive', n.archived ? 'Unarchive' : 'Archive') + delBtn;
   const hex = noteHex(n.color);
   return `<article class="note ${n.pinned ? 'pinned' : ''} ${n.archived ? 'arch' : ''} ${hex ? 'colored' : ''}" data-id="${n.id}" ${hex ? `style="--nc:${hex}"` : ''} ${board ? 'draggable="true"' : ''}>
     ${n.pinned ? `<span class="pin-flag" title="Pinned">${icon('pin')}</span>` : ''}
