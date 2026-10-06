@@ -89,6 +89,9 @@ main{max-width:1200px;margin:0 auto;padding:18px 16px 80px}
 .pv.rem{background:color-mix(in srgb,var(--hi) 30%,var(--surface));color:var(--fg)}
 .ghost{border:0;background:none;color:var(--muted);padding:6px;border-radius:7px;display:grid;place-items:center}
 .ghost:hover{color:var(--fg);background:var(--surface-2)}
+.dict-hint{display:flex;gap:8px;align-items:flex-start;background:color-mix(in srgb,var(--hi) 30%,var(--surface));color:var(--fg);border-radius:8px;padding:8px 10px;margin:6px 0 0;font-size:14px}
+.dict-hint .i{margin-top:2px}
+.dict-hint span{flex:1}
 .act.mic[aria-pressed="true"]{background:var(--danger);border-color:var(--danger);color:#fff}
 .btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:7px 12px;font-size:14px;display:inline-flex;align-items:center;gap:6px}
 .btn:hover{border-color:var(--muted)}
@@ -316,6 +319,8 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt
 const clone = o => JSON.parse(JSON.stringify(o));
 const uid = p => p + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 const IN_ARTIFACT = !!(window.claude && typeof window.claude.use === 'function');
+const IS_IOS = /iP(hone|od|ad)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const IS_PHONE = IS_IOS || /Android/i.test(navigator.userAgent);
 
 /* ---------- storage ---------- */
 const LS = {
@@ -810,11 +815,12 @@ function composerHTML(){
   return `<section class="composer" id="composer" aria-label="Capture a note">
     <label class="sr" for="cap">New note</label>
     <textarea id="cap" rows="1" placeholder="What's on your mind? Saved the moment you hit Enter."></textarea>
+    ${S.ui.dictHint ? dictHintHTML() : ''}
     <div class="thumbs" id="thumbs"></div>
     <div class="comp-row">
       <div class="preview" id="preview"></div>
       <button type="button" class="ghost" data-act="attach" aria-label="Attach image" title="Attach image (or paste / drop one)">${icon('image')}</button>
-      ${(!IN_ARTIFACT && (window.SpeechRecognition || window.webkitSpeechRecognition)) ? `<button type="button" class="act mic" data-act="mic" id="micBtn" aria-pressed="false" title="Talk instead of typing">${icon('mic')}<span>Dictate</span></button>` : ''}
+      ${(!IN_ARTIFACT && (IS_IOS || window.SpeechRecognition || window.webkitSpeechRecognition)) ? `<button type="button" class="act mic" data-act="mic" id="micBtn" aria-pressed="false" title="Talk instead of typing">${icon('mic')}<span>Dictate</span></button>` : ''}
       <button type="button" class="btn primary" data-act="save" id="saveBtn">${icon('send')}Save</button>
     </div>
   </section>`;
@@ -998,7 +1004,7 @@ function renderThumbs(){
 }
 function capture(){
   const c = $('#cap'); if (!c) return;
-  stopDictation();
+  stopDictation(); S.ui.dictHint = false;
   const raw = c.value;
   if (!raw.trim() && !S.ui.pending.length) { c.focus(); return; }
   const r = parseCapture(raw);
@@ -1280,6 +1286,7 @@ document.addEventListener('click', e => {
     case 'attach': $('#fileImg').click(); break;
     case 'unpend': S.ui.pending.splice(+d.i, 1); renderThumbs(); break;
     case 'mic': dictate(); break;
+    case 'dicthintx': S.ui.dictHint = false; $('.dict-hint')?.remove(); break;
     case 'more': S.ui.limit += 60; render(); break;
     case 'clearf': Object.assign(S.ui, { tag:'all', q:'', link:false, image:false, list:false, archived:false, range:'all' }); render(); break;
     case 'newtag': openNewTag(); break;
@@ -1483,8 +1490,20 @@ function stopDictation(){
   try { r.abort(); } catch(e){}
   micUI();
 }
+/* iPhone and iPad give Home Screen apps no speech recognition, so there the button points
+   to the keyboard's own microphone key, which works in any text box. */
+function dictHintHTML(){
+  return `<p class="dict-hint" role="status">${icon('mic')}<span>Tap the <b>microphone key</b> on your keyboard (next to the space bar, or bottom right) and start talking. Tap it again when you're done. No mic key? Turn on Settings → General → Keyboard → Enable Dictation.</span><button type="button" class="act" data-act="dicthintx">Got it</button></p>`;
+}
+function keyboardDictation(){
+  const c = $('#cap'); if (!c) return;
+  c.focus();
+  S.ui.dictHint = true;
+  if (!$('.dict-hint')) c.insertAdjacentHTML('afterend', dictHintHTML());
+}
 function dictate(){
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition; if (!SR) return;
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (IS_IOS || !SR) return keyboardDictation();
   if (rec){
     const r = rec;
     try { r.stop(); } catch(e){}
@@ -1494,14 +1513,18 @@ function dictate(){
   }
   const c = $('#cap'); if (!c) return;
   recBase = c.value ? c.value.replace(/\s*$/, ' ') : '';
-  const r = new SR(); r.interimResults = true; r.continuous = true; r.lang = navigator.language || 'en-US';
+  const r = new SR(); r.interimResults = true; r.continuous = !IS_PHONE; // Android repeats words in continuous mode r.lang = navigator.language || 'en-US';
   r.onresult = ev => {
     if (rec !== r) return;
     const c = $('#cap'); if (!c) return;
     let t = ''; for (const x of ev.results) t += x[0].transcript;
     c.value = recBase + t.trimStart(); autosize(); updatePreview();
   };
-  r.onerror = ev => { if (rec === r && MIC_ERRORS[ev.error]) toast(MIC_ERRORS[ev.error], { ms: 12000 }); };
+  r.onerror = ev => {
+    if (rec !== r) return;
+    if (IS_PHONE && /not-allowed|network/.test(ev.error)){ rec = null; micUI(); keyboardDictation(); return; }
+    if (MIC_ERRORS[ev.error]) toast(MIC_ERRORS[ev.error], { ms: 12000 });
+  };
   r.onend = () => { if (rec === r){ rec = null; clearTimeout(recTimer); micUI(); $('#cap')?.focus(); } };
   rec = r;
   try { r.start(); } catch(e){ rec = null; toast('Dictation couldn\'t start. Press Dictate to try again.'); }
@@ -1531,7 +1554,7 @@ window.__catchallTest = { parseReminder, parseCapture, parseStructure, nextOccur
 </div>
 <script>
 (function () {
-  var CURRENT_VERSION = "10";
+  var CURRENT_VERSION = "11";
   var banner = document.getElementById('__update-banner');
   var updateBtn = document.getElementById('__update-btn');
   var dismissBtn = document.getElementById('__dismiss-btn');
