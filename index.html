@@ -69,8 +69,12 @@ button{cursor:pointer}
 .sync{display:flex;align-items:center;gap:6px;font:12px var(--font-mono);color:var(--muted)}
 .sync::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--muted)}
 .sync[data-s="synced"]::before{background:var(--ok)}
-.sync[data-s="error"]::before{background:var(--danger)}
-@media (max-width:640px){ .views button span.lbl{display:none} .sync span{display:none} }
+.sync[data-s="error"]::before,.sync[data-s="autherr"]::before,.sync[data-s="noscope"]::before{background:var(--danger)}
+.sync[data-s="error"],.sync[data-s="autherr"],.sync[data-s="noscope"]{color:var(--danger);font-weight:500}
+/* phones show only the dot when all is well, and the words when something needs attention */
+@media (max-width:640px){ .views button span.lbl{display:none} .sync[data-s="synced"] span,.sync[data-s="connecting"] span{display:none} }
+.sync-diag{font:12px/1.5 var(--font-mono);color:var(--muted);margin:0}
+.sync-err{background:color-mix(in srgb,var(--danger) 12%,var(--surface));border:1px solid color-mix(in srgb,var(--danger) 45%,var(--line));border-radius:8px;padding:8px 10px;font-size:14px;margin:0}
 
 main{max-width:1200px;margin:0 auto;padding:18px 16px 80px}
 .col{max-width:740px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
@@ -366,12 +370,13 @@ const sync = { col:null, state:'local', first:true, chains:new Map(), readonly:f
 function setSync(s){
   sync.state = s;
   const el = $('#sync'); el.dataset.s = s;
-  const label = { local:'This device', connecting:'Syncing…', synced:'Synced', error:'Sync paused', readonly:'Read-only', autherr:'Reconnect sync' }[s];
+  const label = { local:'Not syncing', connecting:'Syncing…', synced:'Synced', error:'Sync paused', readonly:'Read-only', autherr:'Reconnect sync', noscope:"Can't save" }[s];
   el.innerHTML = `<span>${label}</span>`;
   el.title = s === 'synced' ? (IN_ARTIFACT ? 'Notes sync to your Claude account.' : 'Notes sync through your private GitHub gist to every connected device.')
            : s === 'local' ? 'Notes are saved on this device only. Open Settings to sync across devices.'
            : s === 'error' ? 'Could not reach GitHub. Changes are saved here and will sync when the connection is back.'
-           : s === 'autherr' ? 'GitHub rejected the access token. Open Settings and connect again.' : label;
+           : s === 'autherr' ? 'GitHub rejected the access token. Open Settings and connect again.'
+           : s === 'noscope' ? "This device can read your notes but GitHub won't let it save them. Open Settings to fix." : label;
 }
 async function initSync(){
   if (!IN_ARTIFACT){ initGist(); return; }
@@ -434,7 +439,8 @@ function pushTags(){ if (!IN_ARTIFACT) return schedulePush(); if (sync.col && !s
 
 /* ---------- sync (standalone copy: a private GitHub gist shared by your devices) ---------- */
 const GIST_FILE = 'catchall.json', GIST_DESC = 'Catchall notes (sync data, edited by the app)';
-const gist = { token: LS.get('ghToken', ''), id: LS.get('gistId', ''), timer:null, busy:false, again:false, dirty:false, last:0 };
+const gist = { token: LS.get('ghToken', ''), id: LS.get('gistId', ''), timer:null, busy:false, again:false, dirty:false, last:0,
+  lastPull: 0, lastPush: LS.get('lastPush', 0), err: '', warned: false };
 async function gh(path, opts = {}){
   const headers = { Authorization: 'Bearer ' + gist.token, Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' };
   if (opts.body) headers['Content-Type'] = 'application/json';
@@ -458,7 +464,7 @@ function mergeRemote(data){
   if ((rp.updatedAt || 0) > S.push.updatedAt){ S.push = Object.assign({}, S.push, rp); changed = true; }
   else if (S.push.updatedAt > (rp.updatedAt || 0)) localNewer = true;
   const rb = data.board || {}, lb = S.settings.boardUpdatedAt || 0;
-  if ((rb.updatedAt || 0) > lb){ takeBoard(rb.tags, rb.updatedAt); changed = true; }
+  if ((rb.updatedAt || 0) > lb || (rb.updatedAt === lb && lb === 1 && JSON.stringify(rb.tags) !== JSON.stringify(S.settings.boardTags))){ takeBoard(rb.tags, rb.updatedAt); changed = true; }
   else if (lb > (rb.updatedAt || 0)) localNewer = true;
   const seen = new Set();
   for (const n of data.notes){
@@ -486,15 +492,24 @@ async function syncNow(){
   try {
     const wasDirty = gist.dirty; gist.dirty = false;
     const remote = await readGist();
+    gist.lastPull = Date.now();
     const { changed, localNewer } = mergeRemote(remote);
     if (changed){ saveLocal(); render(); }
     if (wasDirty || localNewer){
-      await gh('/gists/' + gist.id, { method:'PATCH', body: JSON.stringify({ files: { [GIST_FILE]: { content: JSON.stringify(snapshotData()) } } }) });
+      try {
+        await gh('/gists/' + gist.id, { method:'PATCH', body: JSON.stringify({ files: { [GIST_FILE]: { content: JSON.stringify(snapshotData()) } } }) });
+      } catch(e){ throw Object.assign({}, e, { saving: true }); }
+      gist.lastPush = Date.now(); LS.set('lastPush', gist.lastPush);
     }
-    gist.last = Date.now(); setSync('synced');
+    gist.last = Date.now(); gist.err = ''; setSync('synced');
   } catch(e){
-    if (e && (e.code === 'auth' || e.code === 'scope')) setSync('autherr'); else setSync('error');
-    if (e && e.code !== 'auth') gist.dirty = true;
+    const c = e && e.code;
+    if (c === 'auth'){ setSync('autherr'); gist.err = 'GitHub rejected the sync token on this device. It may have been deleted or expired. Tap Disconnect this device, then connect again with a new token.'; }
+    else if (e && e.saving && c === 'scope'){ setSync('noscope'); gist.err = "This device can read your notes but GitHub won't let it save changes (error " + e.status + "). The token is missing the gist permission. Tap Disconnect this device, then connect again with a token made from the link in the steps, with the gist box ticked."; }
+    else if (c === 'scope'){ setSync('autherr'); gist.err = "GitHub won't let this device open the sync data (error " + e.status + "). Tap Disconnect this device, then connect again with a token that has the gist box ticked."; }
+    else { setSync('error'); gist.err = "Couldn't reach GitHub" + (e && e.status ? ' (error ' + e.status + ')' : '') + '. Changes are kept here and will go through when the connection is back.'; }
+    if (c !== 'auth') gist.dirty = true;
+    if (!gist.warned && c !== 'http' && e && e.code){ gist.warned = true; toast("Changes on this device aren't reaching your other devices. Open Settings → Sync across devices to see why.", { ms: 12000 }); }
   } finally {
     gist.busy = false;
     if (gist.again){ gist.again = false; syncNow(); }
@@ -534,12 +549,18 @@ async function showQR(text = gist.token, boxId = 'qrBox', caption){
   const q = qrcode(0, 'M'); q.addData(text); q.make();
   box.innerHTML = `<div style="background:#fff;padding:10px;border-radius:10px;width:max-content;max-width:100%">${q.createSvgTag({ cellSize:5, margin:2 })}</div><p class="small">${caption || "Scan with your phone's camera, copy the text it shows, then paste it into Settings → Sync in Catchall on the phone. This code is a password for your notes, so don't share it."}</p>`;
 }
+function agoText(t){
+  if (!t) return 'never';
+  const m = Math.round((Date.now() - t) / 60000);
+  return m < 1 ? 'just now' : m < 60 ? m + ' min ago' : m < 1440 ? Math.round(m / 60) + ' hr ago' : new Date(t).toLocaleString([], { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' });
+}
 function syncSectionHTML(){
   if (IN_ARTIFACT) return `<div class="set-sec"><h3>Phone and PC</h3><p class="small">For one notebook that syncs between your phone and computer, use the standalone copy at <a href="https://krackenc.github.io/catchall/" target="_blank" rel="noopener">krackenc.github.io/catchall</a>. To move notes over, export a JSON backup here and restore it there.</p></div>`;
   if (gist.id) {
     const ago = gist.last ? Math.max(0, Math.round((Date.now() - gist.last) / 60000)) : null;
     return `<div class="set-sec"><h3>Sync across devices</h3>
-      <p class="small">${sync.state === 'autherr' ? 'GitHub rejected the token. Disconnect, then connect again with a new token.' : `Connected to your private GitHub gist${ago == null ? '' : ago < 1 ? ' · synced just now' : ` · synced ${ago} min ago`}. Changes sync within a few seconds, and when you switch back to the app.`}</p>
+      ${gist.err ? `<p class="sync-err">${esc(gist.err)}</p>` : `<p class="small">Connected to your private GitHub gist${ago == null ? '' : ago < 1 ? ' · synced just now' : ` · synced ${ago} min ago`}. Changes sync within a few seconds, and when you switch back to the app.</p>`}
+      <p class="sync-diag">Last received: ${esc(agoText(gist.lastPull))} · Last sent from this device: ${esc(agoText(gist.lastPush))}</p>
       <div class="row"><button type="button" class="btn" data-set="syncnow">Sync now</button><button type="button" class="btn" data-set="qr">Show code for phone</button><button type="button" class="btn danger" data-set="disconnect">Disconnect this device</button></div>
       <div id="qrBox"></div></div>`;
   }
@@ -1599,7 +1620,7 @@ window.__catchallTest = { parseReminder, parseCapture, parseStructure, nextOccur
 </div>
 <script>
 (function () {
-  var CURRENT_VERSION = "13";
+  var CURRENT_VERSION = "14";
   var banner = document.getElementById('__update-banner');
   var updateBtn = document.getElementById('__update-btn');
   var dismissBtn = document.getElementById('__dismiss-btn');
