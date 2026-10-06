@@ -196,12 +196,14 @@ main{max-width:1200px;margin:0 auto;padding:18px 16px 80px}
 .rlist h2{font:700 20px var(--font-display);margin:0 0 4px}
 .rsec{display:flex;flex-direction:column;gap:8px}
 .rsec h3{font:500 12px var(--font-mono);text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin:14px 2px 2px}
-.rrow{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.rrow{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.rrow .n-actions,.rrow .swatches{flex-basis:100%}
+.rrow.colored{background:color-mix(in srgb,var(--nc) 22%,var(--surface));border-color:color-mix(in srgb,var(--nc) 60%,var(--line))}
 .rrow .when{font:13px var(--font-mono);min-width:0;flex:none;width:150px;color:var(--muted)}
 .rrow .what{flex:1;min-width:0;overflow-wrap:anywhere}
 .rrow.overdue{border-color:color-mix(in srgb,var(--hi) 70%,var(--line));background:color-mix(in srgb,var(--hi) 14%,var(--surface))}
 .rrow.sent .what{text-decoration:line-through;color:var(--muted)}
-@media (max-width:560px){ .rrow{flex-wrap:wrap} .rrow .when{width:auto;order:2} .rrow .what{flex-basis:100%} }
+@media (max-width:560px){ .rrow .when{width:auto} .rrow .what{flex-basis:100%;order:-1} }
 
 /* dialogs */
 dialog{border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--fg);padding:0;width:min(560px,calc(100vw - 32px));max-height:calc(100dvh - 48px)}
@@ -756,8 +758,9 @@ function noteBody(n){
   if ((n.images || []).length) h += `<div class="n-imgs">${n.images.map((src, i) => `<button type="button" data-act="zoom" data-id="${n.id}" data-i="${i}" aria-label="Open image"><img src="${esc(src)}" alt="" loading="lazy"></button>`).join('')}</div>`;
   return h;
 }
+const actBtn = (n, act, ic, label, extra = '') => `<button type="button" class="act ${act === 'del' ? 'del' : ''}" data-act="${act}" data-id="${n.id}" ${extra}>${icon(ic)}<span>${label}</span></button>`;
 function noteCard(n, board, moves = ''){
-  const btn = (act, ic, label, extra = '') => `<button type="button" class="act ${act === 'del' ? 'del' : ''}" data-act="${act}" data-id="${n.id}" ${extra}>${icon(ic)}<span>${label}</span></button>`;
+  const btn = (...a) => actBtn(n, ...a);
   const colorBtn = btn('colorpick', 'palette', 'Color', 'aria-expanded="false"');
   const delBtn = btn('del', 'trash', 'Delete');
   const acts = board
@@ -902,14 +905,17 @@ function renderCal(main){
     <div class="cal">${cells}</div>${day}`;
 }
 function reminderRow(n){
-  const r = n.remind, overdue = !r.sent && r.at <= Date.now();
+  const r = n.remind, overdue = !r.sent && r.at <= Date.now(), hex = noteHex(n.color);
   const label = n.kind === 'list' ? (n.text || n.items.map(i => i.t).join(', ')) : n.text;
-  return `<div class="rrow ${overdue ? 'overdue' : ''} ${r.sent ? 'sent' : ''}">
+  return `<div class="rrow ${overdue ? 'overdue' : ''} ${r.sent ? 'sent' : ''} ${hex ? 'colored' : ''}" ${hex ? `style="--nc:${hex}"` : ''}>
     <span class="when">${esc(fWhen(r.at))}${r.repeat ? `<br>${icon('repeat')} ${REPEAT_LABEL[r.repeat]}` : ''}</span>
     <span class="what">${rich(label || '(image)')}</span>
-    ${r.sent ? '' : `<button type="button" class="btn" data-act="rdone" data-id="${n.id}">${icon('check')}${r.repeat ? 'Skip' : 'Done'}</button>`}
-    <button type="button" class="ghost" data-act="edit" data-id="${n.id}" aria-label="Edit reminder">${icon('edit')}</button>
-    <button type="button" class="ghost" data-act="rclear" data-id="${n.id}" aria-label="Remove reminder" title="Remove reminder">${icon('x')}</button>
+    <div class="n-actions">
+      ${r.sent ? '' : actBtn(n, 'rdone', 'check', r.repeat ? 'Skip this one' : 'Done')}
+      ${actBtn(n, 'edit', 'edit', 'Edit')}${actBtn(n, 'colorpick', 'palette', 'Color', 'aria-expanded="false"')}
+      ${actBtn(n, 'rclear', 'bell', 'Remove reminder')}${actBtn(n, 'del', 'trash', 'Delete')}
+    </div>
+    <div class="swatches" hidden>${swatchRow(n.color, `data-act="setcolor" data-id="${n.id}"`)}</div>
   </div>`;
 }
 function renderRem(main){
@@ -1257,7 +1263,7 @@ document.addEventListener('click', e => {
     case 'edit': openEditor(id); break;
     case 'del': { const before = clone(n); delNote(id); render(); toast('Note deleted', { restore: before }); break; }
     case 'colorpick': {
-      const row = t.closest('.note').querySelector('.swatches');
+      const row = t.closest('.note, .rrow').querySelector('.swatches');
       row.hidden = !row.hidden; t.setAttribute('aria-expanded', String(!row.hidden));
       if (!row.hidden) row.querySelector('[aria-pressed="true"]')?.focus();
       break;
