@@ -326,6 +326,9 @@ const S = {
 };
 for (const n of LS.get('notes', [])) if (n && n.id) S.notes.set(n.id, n);
 S.tags = LS.get('tags', []); S.tagsUpdatedAt = LS.get('tagsUpdatedAt', 0);
+// Board columns sync with the notes. Columns picked before syncing existed get the oldest
+// possible timestamp, so any device that changes its columns later wins.
+if (S.settings.boardTags.length && !S.settings.boardUpdatedAt) S.settings.boardUpdatedAt = 1;
 S.push = Object.assign({ topic:'', enabled:false, showText:true, updatedAt:0 }, LS.get('push', {}));
 let localWarned = false;
 function saveLocal(){
@@ -370,6 +373,12 @@ function onRemote(snap){
       else if (sync.first && S.tagsUpdatedAt > ru) pushTags();
       continue;
     }
+    if (d.id === 'board'){
+      const ru = v.updatedAt || 0, lu = S.settings.boardUpdatedAt || 0;
+      if (ru > lu){ takeBoard(v.list, ru); changed = true; }
+      else if (sync.first && lu > ru) pushBoard();
+      continue;
+    }
     if (d.id[0] !== 'n') continue;
     const local = S.notes.get(d.id);
     if (!local || (v.updatedAt || 0) > (local.updatedAt || 0)){ S.notes.set(d.id, clone(v)); changed = true; }
@@ -378,6 +387,7 @@ function onRemote(snap){
   if (sync.first){
     for (const n of S.notes.values()) if (!seen.has(n.id)) push(n.id);
     if (!seen.has('tags') && S.tags.length) pushTags();
+    if (!seen.has('board') && S.settings.boardUpdatedAt) pushBoard();
     sync.first = false;
   }
   if (!sync.readonly) setSync('synced');
@@ -394,6 +404,9 @@ function chain(key, fn){
   sync.chains.set(key, p);
 }
 function push(id){ if (!IN_ARTIFACT) return schedulePush(); if (sync.col && !sync.readonly) chain(id, () => { const n = S.notes.get(id); return n ? sync.col.doc(id).set(clone(n)) : null; }); }
+function pushBoard(){ if (!IN_ARTIFACT) return schedulePush(); if (sync.col && !sync.readonly) chain('board', () => sync.col.doc('board').set({ list: clone(S.settings.boardTags), updatedAt: S.settings.boardUpdatedAt || 0 })); }
+function commitBoard(){ S.settings.boardUpdatedAt = Date.now(); saveSettings(); pushBoard(); }
+function takeBoard(list, at){ S.settings.boardTags = clone(list || []); S.settings.boardUpdatedAt = at; saveSettings(); }
 function pushTags(){ if (!IN_ARTIFACT) return schedulePush(); if (sync.col && !sync.readonly) chain('tags', () => sync.col.doc('tags').set({ list: clone(S.tags), updatedAt: S.tagsUpdatedAt })); }
 
 
@@ -412,7 +425,7 @@ async function gh(path, opts = {}){
 function snapshotData(){
   const cutoff = Date.now() - 120 * 864e5;
   for (const [id, n] of S.notes) if (n.deleted && n.updatedAt < cutoff) S.notes.delete(id);
-  return { app:'Catchall', v:1, savedAt: Date.now(), tags: S.tags, tagsUpdatedAt: S.tagsUpdatedAt, push: S.push, notes: [...S.notes.values()] };
+  return { app:'Catchall', v:1, savedAt: Date.now(), tags: S.tags, tagsUpdatedAt: S.tagsUpdatedAt, push: S.push, board: { tags: S.settings.boardTags, updatedAt: S.settings.boardUpdatedAt || 0 }, notes: [...S.notes.values()] };
 }
 function mergeRemote(data){
   let changed = false, localNewer = false;
@@ -422,6 +435,9 @@ function mergeRemote(data){
   const rp = data.push || {};
   if ((rp.updatedAt || 0) > S.push.updatedAt){ S.push = Object.assign({}, S.push, rp); changed = true; }
   else if (S.push.updatedAt > (rp.updatedAt || 0)) localNewer = true;
+  const rb = data.board || {}, lb = S.settings.boardUpdatedAt || 0;
+  if ((rb.updatedAt || 0) > lb){ takeBoard(rb.tags, rb.updatedAt); changed = true; }
+  else if (lb > (rb.updatedAt || 0)) localNewer = true;
   const seen = new Set();
   for (const n of data.notes){
     if (!n || !n.id) continue; seen.add(n.id);
@@ -788,7 +804,7 @@ function applyTag(id, tid){
   const t = tid && tagById(tid), b = S.settings.boardTags;
   let msg = t ? `Tagged “${t.name}”` : 'Tag removed';
   if (t && !b.includes(t.id)){
-    if (b.length < 5){ b.push(t.id); saveSettings(); msg += ', and added it as a column on the Board'; }
+    if (b.length < 5){ b.push(t.id); commitBoard(); msg += ', and added it as a column on the Board'; }
     else msg += '. The Board already has 5 columns, so pick it there to show it';
   }
   render(); toast(msg + '.');
@@ -1276,8 +1292,8 @@ document.addEventListener('click', e => {
   if (d.try != null){ const c = $('#cap'); c.value = d.try; autosize(); updatePreview(); c.focus(); return; }
   if (d.bpick){
     const b = S.settings.boardTags, i = b.indexOf(d.bpick);
-    if (i >= 0) b.splice(i, 1); else if (b.length < 5) b.push(d.bpick); else toast('A board holds up to 5 columns.');
-    saveSettings(); render(); return;
+    if (i >= 0) b.splice(i, 1); else if (b.length < 5) b.push(d.bpick); else { toast('A board holds up to 5 columns.'); return; }
+    commitBoard(); render(); return;
   }
   if (d.day){ const k = dayKey(+d.day); S.ui.calDay = S.ui.calDay === k ? null : k; render(); return; }
   if (d.edtag){ const i = edState.tags.indexOf(d.edtag); if (i >= 0) edState.tags.splice(i, 1); else edState.tags.push(d.edtag); renderEdTags(); return; }
@@ -1360,7 +1376,7 @@ function setAction(a, t){
     if (!t.classList.contains('armed')){ t.classList.add('armed'); t.textContent = 'Confirm'; return; }
     S.tags = S.tags.filter(x => x.id !== id); commitTags();
     for (const n of liveNotes()) if ((n.tags || []).includes(id)) putNote({ ...n, tags: n.tags.filter(x => x !== id) });
-    S.settings.boardTags = S.settings.boardTags.filter(x => x !== id); saveSettings();
+    S.settings.boardTags = S.settings.boardTags.filter(x => x !== id); commitBoard();
     if (S.ui.tag === id) S.ui.tag = 'all';
     renderTagRows(); render(); return;
   }
@@ -1415,7 +1431,7 @@ function setAction(a, t){
   if (a === 'wipe'){
     if (!t.classList.contains('armed')){ t.classList.add('armed'); t.textContent = 'Erase every note and tag? Click again'; return; }
     for (const n of [...S.notes.values()]) if (!n.deleted) delNote(n.id);
-    S.tags = []; commitTags(); S.settings.boardTags = []; saveSettings();
+    S.tags = []; commitTags(); S.settings.boardTags = []; commitBoard();
     $('#setDlg').close(); render(); toast('Everything was erased.');
   }
 }
