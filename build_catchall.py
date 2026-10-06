@@ -60,14 +60,19 @@ banner = '''
   window.__appVersion = CURRENT_VERSION;
   window.__checkForUpdate = checkVersion;
 
+  // Phones (iPhone/iPad Home Screen apps especially) must never navigate here: a reload or
+  // URL change can hand the app a fresh, empty storage container, which once wiped notes.
+  // So on phones the new page is swapped in place. Computers reload normally, which is safe.
+  var isPhone = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
   updateBtn.addEventListener('click', function () {
     updateBtn.textContent = 'Updating…';
     updateBtn.disabled = true;
-    fetch('./?_=' + Date.now(), { cache: 'no-store' })
-      .then(function (r) { return r.text(); })
+    // Re-download the page with cache:'reload' so the browser's stored copy is replaced too;
+    // otherwise the next launch can open the old copy and offer the same update again.
+    fetch('./', { cache: 'reload' })
+      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
       .then(function (freshHtml) {
-        // No location.href / reload / pushState anywhere in this path --
-        // that navigation is what wiped local data on a prior mirror.
+        if (!isPhone) { location.reload(); return; }
         document.open();
         document.write(freshHtml);
         document.close();
