@@ -270,6 +270,96 @@ dialog::backdrop{background:rgb(8 12 20/.5)}
 .toast button{border:1px solid currentColor;background:none;color:inherit;border-radius:7px;padding:4px 9px;font-size:13px;opacity:.9}
 @keyframes up{from{transform:translateY(8px);opacity:0}}
 @media (prefers-reduced-motion:reduce){ *{animation:none!important;transition:none!important} }
+
+/* ---------- depth + texture: paper grain on the desk and every card, lifted index cards,
+   tactile buttons, red thumbtacks for pins, and a corkboard for the Board view ---------- */
+:root{
+  --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .08 0 0 0 0 .1 0 0 0 0 .2 0 0 0 .1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --sh-rgb:24 34 70; --hl:rgb(255 255 255/.75); --desk-glow:#f7f9fd;
+  --cork:#c9a476; --cork-2:#a9824f; --cork-dot:rgb(90 58 24/.22); --tack:#e5484d; --tack-hi:#ff9a9a; --tack-lo:#9e2328;
+  --sh-1:inset 0 1px 0 var(--hl), 0 1px 1px rgb(var(--sh-rgb)/.07), 0 3px 6px -2px rgb(var(--sh-rgb)/.10), 0 12px 24px -14px rgb(var(--sh-rgb)/.30);
+  --sh-2:inset 0 1px 0 var(--hl), 0 2px 3px rgb(var(--sh-rgb)/.08), 0 8px 14px -6px rgb(var(--sh-rgb)/.16), 0 22px 36px -16px rgb(var(--sh-rgb)/.38);
+  --sh-btn:inset 0 1px 0 var(--hl), 0 1px 0 rgb(var(--sh-rgb)/.10), 0 1px 2px rgb(var(--sh-rgb)/.08);
+  --sh-in:inset 0 1px 3px rgb(var(--sh-rgb)/.10);
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .85 0 0 0 0 .9 0 0 0 0 1 0 0 0 .06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --sh-rgb:0 0 0; --hl:rgb(255 255 255/.06); --desk-glow:#18213a;
+  --cork:#4a3a29; --cork-2:#33281c; --cork-dot:rgb(0 0 0/.35);
+  --sh-1:inset 0 1px 0 var(--hl), 0 1px 1px rgb(0 0 0/.35), 0 4px 8px -2px rgb(0 0 0/.35), 0 14px 26px -12px rgb(0 0 0/.6);
+  --sh-2:inset 0 1px 0 var(--hl), 0 2px 3px rgb(0 0 0/.4), 0 10px 18px -6px rgb(0 0 0/.45), 0 24px 40px -14px rgb(0 0 0/.7);
+  --sh-btn:inset 0 1px 0 var(--hl), 0 1px 0 rgb(0 0 0/.4), 0 1px 3px rgb(0 0 0/.3);
+  --sh-in:inset 0 1px 3px rgb(0 0 0/.4); } }
+:root[data-theme="dark"]{
+  --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .85 0 0 0 0 .9 0 0 0 0 1 0 0 0 .06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --sh-rgb:0 0 0; --hl:rgb(255 255 255/.06); --desk-glow:#18213a;
+  --cork:#4a3a29; --cork-2:#33281c; --cork-dot:rgb(0 0 0/.35);
+  --sh-1:inset 0 1px 0 var(--hl), 0 1px 1px rgb(0 0 0/.35), 0 4px 8px -2px rgb(0 0 0/.35), 0 14px 26px -12px rgb(0 0 0/.6);
+  --sh-2:inset 0 1px 0 var(--hl), 0 2px 3px rgb(0 0 0/.4), 0 10px 18px -6px rgb(0 0 0/.45), 0 24px 40px -14px rgb(0 0 0/.7);
+  --sh-btn:inset 0 1px 0 var(--hl), 0 1px 0 rgb(0 0 0/.4), 0 1px 3px rgb(0 0 0/.3);
+  --sh-in:inset 0 1px 3px rgb(0 0 0/.4); }
+
+/* the desk */
+body{background:var(--grain), radial-gradient(120% 70% at 50% -10%, var(--desk-glow), transparent 70%), var(--bg);min-height:100%}
+.top{box-shadow:0 1px 0 var(--hl) inset, 0 8px 18px -14px rgb(var(--sh-rgb)/.45)}
+.brand-mark{background:linear-gradient(160deg, color-mix(in srgb,var(--accent) 80%,#fff), var(--accent) 55%, color-mix(in srgb,var(--accent) 80%,#000));box-shadow:inset 0 1px 0 rgb(255 255 255/.35), 0 2px 5px rgb(var(--sh-rgb)/.35)}
+.views{box-shadow:var(--sh-in)}
+.views button[aria-pressed="true"]{box-shadow:var(--sh-btn)}
+
+/* cards lift off the desk */
+.composer,.note,.rrow,dialog{background:var(--grain), var(--surface);box-shadow:var(--sh-1)}
+.composer{border-color:color-mix(in srgb,var(--line) 70%,transparent)}
+.composer:focus-within{box-shadow:var(--sh-2), 0 0 0 4px color-mix(in srgb,var(--accent) 16%,transparent)}
+.note{border-color:color-mix(in srgb,var(--line) 75%,transparent)}
+.note.pinned{background:var(--grain), linear-gradient(180deg, color-mix(in srgb,var(--hi) 8%,var(--surface)), color-mix(in srgb,var(--hi) 18%,var(--surface)))}
+.note.colored,.rrow.colored{background:var(--grain), linear-gradient(170deg, color-mix(in srgb,var(--nc) 16%,var(--surface)), color-mix(in srgb,var(--nc) 30%,var(--surface)))}
+.rrow.overdue{background:var(--grain), color-mix(in srgb,var(--hi) 14%,var(--surface))}
+dialog{box-shadow:var(--sh-2), 0 40px 80px -30px rgb(var(--sh-rgb)/.5)}
+@media (hover:hover) and (prefers-reduced-motion:no-preference){
+  .note{transition:box-shadow .2s ease, transform .2s ease, rotate .2s ease}
+  .note:hover{transform:translateY(-2px);box-shadow:var(--sh-2)}
+}
+
+/* red thumbtack for pinned notes, the same one as the app icon */
+.pin-flag{top:-6px;left:50%;right:auto;width:16px;height:16px;margin-left:-8px;border-radius:50%;
+  background:radial-gradient(circle at 35% 32%, var(--tack-hi) 0 18%, var(--tack) 45%, var(--tack-lo) 100%);
+  box-shadow:1px 3px 3px rgb(0 0 0/.35), inset -1px -1px 2px rgb(0 0 0/.25)}
+.pin-flag .i{display:none}
+.note.pinned .n-body{padding-right:0}
+
+/* tactile controls */
+.act,.btn,.chip,.ftog,.fsel,.icon-btn{box-shadow:var(--sh-btn);background-image:linear-gradient(180deg, transparent, rgb(var(--sh-rgb)/.035))}
+.act:active,.btn:active,.chip:active,.ftog:active,.icon-btn:active{transform:translateY(1px);box-shadow:var(--sh-in)}
+.btn.primary{background:linear-gradient(180deg, color-mix(in srgb,var(--accent) 88%,#fff), var(--accent));box-shadow:inset 0 1px 0 rgb(255 255 255/.28), 0 1px 0 color-mix(in srgb,var(--accent) 60%,#000), 0 4px 10px -4px color-mix(in srgb,var(--accent) 70%,transparent)}
+.chip[aria-pressed="true"]{box-shadow:var(--sh-in)}
+.search{box-shadow:var(--sh-in)}
+.act.mic[aria-pressed="true"]{box-shadow:0 0 0 4px color-mix(in srgb,var(--danger) 22%,transparent)}
+.nswatch{box-shadow:inset 0 -2px 3px rgb(0 0 0/.15), 0 1px 2px rgb(var(--sh-rgb)/.2)}
+.empty{background:var(--grain), color-mix(in srgb,var(--surface) 55%,transparent)}
+.try{box-shadow:var(--sh-btn)}
+
+/* calendar: little cards on the desk */
+.cell{background:var(--grain), var(--surface);box-shadow:var(--sh-btn)}
+.cell.out{box-shadow:none}
+
+/* the Board is a corkboard; each card is tacked to it */
+.bcol{background:radial-gradient(circle at 2px 2px, var(--cork-dot) 1px, transparent 1.6px) 0 0/9px 9px,
+  radial-gradient(circle at 5px 6px, var(--cork-dot) .8px, transparent 1.4px) 0 0/13px 11px,
+  var(--grain), linear-gradient(160deg, var(--cork), var(--cork-2));
+  border:1px solid color-mix(in srgb,var(--cork-2) 70%,#000);
+  box-shadow:inset 0 2px 8px rgb(0 0 0/.28), inset 0 0 0 3px rgb(255 255 255/.04), 0 1px 0 var(--hl);gap:14px;padding:12px 10px 14px}
+.bcol h3{background:var(--grain), var(--surface);border-radius:6px;padding:6px 10px;margin:0;box-shadow:var(--sh-btn)}
+.bcol > p.small{background:var(--grain), var(--surface);border-radius:6px;padding:8px 10px;opacity:.92}
+.bcol.over{border:1.5px dashed var(--accent);box-shadow:inset 0 2px 8px rgb(0 0 0/.28), 0 0 0 4px color-mix(in srgb,var(--accent) 22%,transparent)}
+.bcol.archive{background:var(--grain), transparent;border:1.5px dashed var(--line);box-shadow:none}
+.bcol .note{margin-top:4px}
+.bcol .note .pin-flag{display:none}
+.bcol .note::before{content:"";position:absolute;top:-6px;left:50%;width:14px;height:14px;margin-left:-7px;border-radius:50%;
+  background:radial-gradient(circle at 35% 32%, var(--tack-hi) 0 18%, var(--tack) 45%, var(--tack-lo) 100%);box-shadow:1px 3px 3px rgb(0 0 0/.35)}
+.bcol .note.colored::before{background:radial-gradient(circle at 35% 32%, #fff 0 14%, var(--nc) 50%, color-mix(in srgb,var(--nc) 60%,#000) 100%)}
+.bcol .note:nth-of-type(odd){rotate:-.6deg}
+.bcol .note:nth-of-type(even){rotate:.5deg}
+.bcol .note:hover,.bcol .note:focus-within{rotate:0deg}
 </style>
 
 <header class="top">
@@ -1620,7 +1710,7 @@ window.__catchallTest = { parseReminder, parseCapture, parseStructure, nextOccur
 </div>
 <script>
 (function () {
-  var CURRENT_VERSION = "14";
+  var CURRENT_VERSION = "15";
   var banner = document.getElementById('__update-banner');
   var updateBtn = document.getElementById('__update-btn');
   var dismissBtn = document.getElementById('__dismiss-btn');
