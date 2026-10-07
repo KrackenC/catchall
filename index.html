@@ -263,8 +263,15 @@ dialog{border:0;border-radius:14px;background:var(--surface);color:var(--fg);pad
 .trow input{padding:6px 8px!important;font-size:14px!important}
 .swatch{width:26px;height:26px;border-radius:8px;border:1px solid var(--line);background:var(--c)}
 .small{font-size:13px;color:var(--muted);margin:0}
-.lightbox{width:auto;max-width:calc(100vw - 32px);background:var(--photo-bg);border:0}
-.lightbox img{display:block;max-width:calc(100vw - 32px);max-height:calc(100dvh - 64px)}
+.lightbox{width:auto;max-width:calc(100vw - 32px);max-height:calc(100dvh - 32px);background:var(--photo-bg);border:0;padding:0;display:flex;flex-direction:column}
+.lightbox:not([open]){display:none}
+.lb-bar{display:flex;justify-content:flex-end;gap:8px;padding:8px;flex:none}
+.lb-pic{overflow:auto;flex:1 1 auto;min-height:0;display:grid;place-items:center}
+.lightbox img{display:block;max-width:calc(100vw - 32px);max-height:calc(100dvh - 96px);cursor:zoom-in}
+.lightbox.zoomed{width:calc(100vw - 32px);height:calc(100dvh - 32px)}
+.lightbox.zoomed .lb-pic{place-items:start}
+.lightbox.zoomed img{max-width:none;max-height:none;cursor:zoom-out}
+img.loading{background:var(--surface-2)}
 
 /* toasts */
 .toasts{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:8px;z-index:50;width:min(460px,calc(100vw - 32px))}
@@ -615,7 +622,7 @@ function pushTags(){ if (!IN_ARTIFACT) return schedulePush(); if (sync.col && !s
 
 /* ---------- sync (standalone copy: a private GitHub gist shared by your devices) ---------- */
 const GIST_FILE = 'catchall.json', GIST_DESC = 'Catchall notes (sync data, edited by the app)';
-const gist = { token: LS.get('ghToken', ''), id: LS.get('gistId', ''), timer:null, busy:false, again:false, dirty:false, last:0,
+const gist = { token: LS.get('ghToken', ''), id: LS.get('gistId', ''), imgId: LS.get('imgGistId', ''), owner: LS.get('ghOwner', ''), timer:null, busy:false, again:false, dirty:false, last:0,
   lastPull: 0, lastPush: LS.get('lastPush', 0), err: '', warned: false };
 async function gh(path, opts = {}){
   const headers = { Authorization: 'Bearer ' + gist.token, Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' };
@@ -628,12 +635,16 @@ async function gh(path, opts = {}){
 }
 function snapshotData(){
   const cutoff = Date.now() - 120 * 864e5;
-  for (const [id, n] of S.notes) if (n.deleted && n.updatedAt < cutoff) S.notes.delete(id);
-  return { app:'Catchall', v:1, savedAt: Date.now(), tags: S.tags, tagsUpdatedAt: S.tagsUpdatedAt, push: S.push, board: { tags: S.settings.boardTags, updatedAt: S.settings.boardUpdatedAt || 0 }, notes: [...S.notes.values()] };
+  const gone = [];
+  for (const [id, n] of S.notes) if (n.deleted && n.updatedAt < cutoff){ gone.push(...(n.images || [])); S.notes.delete(id); }
+  if (gone.length) trashImages(gone);
+  return { app:'Catchall', v:1, savedAt: Date.now(), imgGist: gist.imgId || undefined, tags: S.tags, tagsUpdatedAt: S.tagsUpdatedAt, push: S.push, board: { tags: S.settings.boardTags, updatedAt: S.settings.boardUpdatedAt || 0 }, notes: [...S.notes.values()] };
 }
 function mergeRemote(data){
   let changed = false, localNewer = false;
   if (!data || !Array.isArray(data.notes)) return { changed, localNewer: true };
+  if (data.imgGist && data.imgGist !== gist.imgId){ gist.imgId = data.imgGist; LS.set('imgGistId', gist.imgId); changed = true; }
+  else if (gist.imgId && !data.imgGist) localNewer = true;
   if ((data.tagsUpdatedAt || 0) > S.tagsUpdatedAt){ S.tags = data.tags || []; S.tagsUpdatedAt = data.tagsUpdatedAt; changed = true; }
   else if (S.tagsUpdatedAt > (data.tagsUpdatedAt || 0)) localNewer = true;
   const rp = data.push || {};
@@ -654,6 +665,7 @@ function mergeRemote(data){
 }
 async function readGist(){
   const g = await gh('/gists/' + gist.id);
+  const owner = g.owner && g.owner.login; if (owner && owner !== gist.owner){ gist.owner = owner; LS.set('ghOwner', owner); }
   const f = g.files && g.files[GIST_FILE];
   if (!f) return null;
   let txt = f.content;
@@ -671,6 +683,7 @@ async function syncNow(){
     gist.lastPull = Date.now();
     const { changed, localNewer } = mergeRemote(remote);
     if (changed){ saveLocal(); render(); }
+    try { await syncImages(); } catch(e){ throw Object.assign({}, e, { saving: true }); }
     if (wasDirty || localNewer){
       try {
         await gh('/gists/' + gist.id, { method:'PATCH', body: JSON.stringify({ files: { [GIST_FILE]: { content: JSON.stringify(snapshotData()) } } }) });
@@ -706,7 +719,7 @@ async function connectGist(token){
   gist.dirty = true; await syncNow();
   return found;
 }
-function disconnectGist(){ gist.token = ''; gist.id = ''; LS.set('ghToken', ''); LS.set('gistId', ''); setSync('local'); }
+function disconnectGist(){ gist.token = ''; gist.id = ''; gist.imgId = ''; LS.set('imgGistId', ''); LS.set('ghToken', ''); LS.set('gistId', ''); setSync('local'); }
 function initGist(){
   if (!gist.token || !gist.id){ setSync('local'); return; }
   syncNow();
@@ -750,9 +763,107 @@ function syncSectionHTML(){
     <p class="small" id="ghMsg"></p></div>`;
 }
 
+/* ---------- photos (standalone copy) ----------
+   Photos are kept at full quality in IndexedDB, not inside the notes, so the notes stay small.
+   A note stores "img:<id>" references. Each photo syncs as one text file (a data URL) in a
+   second private gist; other devices download it from the gist's raw URL when they need it.
+   The Claude copy keeps the older small inline images. */
+const IMG_DESC = 'Catchall photos (sync data, edited by the app)';
+const BLANK_IMG = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
+const isRef = v => typeof v === 'string' && v.startsWith('img:');
+const imgFile = ref => ref.slice(4) + '.txt';
+let imgDBp = null;
+function imgDB(){
+  return imgDBp || (imgDBp = new Promise((res, rej) => {
+    const r = indexedDB.open('catchall-photos', 1);
+    r.onupgradeneeded = () => r.result.createObjectStore('img');
+    r.onsuccess = () => res(r.result); r.onerror = () => { imgDBp = null; rej(r.error); };
+  }));
+}
+async function idb(mode, fn){
+  const db = await imgDB();
+  return new Promise((res, rej) => { const tx = db.transaction('img', mode), r = fn(tx.objectStore('img')); tx.oncomplete = () => res(r && r.result); tx.onerror = () => rej(tx.error); });
+}
+const imgPut = (ref, d) => idb('readwrite', st => st.put(d, ref));
+const imgGet = ref => idb('readonly', st => st.get(ref)).catch(() => null);
+const imgDel = ref => idb('readwrite', st => st.delete(ref)).catch(() => {});
+const imgURL = new Map(), imgLoading = new Map(), imgFailedAt = new Map();
+const imgSrc = v => isRef(v) ? (imgURL.get(v) || BLANK_IMG) : v;
+async function imgData(ref){ return (await imgGet(ref)) || (await fetchRemoteImg(ref)); }
+function loadImg(ref){
+  if (imgURL.has(ref)) return Promise.resolve(imgURL.get(ref));
+  if (Date.now() - (imgFailedAt.get(ref) || 0) < 30e3) return Promise.resolve('');
+  if (!imgLoading.has(ref)) imgLoading.set(ref, (async () => {
+    const d = await imgData(ref);
+    imgLoading.delete(ref);
+    if (!d){ imgFailedAt.set(ref, Date.now()); return ''; }
+    const u = URL.createObjectURL(await (await fetch(d)).blob());
+    imgURL.set(ref, u); return u;
+  })());
+  return imgLoading.get(ref);
+}
+function hydrateImgs(root = document){
+  root.querySelectorAll('img[data-ref]').forEach(async el => {
+    const ref = el.dataset.ref; if (imgURL.has(ref)){ el.src = imgURL.get(ref); return; }
+    el.classList.add('loading');
+    const u = await loadImg(ref);
+    if (u && el.dataset.ref === ref){ el.src = u; el.classList.remove('loading'); }
+  });
+}
+const imgTag = (v, extra = '') => `<img src="${esc(imgSrc(v))}" ${isRef(v) ? `data-ref="${esc(v)}"` : ''} ${extra}>`;
+async function storePhoto(dataUrl){ const ref = uid('img:'); await imgPut(ref, dataUrl); return ref; }
+
+const imgSync = { uploaded: new Set(LS.get('imgUploaded', [])), trash: new Set(LS.get('imgTrash', [])) };
+function markUploaded(ref){ if (!imgSync.uploaded.has(ref)){ imgSync.uploaded.add(ref); LS.set('imgUploaded', [...imgSync.uploaded]); } }
+function trashImages(refs){
+  const live = new Set(); for (const n of S.notes.values()) for (const v of n.images || []) live.add(v);
+  for (const r of refs) if (isRef(r) && !live.has(r)){ imgSync.trash.add(r); imgDel(r); }
+  LS.set('imgTrash', [...imgSync.trash]);
+}
+async function fetchRemoteImg(ref){
+  if (IN_ARTIFACT || !gist.imgId || !gist.owner) return null;
+  try {
+    const r = await fetch(`https://gist.githubusercontent.com/${encodeURIComponent(gist.owner)}/${gist.imgId}/raw/${encodeURIComponent(imgFile(ref))}`, { cache:'no-store' });
+    if (!r.ok) return null;
+    const d = (await r.text()).trim();
+    if (!d.startsWith('data:image/')) return null;
+    await imgPut(ref, d); markUploaded(ref);
+    return d;
+  } catch(e){ return null; }
+}
+async function ensureImgGist(){
+  if (gist.imgId) return gist.imgId;
+  let found = null;
+  for (let page = 1; page <= 5 && !found; page++){
+    const list = await gh('/gists?per_page=100&page=' + page);
+    found = list.find(g => g.description === IMG_DESC);
+    if (list.length < 100) break;
+  }
+  if (!found) found = await gh('/gists', { method:'POST', body: JSON.stringify({ description: IMG_DESC, public:false, files: { 'README.md': { content: 'Photos attached to Catchall notes. Each file is one photo. The app adds and removes these files; please leave them alone.' } } }) });
+  gist.imgId = found.id; LS.set('imgGistId', gist.imgId);
+  return gist.imgId;
+}
+// Upload any photo a note uses that this device hasn't sent yet, and remove photos no note uses.
+async function syncImages(){
+  const todo = new Set();
+  for (const n of S.notes.values()) if (!n.deleted) for (const v of n.images || []) if (isRef(v) && !imgSync.uploaded.has(v)) todo.add(v);
+  if (!todo.size && !imgSync.trash.size) return;
+  await ensureImgGist();
+  for (const ref of todo){
+    const d = await imgGet(ref); if (!d) continue;
+    await gh('/gists/' + gist.imgId, { method:'PATCH', body: JSON.stringify({ files: { [imgFile(ref)]: { content: d } } }) });
+    markUploaded(ref);
+  }
+  if (imgSync.trash.size){
+    const files = {}; for (const r of imgSync.trash) files[imgFile(r)] = null;
+    try { await gh('/gists/' + gist.imgId, { method:'PATCH', body: JSON.stringify({ files }) }); } catch(e){ if (!e || e.status !== 422) throw e; }
+    imgSync.trash.clear(); LS.set('imgTrash', []);
+  }
+}
+
 /* ---------- mutations ---------- */
 function putNote(n){ const prev = S.notes.get(n.id); n.updatedAt = Date.now(); S.notes.set(n.id, n); saveLocal(); push(n.id); notifyChange(prev, n); }
-function delNote(id){ const prev = S.notes.get(id); S.notes.set(id, { id, deleted:true, updatedAt: Date.now() }); saveLocal(); push(id); notifyChange(prev, S.notes.get(id)); }
+function delNote(id){ const prev = S.notes.get(id); S.notes.set(id, { id, deleted:true, updatedAt: Date.now(), images: (prev && prev.images || []).filter(isRef) }); saveLocal(); push(id); notifyChange(prev, S.notes.get(id)); }
 
 /* ---------- phone push notifications (standalone copy, via the ntfy app) ----------
    ntfy.sh can't take back a queued message, so a reminder is only queued in the
@@ -999,7 +1110,7 @@ function noteBody(n){
     if ((n.items || []).some(it => it.done)) h += `<div><button type="button" class="btn" data-act="cleardone" data-id="${n.id}" style="font-size:13px;padding:4px 10px">${icon('check')}Remove checked items</button></div>`;
   } else if (n.text) h += `<div class="n-body">${rich(n.text)}</div>`;
   const v = videoLink(n); if (v) h += `<div>${v}</div>`;
-  if ((n.images || []).length) h += `<div class="n-imgs">${n.images.map((src, i) => `<button type="button" data-act="zoom" data-id="${n.id}" data-i="${i}" aria-label="Open image"><img src="${esc(src)}" alt="" loading="lazy"></button>`).join('')}</div>`;
+  if ((n.images || []).length) h += `<div class="n-imgs">${n.images.map((src, i) => `<button type="button" data-act="zoom" data-id="${n.id}" data-i="${i}" aria-label="Open image">${imgTag(src, 'alt=""')}</button>`).join('')}</div>`;
   return h;
 }
 const actBtn = (n, act, ic, label, extra = '') => `<button type="button" class="act ${act === 'del' ? 'del' : ''}" data-act="${act}" data-id="${n.id}" ${extra}>${icon(ic)}<span>${label}</span></button>`;
@@ -1225,6 +1336,7 @@ function render(){
   } else stopDictation();
   micUI();
   if (qf != null && $('#q')){ $('#q').focus(); $('#q').setSelectionRange(qf, qf); }
+  hydrateImgs();
   const due = liveNotes().filter(n => n.remind && !n.remind.sent && n.remind.at <= Date.now()).length;
   document.title = due ? `(${due}) Catchall` : 'Catchall';
 }
@@ -1247,7 +1359,7 @@ function updatePreview(){
 }
 function renderThumbs(){
   const t = $('#thumbs'); if (!t) return;
-  t.innerHTML = S.ui.pending.map((src, i) => `<div class="thumb"><img src="${esc(src)}" alt="Attached image ${i + 1}"><button type="button" data-act="unpend" data-i="${i}" aria-label="Remove image">${icon('x')}</button></div>`).join('');
+  t.innerHTML = S.ui.pending.map((src, i) => `<div class="thumb">${imgTag(src, `alt="Attached image ${i + 1}"`)}<button type="button" data-act="unpend" data-i="${i}" aria-label="Remove image">${icon('x')}</button></div>`).join('');
 }
 function capture(){
   const c = $('#cap'); if (!c) return;
@@ -1286,13 +1398,20 @@ async function addImages(files){
   for (const f of imgs){
     if (S.ui.pending.length >= 4){ toast('Up to 4 images per note.'); break; }
     try {
-      let d = await compress(f, 1100, .72);
-      if (d.length > 52000) d = await compress(f, 800, .62);
-      if (d.length > 52000) d = await compress(f, 560, .55);
-      S.ui.pending.push(d);
+      if (IN_ARTIFACT){
+        let d = await compress(f, 1100, .72);
+        if (d.length > 52000) d = await compress(f, 800, .62);
+        if (d.length > 52000) d = await compress(f, 560, .55);
+        S.ui.pending.push(d);
+      } else {
+        // sharp enough to read labels and part numbers; about 0.3 to 0.9 MB per photo
+        let d = await compress(f, 2048, .85);
+        if (d.length > 1.6e6) d = await compress(f, 1600, .8);
+        S.ui.pending.push(await storePhoto(d));
+      }
     } catch(e){ toast('That image could not be read. Try a JPEG or PNG.'); }
   }
-  renderThumbs(); updatePreview();
+  renderThumbs(); updatePreview(); hydrateImgs();
 }
 
 /* ---------- reminders engine ---------- */
@@ -1370,7 +1489,7 @@ function openEditor(id, opts = {}){
     </div>
     <div class="set-sec" id="edImgWrap"><h3>Images</h3><div class="thumbs" id="edImgs"></div></div>
     <div class="dlg-foot"><button type="button" class="btn danger left" data-ed="delete">${icon('trash')}Delete</button><button type="button" class="btn" data-ed="close">Cancel</button><button type="submit" class="btn primary">Save</button></div>`;
-  renderEdTags(); renderEdImgs();
+  renderEdTags(); renderEdImgs(); hydrateImgs($('#edForm'));
   $('#edDlg').showModal();
   if (opts.focus === 'rem') $('#edAt').focus(); else { const t = $('#edText'); t.focus(); t.setSelectionRange(t.value.length, t.value.length); }
 }
@@ -1380,7 +1499,7 @@ function renderEdTags(){
 }
 function renderEdImgs(){
   $('#edImgWrap').hidden = !edState.images.length;
-  $('#edImgs').innerHTML = edState.images.map((src, i) => `<div class="thumb"><img src="${esc(src)}" alt=""><button type="button" data-ed="rmimg" data-i="${i}" aria-label="Remove image">${icon('x')}</button></div>`).join('');
+  $('#edImgs').innerHTML = edState.images.map((src, i) => `<div class="thumb">${imgTag(src, 'alt=""')}<button type="button" data-ed="rmimg" data-i="${i}" aria-label="Remove image">${icon('x')}</button></div>`).join('');
 }
 function saveEditor(){
   const n = S.notes.get(edState.id); if (!n) return;
@@ -1395,7 +1514,9 @@ function saveEditor(){
     const was = n.remind;
     remind = { at, repeat: rep, sent: was && was.at === at && was.sent && was.repeat === rep ? true : false };
   }
+  const dropped = (n.images || []).filter(v => !edState.images.includes(v));
   putNote({ ...n, kind: st.kind, text: st.text, items: st.items, tags, images: edState.images, remind, color: edState.color });
+  if (dropped.length) trashImages(dropped);
   $('#edDlg').close(); render(); toast('Saved');
 }
 
@@ -1456,7 +1577,10 @@ function renderTagRows(){
       <button type="button" class="btn danger" data-set="deltag">Delete</button></div>`).join('')
     : '<p class="small">No tags yet. Add one here, or type #something in a note.</p>';
 }
-function exportNotes(fmt){
+async function withPhotos(ns){
+  return Promise.all(ns.map(async n => (n.images || []).some(isRef) ? { ...n, images: (await Promise.all(n.images.map(async v => isRef(v) ? await imgData(v) : v))).filter(Boolean) } : n));
+}
+async function exportNotes(fmt){
   const scope = $('#expScope')?.value || 'all';
   let ns = liveNotes();
   if (scope === 'view') ns = ns.filter(matches); else if (scope === 'pinned') ns = ns.filter(n => n.pinned);
@@ -1464,7 +1588,7 @@ function exportNotes(fmt){
   const tn = n => (n.tags || []).map(id => tagById(id)?.name).filter(Boolean);
   const stamp = new Date().toISOString().slice(0, 10);
   let data, name;
-  if (fmt === 'json'){ data = JSON.stringify({ app:'Catchall', version:1, exportedAt:new Date().toISOString(), tags:S.tags, notes:ns }, null, 2); name = `catchall-backup-${stamp}.json`; }
+  if (fmt === 'json'){ data = JSON.stringify({ app:'Catchall', version:1, exportedAt:new Date().toISOString(), tags:S.tags, notes: await withPhotos(ns) }, null, 2); name = `catchall-backup-${stamp}.json`; }
   else if (fmt === 'csv'){
     const q = v => '"' + String(v ?? '').replace(/"/g, '""') + '"';
     data = 'created,text,checklist,tags,pinned,archived,reminder,repeat,images\n' + ns.map(n => [new Date(n.createdAt).toISOString(), n.text, (n.items || []).map(i => (i.done ? '[x] ' : '[ ] ') + i.t).join(' | '), tn(n).join(' '), n.pinned ? 'yes' : '', n.archived ? 'yes' : '', n.remind ? new Date(n.remind.at).toISOString() : '', n.remind?.repeat || '', (n.images || []).length].map(q).join(',')).join('\n');
@@ -1502,7 +1626,14 @@ async function importFile(file){
     let added = 0;
     for (const t of j.tags || []) if (t && t.id && !tagById(t.id)) { S.tags.push(t); }
     commitTags();
-    for (const n of j.notes){ if (!n || !n.id || n.deleted) continue; const cur = S.notes.get(n.id); if (!cur || cur.deleted || (n.updatedAt || 0) > (cur.updatedAt || 0)){ S.notes.set(n.id, n); push(n.id); added++; } }
+    for (const n of j.notes){
+      if (!n || !n.id || n.deleted) continue;
+      const cur = S.notes.get(n.id);
+      if (!cur || cur.deleted || (n.updatedAt || 0) > (cur.updatedAt || 0)){
+        if (!IN_ARTIFACT && (n.images || []).length) n.images = await Promise.all(n.images.map(v => typeof v === 'string' && v.startsWith('data:image/') ? storePhoto(v) : v));
+        S.notes.set(n.id, n); push(n.id); added++;
+      }
+    }
     saveLocal(); render(); openSettings(); toast(`Restored ${added} note${added === 1 ? '' : 's'}`);
   } catch(e){ toast("That file isn't a Catchall JSON backup."); }
 }
@@ -1531,7 +1662,7 @@ document.addEventListener('click', e => {
   switch (d.act){
     case 'save': capture(); break;
     case 'attach': $('#fileImg').click(); break;
-    case 'unpend': S.ui.pending.splice(+d.i, 1); renderThumbs(); break;
+    case 'unpend': { const [r] = S.ui.pending.splice(+d.i, 1); if (isRef(r)) imgDel(r); renderThumbs(); break; }
     case 'mic': dictate(); break;
     case 'dicthintx': S.ui.dictHint = false; $('.dict-hint')?.remove(); break;
     case 'more': S.ui.limit += 60; render(); break;
@@ -1557,7 +1688,13 @@ document.addEventListener('click', e => {
       break;
     }
     case 'item': { const items = n.items.map((x, i) => i === +d.i ? { ...x, done: !x.done } : x); putNote({ ...n, items }); render(); break; }
-    case 'zoom': { const img = document.createElement('img'); img.alt = ''; img.src = n.images[+d.i]; $('#lbDlg').replaceChildren(img); $('#lbDlg').showModal(); break; }
+    case 'zoom': {
+      const v = n.images[+d.i], dlg = $('#lbDlg');
+      dlg.classList.remove('zoomed');
+      dlg.innerHTML = `<div class="lb-bar"><button type="button" class="btn" data-lb="zoom">${icon('search')}<span>Zoom in</span></button><button type="button" class="btn" data-lb="close">${icon('x')}Close</button></div><div class="lb-pic">${imgTag(v, 'alt="Photo from the note"')}</div>`;
+      dlg.showModal(); hydrateImgs(dlg);
+      break;
+    }
     case 'mv': { const tags = (n.tags || []).filter(x => x !== d.from); tags.push(d.to); putNote({ ...n, tags }); render(); break; }
     case 'rdone': completeReminder(id); break;
     case 'rclear': putNote({ ...n, remind:null }); render(); break;
@@ -1691,7 +1828,14 @@ document.addEventListener('keydown', e => {
   else if ((e.key === 'n' || e.key === 'c') && !e.metaKey && !e.ctrlKey && $('#cap')){ e.preventDefault(); $('#cap').focus(); }
 });
 $('#edForm').addEventListener('submit', e => { e.preventDefault(); saveEditor(); });
-$('#lbDlg').addEventListener('click', () => $('#lbDlg').close());
+$('#lbDlg').addEventListener('click', e => {
+  const dlg = $('#lbDlg'), b = e.target.closest('[data-lb]');
+  const zoom = on => { dlg.classList.toggle('zoomed', on); const l = dlg.querySelector('[data-lb="zoom"] span'); if (l) l.textContent = on ? 'Fit to screen' : 'Zoom in'; };
+  if (b && b.dataset.lb === 'close') dlg.close();
+  else if (b && b.dataset.lb === 'zoom') zoom(!dlg.classList.contains('zoomed'));
+  else if (e.target.tagName === 'IMG') zoom(!dlg.classList.contains('zoomed'));
+  else if (e.target === dlg) dlg.close();
+});
 document.addEventListener('paste', e => {
   if (e.target.id !== 'cap') return;
   const files = [...(e.clipboardData?.files || [])];
@@ -1803,7 +1947,7 @@ window.__catchallTest = { parseReminder, parseCapture, parseStructure, nextOccur
 </div>
 <script>
 (function () {
-  var CURRENT_VERSION = "17";
+  var CURRENT_VERSION = "18";
   var banner = document.getElementById('__update-banner');
   var updateBtn = document.getElementById('__update-btn');
   var dismissBtn = document.getElementById('__dismiss-btn');
