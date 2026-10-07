@@ -426,7 +426,20 @@
         "name": "reminder-stack",
         "value": "560px"
       }
-    ]
+    ],
+    "utilityTokens": {
+      "--shell-ok": "#7bd88f",
+      "--shell-err": "#ff8a78",
+      "--shell-err-fg": "#ffd0c8",
+      "--shell-line": "rgb(255 255 255/.24)",
+      "--scrim": {
+        "light": "rgb(20 32 22/.55)",
+        "dark": "rgb(0 0 0/.62)"
+      },
+      "--photo-bg": "#000000",
+      "--photo-scrim": "rgb(0 0 0/.65)",
+      "--photo-fg": "#ffffff"
+    }
   },
   "components": [
     {

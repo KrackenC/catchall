@@ -19,6 +19,27 @@ colors:
   nonphoto-blue: "#1f74a3"
   nonphoto-wash: "#d3ecf7"
   ok-green: "#2e7d4f"
+  pad-green-dark: "#141b15"
+  pad-grid-dark: "#1c261d"
+  sheet-dark: "#1d261e"
+  sheet-tint-dark: "#253027"
+  graphite-dark: "#e2eadb"
+  graphite-soft-dark: "#9db0a0"
+  hairline-dark: "#334237"
+  shell-green-dark: "#1f3a27"
+  shell-green-deep-dark: "#18301f"
+  shell-ink-soft-dark: "#9fb9a3"
+  rule-green-dark: "#5d9a70"
+  red-pencil-dark: "#ff7a66"
+  red-pencil-ink-dark: "#1a0d0a"
+  nonphoto-blue-dark: "#6cc4ea"
+  nonphoto-wash-dark: "#173c4b"
+  ok-green-dark: "#5cc489"
+  shell-ok: "#7bd88f"
+  shell-alert: "#ff8a78"
+  shell-alert-ink: "#ffd0c8"
+  photo-ground: "#000000"
+  photo-ink: "#ffffff"
 typography:
   display:
     fontFamily: "Barlow Semi Condensed, Arial Narrow, system-ui, sans-serif"
@@ -57,6 +78,26 @@ typography:
     fontSize: "17px"
     fontWeight: 400
     lineHeight: 1.45
+  caption:
+    fontFamily: "Barlow, Segoe UI, system-ui, sans-serif"
+    fontSize: "13px"
+    fontWeight: 400
+    lineHeight: 1.4
+  micro:
+    fontFamily: "Barlow Semi Condensed, Arial Narrow, system-ui, sans-serif"
+    fontSize: "12px"
+    fontWeight: 500
+    lineHeight: 1.2
+  body-hyperlegible:
+    fontFamily: "Atkinson Hyperlegible, Segoe UI, system-ui, sans-serif"
+    fontSize: "16px"
+    fontWeight: 400
+    lineHeight: 1.5
+  body-typewriter:
+    fontFamily: "JetBrains Mono, ui-monospace, SF Mono, Menlo, monospace"
+    fontSize: "16px"
+    fontWeight: 400
+    lineHeight: 1.5
   label:
     fontFamily: "Barlow Semi Condensed, Arial Narrow, system-ui, sans-serif"
     fontSize: "14px"
@@ -74,6 +115,7 @@ rounded:
   shell-tabs: "10px"
   sheet: "12px"
   capture: "14px"
+  pill: "99px"
 spacing:
   xs: "6px"
   sm: "8px"
@@ -211,7 +253,15 @@ A two-pencil palette on green engineering paper: graphite ink, a sparing red, a 
 - **Graphite** (#242b25): all body ink. **Graphite Soft** (#526056): metadata, counts, placeholders, inactive labels.
 - **Hairline** (#c3d3b4): control borders and the rules inside a sheet.
 
-Note colors (nine, plus none) and tag colors come from a fixed user palette and tint a sheet by mixing 24% into Sheet. They are content color, not system color.
+Note colors (nine, plus none) and tag colors come from a fixed user palette and tint a sheet by mixing 24% into Sheet. They are content color, not system color. The "no color" swatch is marked with a Graphite Soft slash, never red.
+
+### Utility
+- **Header signals:** **Shell OK** (#7bd88f) is the synced dot. **Shell Alert** (#ff8a78) and **Shell Alert Ink** (#ffd0c8) mark sync problems. **Shell Line** (white at 24%) outlines controls on the header band. These live only on the deep green shell.
+- **Scrim:** dark green at 55% (black at 62% in dark mode) behind dialogs.
+- **Photo:** **Photo Ground** (#000) behind the image viewer. **Photo Scrim** (black at 65%) with **Photo Ink** (#fff) on the remove button over image thumbnails. Photos keep a neutral ground so their colors read true.
+- **Shadows:** every shadow is the shadow tint (`--sh-rgb`) at an opacity. No literal black or white shadows.
+
+Every color in the stylesheet is a token. Component rules reference tokens only.
 
 ### Named Rules
 **The Two Pencils Rule.** Red means act or attend: Save, Delete, due. Blue means where you are: pinned, selected, focused. Neither pencil is decoration, and neither stands in for the other.
