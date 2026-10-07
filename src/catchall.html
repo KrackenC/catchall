@@ -1912,6 +1912,8 @@ render();
 clearInterval(window.__catchallTick); window.__catchallTick = setInterval(tick, 15000); setTimeout(tick, 800);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) tick(); });
 initSync();
+// Tells the update script when installing a new version now would interrupt something.
+window.__appBusy = () => S.ui.pending.length > 0 || !!($('#cap') && $('#cap').value.trim()) || !!document.querySelector('dialog[open]');
 window.__catchallTest = { parseReminder, parseCapture, parseStructure, nextOccurrence };
 })();
 </script>
