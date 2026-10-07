@@ -426,7 +426,6 @@ dialog::backdrop{background:var(--scrim)}
 /* review fixes: full-height grid, labeled header and controls on phones, ruled sheets */
 body{min-height:100vh}
 .top .icon-btn{width:auto;padding:0 12px;gap:6px;display:inline-flex;align-items:center;font:600 14px var(--font-display)}
-.n-meta{border-top:1px solid var(--line);padding-top:9px}
 .composer .comp-row{border-top:1px solid var(--line);padding-top:10px}
 .n-actions.mv > span{gap:6px;flex-wrap:wrap}
 .mvbtn{padding:7px 8px;font:600 13px var(--font-display);max-width:9rem}
@@ -453,6 +452,112 @@ body{min-height:100vh}
   .filters:not(.open) .ftog,.filters:not(.open) .fsel{display:none}
   .filters.open .ftog,.filters.open .fsel{flex:1 1 auto}
 }
+
+/* ---------- calm pass: desk layout, page headers, ruled action bands, the calendar as one sheet ---------- */
+/* page header: the view's name in a large title block */
+.pagehead{margin:0 0 16px;background:var(--surface)}
+.pagehead h1{font:700 26px/1 var(--font-display);margin:0;padding:12px 16px;flex:1 1 auto;color:var(--fg);letter-spacing:-.01em}
+.pagehead .tb-cell{padding:0 16px;font-size:16px}
+.ph-ctl{display:flex;align-items:center;gap:6px;padding:6px 10px;border-left:1.5px solid var(--rule)}
+.col .pagehead,.desk-head .pagehead{margin:0}
+
+/* desk layout: capture, then tags and filters, then the feed; on wide screens the tags and filters become a rail */
+.desk{display:grid;grid-template-columns:minmax(0,1fr);grid-template-areas:"head" "cap" "rail" "feed";gap:16px;max-width:760px;margin:0 auto}
+.desk-head{grid-area:head}.desk-cap{grid-area:cap}.rail{grid-area:rail;display:flex;flex-direction:column;gap:12px;min-width:0}.desk-feed{grid-area:feed;gap:14px}
+@media (max-width:640px){ .desk-head{display:none} }
+@media (min-width:1024px){
+  .desk{max-width:none;grid-template-columns:248px minmax(0,1fr);grid-template-areas:"head head" "rail cap" "rail feed";column-gap:28px;align-items:start}
+  .rail{position:sticky;top:calc(env(safe-area-inset-top,0px) + 76px);background:var(--surface);border:1.5px solid var(--rule);border-radius:4px;padding:0 0 12px;gap:0;max-height:calc(100vh - 100px);overflow:auto}
+  .rail .tagbar{flex-direction:column;gap:0;overflow:visible;padding:8px 8px 10px;border-bottom:1px solid var(--line)}
+  .rail .tagbar::before{content:"Tags";font:700 16px/1 var(--font-display);padding:6px 8px 10px;color:var(--fg)}
+  .rail .chip{justify-content:flex-start;width:100%;border:0;background:none;border-radius:6px;padding:8px;font-size:16px}
+  .rail .chip .n{margin-left:auto;font-size:13px}
+  .rail .chip:hover{background:var(--surface-2)}
+  .rail .chip[aria-pressed="true"]{background:var(--blue-wash);color:var(--fg)}
+  .rail .chip[aria-pressed="true"] .n{color:var(--fg)}
+  .rail .chip.add{color:var(--muted);margin-top:4px}
+  .rail .filters{flex-direction:column;align-items:stretch;gap:6px;padding:12px 16px 0}
+  .rail .filters::before{content:"Show only";font:700 16px/1 var(--font-display);padding:2px 0 4px;color:var(--fg)}
+  .rail .search{order:-1;flex:none;margin:0 0 6px}
+  .rail .filters::before{order:0}
+  .rail .ftog,.rail .fsel{width:100%;justify-content:flex-start;border:0;background:none;padding:7px 8px;border-radius:6px;font-size:16px}
+  .rail .ftog:hover{background:var(--surface-2)}
+  .rail .ftog[aria-pressed="true"]{background:var(--blue-wash);color:var(--fg)}
+  .rail .fsel{border:1px solid var(--line);background:var(--surface)}
+}
+.desk-feed .day:first-child .tblock{margin-top:0}
+.desk .desk-feed{max-width:none;margin:0;width:100%}
+
+/* note card: the text leads; time, tag and actions share one ruled band */
+.note{gap:10px;padding:16px 16px 10px}
+.n-body{max-width:70ch}
+.n-band{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 12px;border-top:1px solid var(--line);padding-top:8px}
+.n-band .n-meta{border:0;padding:0;gap:8px;min-width:0}
+.n-actions{display:flex;flex-wrap:wrap;align-items:center;gap:0;margin:0 -6px 0 auto;justify-content:flex-end}
+.n-actions .act{border:0;background:none;border-radius:6px;color:var(--muted);font:500 14px/1 var(--font-body);padding:8px 9px;min-height:34px;gap:5px}
+.n-actions .act:hover{background:color-mix(in srgb,var(--surface-2) 80%,transparent);color:var(--fg)}
+.n-actions .act + .act{position:relative}
+.n-actions .act + .act::before{content:"";position:absolute;left:0;top:9px;bottom:9px;width:1px;background:var(--line)}
+.n-actions .act:hover::before,.n-actions .act:hover + .act::before{opacity:0}
+.n-actions .act[aria-pressed="true"]{background:none;color:var(--blue)}
+.n-actions .act.del{color:var(--red);margin-left:8px}
+.n-actions .act.del::before{display:none}
+.n-actions .act.del:hover{background:var(--red);color:var(--red-fg)}
+.note.colored .n-actions .act,.rrow.colored .n-actions .act{background:none}
+.n-meta .tagsel{min-height:30px;border:1px solid var(--line);border-radius:6px;background:var(--surface);padding:0 0 0 8px;color:var(--fg)}
+.n-meta .tagsel select{height:28px;font:600 13px/1 var(--font-display)}
+.n-moves{display:flex;flex-wrap:wrap;gap:6px}
+.n-moves .act{border:1px solid var(--line);background:var(--surface);color:var(--fg);font:600 13px/1 var(--font-display);padding:6px 9px;min-height:32px;border-radius:6px}
+.n-moves .act:hover{border-color:var(--muted)}
+@media (hover:none){ .n-actions .act{min-height:40px} }
+@media (max-width:640px){
+  .n-band{flex-direction:column;align-items:stretch}
+  .n-actions{margin:0 -6px;justify-content:space-between}
+  .n-actions .act{padding:8px 6px;font-size:13px}
+  .n-actions .act.del{margin-left:0}
+}
+
+/* Board: column name at title size, a colour dot, count in a ruled cell */
+.board-head{margin:0 0 12px}
+.bcol .bhead h3{font:700 17px/1.1 var(--font-display);gap:8px}
+.cdot{width:10px;height:10px;border-radius:50%;background:var(--c);flex:none}
+.bcol .note{padding:14px 14px 8px}
+.bcol .n-band{flex-direction:column;align-items:stretch}
+.bcol .n-actions{justify-content:flex-start;margin:0 -6px}
+.bcol .n-actions .act.del{margin-left:auto}
+.bcol.archive{align-self:stretch;min-height:200px}
+
+/* Calendar: one ruled sheet, hairline days, counts in words */
+.cal{gap:0;background:var(--surface);border:1.5px solid var(--rule);border-radius:4px;overflow:hidden}
+.cal .dow{padding:8px 10px;background:var(--surface-2);border-bottom:1.5px solid var(--rule);font:700 14px var(--font-display);color:var(--fg)}
+.cell{border-radius:0;box-shadow:none;border:0;border-right:1px solid var(--line);border-bottom:1px solid var(--line);background:transparent;min-height:96px;padding:8px}
+.cal > :nth-child(7n){border-right:0}
+.cell:hover{background:color-mix(in srgb,var(--surface-2) 70%,transparent)}
+.cell.out{background:color-mix(in srgb,var(--surface-2) 60%,transparent);box-shadow:none}
+.cell.out .dnum{color:var(--muted);font-weight:500}
+.cell[aria-pressed="true"]{box-shadow:inset 0 0 0 2px var(--blue)}
+.cell .snip{font-size:13px;color:var(--fg)}
+.cell .marks{flex-wrap:wrap;gap:4px 8px;font:600 12px/1.2 var(--font-display);color:var(--muted);font-variant-numeric:tabular-nums}
+.cell .bell{background:var(--blue-wash);color:var(--fg);padding:2px 6px;border-radius:4px}
+@media (max-width:640px){ .cell{min-height:58px;padding:5px} .cell .marks{font-size:12px} .cal .dow{padding:6px 4px;font-size:12px} }
+
+/* Reminders */
+.rhint{margin:-4px 2px 0}
+.rrow .n-band{flex-basis:100%;flex-direction:row}
+.rrow .n-band .n-actions{flex-basis:auto}
+
+/* small fixes */
+#q::placeholder{color:var(--muted)}
+@media (max-width:640px){ .preview .hint{display:none} }
+.btn.shell{background:var(--shell);border-color:var(--shell);color:var(--shell-fg);font-weight:600}
+.btn.shell:hover{background:var(--shell-2)}
+.btn.quiet-del{border-color:transparent;background:none;color:var(--red)}
+.btn.quiet-del:hover{background:var(--red);color:var(--red-fg)}
+.dlg a{color:var(--blue);text-underline-offset:2px}
+.set-row{gap:12px}
+.set-lbl{font:600 14px var(--font-display);color:var(--muted);width:4.5rem;flex:none}
+:root[data-theme="dark"] .note.colored,:root[data-theme="dark"] .rrow.colored{background:color-mix(in oklab,var(--nc) 15%,var(--surface))}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .note.colored,:root:not([data-theme="light"]) .rrow.colored{background:color-mix(in oklab,var(--nc) 15%,var(--surface))} }
 </style>
 
 <header class="top">
@@ -759,7 +864,7 @@ function syncSectionHTML(){
       <li><a href="https://github.com/settings/tokens/new?scopes=gist&description=Catchall%20sync" target="_blank" rel="noopener">Create a GitHub token</a> with only the <b>gist</b> box ticked. Choose “No expiration” so sync doesn't stop later.</li>
       <li>Paste it below and tap Connect. The first device creates the gist, and every other device finds it automatically.</li>
     </ol>
-    <div class="row"><label class="sr" for="ghTok">GitHub token</label><input type="password" id="ghTok" placeholder="ghp_…" autocomplete="off" style="flex:1 1 220px;border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:8px 10px"><button type="button" class="btn primary" data-set="connect">Connect</button></div>
+    <div class="row"><label class="sr" for="ghTok">GitHub token</label><input type="password" id="ghTok" placeholder="ghp_…" autocomplete="off" style="flex:1 1 220px;border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:8px 10px"><button type="button" class="btn shell" data-set="connect">Connect</button></div>
     <p class="small" id="ghMsg"></p></div>`;
 }
 
@@ -1143,17 +1248,20 @@ function noteCard(n, board, moves = ''){
   const btn = (...a) => actBtn(n, ...a);
   const colorBtn = btn('colorpick', 'palette', 'Color', 'aria-expanded="false"');
   const delBtn = btn('del', 'trash', 'Delete');
+  // On the Board the column is the tag, so cards move between columns instead of carrying a tag menu.
   const acts = board
-    ? tagSelect(n) + colorBtn + btn('edit', 'edit', 'Edit') + delBtn
-    : tagSelect(n) + btn('pin', 'pin', n.pinned ? 'Unpin' : 'Pin', n.pinned ? 'aria-pressed="true"' : '') + btn('edit', 'edit', 'Edit') + colorBtn
+    ? btn('edit', 'edit', 'Edit') + colorBtn + delBtn
+    : btn('pin', 'pin', n.pinned ? 'Unpin' : 'Pin', n.pinned ? 'aria-pressed="true"' : '') + btn('edit', 'edit', 'Edit') + colorBtn
       + btn('archive', 'archive', n.archived ? 'Unarchive' : 'Archive') + delBtn;
   const hex = noteHex(n.color);
   return `<article class="note ${n.pinned ? 'pinned' : ''} ${n.archived ? 'arch' : ''} ${hex ? 'colored' : ''}" data-id="${n.id}" ${hex ? `style="--nc:${hex}"` : ''} ${board ? 'draggable="true"' : ''}>
     ${n.pinned ? `<span class="pin-flag" title="Pinned">${icon('pin')}</span>` : ''}
     ${noteBody(n)}
-    <div class="n-meta"><time datetime="${new Date(n.createdAt).toISOString()}">${board ? esc(fDay(n.createdAt)) + ' · ' : ''}${esc(fTime(n.createdAt))}</time>${tagChips(n, mainTag(n))}${remPill(n)}</div>
+    <div class="n-band">
+      <div class="n-meta"><time datetime="${new Date(n.createdAt).toISOString()}">${board ? esc(fDay(n.createdAt)) + ', ' : ''}${esc(fTime(n.createdAt))}</time>${board ? '' : tagSelect(n)}${tagChips(n, board ? (n.tags || []).find(id => S.settings.boardTags.includes(id)) : mainTag(n))}${remPill(n)}</div>
+      ${board && moves ? `<div class="n-moves">${moves}</div>` : ''}<div class="n-actions">${acts}</div>
+    </div>
     <div class="swatches" data-for="${n.id}" hidden>${swatchRow(n.color, `data-act="setcolor" data-id="${n.id}"`)}</div>
-    <div class="n-actions ${board ? 'mv' : ''}">${board ? `<span style="display:flex">${moves}</span>` : ''}${acts}</div>
   </article>`;
 }
 
@@ -1166,7 +1274,7 @@ function renderViews(){
 function composerHTML(){
   return `<section class="composer" id="composer" aria-label="Capture a note">
     <label class="sr" for="cap">New note</label>
-    <textarea id="cap" rows="1" placeholder="What's on your mind? Saved the moment you hit Enter."></textarea>
+    <textarea id="cap" rows="1" placeholder="What's on your mind?"></textarea>
     ${S.ui.dictHint ? dictHintHTML() : ''}
     <div class="thumbs" id="thumbs"></div>
     <div class="comp-row">
@@ -1185,11 +1293,11 @@ function filtersHTML(){
   return `<div class="tagbar" role="toolbar" aria-label="Tags">
       ${chip('all', 'All', all.length)}${chip('pinned', 'Pinned', count(n => n.pinned))}
       ${S.tags.map(t => chip(t.id, t.name, count(n => (n.tags || []).includes(t.id)), t.color)).join('')}
-      ${S.tags.length ? chip('untagged', 'No tag', count(n => !(n.tags || []).length)) : ''}
+      ${S.tags.length && (count(n => !(n.tags || []).length) || u.tag === 'untagged') ? chip('untagged', 'No tag', count(n => !(n.tags || []).length)) : ''}
       <button type="button" class="chip add" data-act="newtag">${icon('plus')}New tag</button>
     </div>
     <div class="filters ${u.filtersOpen ? 'open' : ''}">
-      <label class="search">${icon('search')}<span class="sr">Search notes</span><input id="q" type="search" placeholder="Search everything  ( / )" value="${esc(u.q)}" autocomplete="off"></label>
+      <label class="search">${icon('search')}<span class="sr">Search notes</span><input id="q" type="search" placeholder="Search notes" title="Search notes (press / to jump here)" value="${esc(u.q)}" autocomplete="off"></label>
       <button type="button" class="btn ftoggle" data-act="filters" aria-expanded="${!!u.filtersOpen}">${icon('sliders')}Filters${(() => { const k = ['link','image','list','archived'].filter(x => u[x]).length + (u.range !== 'all' ? 1 : 0); return k ? ` (${k})` : ''; })()}</button>
       ${tog('link','link','Links')}${tog('image','image','Images')}${tog('list','list','Lists')}${tog('archived','archive','Archived')}
       <label class="sr" for="range">Date range</label>
@@ -1221,6 +1329,16 @@ function titleBlock(label, ns, kind){
   const rem = ns.filter(n => n.remind && !n.remind.sent).length, due = ns.filter(n => n.remind && !n.remind.sent && n.remind.at <= Date.now()).length;
   return `<header class="tblock"><h2>${esc(label)}</h2><span class="tb-cell"><b>${ns.length}</b> ${ns.length === 1 ? 'note' : 'notes'}</span>${rem ? `<span class="tb-cell ${due ? 'due' : ''}"><b>${due || rem}</b> ${due ? 'due now' : rem === 1 ? 'reminder' : 'reminders'}</span>` : ''}</header>`;
 }
+/* Every view opens with the same page header: the view's name in a large title block, its counts
+   in ruled cells, and that view's own controls in the last cell. */
+function pageHead(label, cells, ctl = ''){
+  return `<header class="tblock pagehead"><h1>${esc(label)}</h1>${cells.filter(Boolean).map(([n, w, due]) => `<span class="tb-cell ${due ? 'due' : ''}"><b>${n}</b> ${w}</span>`).join('')}${ctl ? `<div class="ph-ctl">${ctl}</div>` : ''}</header>`;
+}
+const plural = (n, one, many) => n === 1 ? one : many;
+function remCells(ns){
+  const pend = ns.filter(n => n.remind && !n.remind.sent), due = pend.filter(n => n.remind.at <= Date.now()).length;
+  return pend.length ? [due ? [due, 'due now', true] : [pend.length, plural(pend.length, 'reminder', 'reminders')]] : [];
+}
 function renderFeed(main){
   const list = liveNotes().filter(matches).sort(byNewest);
   let body = '';
@@ -1235,24 +1353,28 @@ function renderFeed(main){
     for (const d of days) body += `<section class="day">${titleBlock(fDay(d.ns[0].createdAt), d.ns)}${d.ns.map(n => noteCard(n)).join('')}</section>`;
     if (list.length > shown.length) body += `<button type="button" class="btn more" data-act="more">Show ${Math.min(60, list.length - shown.length)} more</button>`;
   }
-  main.innerHTML = `<div class="col">${composerHTML()}${filtersHTML()}<div class="col" id="feed" style="gap:14px">${body}</div></div>`;
+  const live = liveNotes().filter(n => !n.archived);
+  const head = pageHead(S.ui.archived ? 'Archive' : 'Feed', [[list.length, plural(list.length, 'note', 'notes') + (list.length !== live.length && !S.ui.archived ? ' shown' : '')], ...remCells(live)]);
+  // desk layout: tags and filters in a rail beside the feed on wide screens, stacked under capture on phones
+  main.innerHTML = `<div class="desk"><div class="desk-head">${head}</div><div class="desk-cap">${composerHTML()}</div><aside class="rail" aria-label="Tags and filters">${filtersHTML()}</aside><div class="col desk-feed" id="feed">${body}</div></div>`;
 }
 function renderBoard(main){
   const cols = S.settings.boardTags.map(tagById).filter(Boolean);
   const picker = `<div class="picker" role="group" aria-label="Columns"><span class="picker-lbl">Columns</span>${S.tags.map(t => `<button type="button" class="chip" style="--c:${esc(t.color)}" data-bpick="${t.id}" aria-pressed="${S.settings.boardTags.includes(t.id)}"><span class="dot"></span>${esc(t.name)}</button>`).join('')}<button type="button" class="chip add" data-act="newtag">${icon('plus')}New tag</button></div>`;
   if (cols.length < 2){
-    main.innerHTML = `<div class="col"><div class="empty"><h3>Turn tags into columns</h3><p>Pick 2 to 5 tags. Each becomes a column, and dragging a card between columns retags it. Drop a card on Archive to clear it off the board.</p>${S.tags.length ? picker : `<p>You don't have any tags yet. Make one here, or add a #hashtag to any note.</p>${picker}`}</div></div>`;
+    main.innerHTML = `${pageHead('Board', [])}<div class="col"><div class="empty"><h3>Turn tags into columns</h3><p>Pick 2 to 5 tags. Each becomes a column, and dragging a card between columns retags it. Drop a card on Archive to clear it off the board.</p>${S.tags.length ? picker : `<p>You don't have any tags yet. Make one here, or add a #hashtag to any note.</p>${picker}`}</div></div>`;
     return;
   }
   const notes = liveNotes().filter(n => !n.archived);
   const colHTML = (t, idx) => {
     const ns = notes.filter(n => (n.tags || []).includes(t.id)).sort(byNewest);
     return `<section class="bcol" data-col="${t.id}" aria-label="${esc(t.name)}">
-      <header class="tblock bhead"><h3><span class="tg" style="--c:${esc(t.color)}"><span class="dot"></span>${esc(t.name)}</span></h3><span class="tb-cell"><b>${ns.length}</b> ${ns.length === 1 ? 'note' : 'notes'}</span></header>
-      ${ns.map(n => noteCard(n, true, (idx > 0 ? `<button type="button" class="act mvbtn" data-act="mv" data-id="${n.id}" data-from="${t.id}" data-to="${cols[idx-1].id}" title="Move to ${esc(cols[idx-1].name)}">${icon('left')}<span>${esc(cols[idx-1].name)}</span></button>` : '') + (idx < cols.length - 1 ? `<button type="button" class="act mvbtn" data-act="mv" data-id="${n.id}" data-from="${t.id}" data-to="${cols[idx+1].id}" title="Move to ${esc(cols[idx+1].name)}"><span>${esc(cols[idx+1].name)}</span>${icon('right')}</button>` : ''))).join('') || '<p class="small" style="padding:4px">Nothing here yet. Drag a card in.</p>'}
+      <header class="tblock bhead"><h3><span class="cdot" style="--c:${esc(t.color)}"></span>${esc(t.name)}</h3><span class="tb-cell"><b>${ns.length}</b> ${plural(ns.length, 'note', 'notes')}</span></header>
+      ${ns.map(n => noteCard(n, true, (idx > 0 ? `<button type="button" class="act mvbtn" data-act="mv" data-id="${n.id}" data-from="${t.id}" data-to="${cols[idx-1].id}" title="Move to the ${esc(cols[idx-1].name)} column">${icon('left')}<span>Move to ${esc(cols[idx-1].name)}</span></button>` : '') + (idx < cols.length - 1 ? `<button type="button" class="act mvbtn" data-act="mv" data-id="${n.id}" data-from="${t.id}" data-to="${cols[idx+1].id}" title="Move to the ${esc(cols[idx+1].name)} column"><span>Move to ${esc(cols[idx+1].name)}</span>${icon('right')}</button>` : ''))).join('') || '<p class="small" style="padding:4px">Nothing here yet. Drag a card in.</p>'}
     </section>`;
   };
-  main.innerHTML = `<div class="board-head"><h2>Board</h2>${picker}</div>
+  const onBoard = notes.filter(n => cols.some(t => (n.tags || []).includes(t.id))).length;
+  main.innerHTML = `${pageHead('Board', [[cols.length, plural(cols.length, 'column', 'columns')], [onBoard, plural(onBoard, 'note', 'notes')]])}<div class="board-head">${picker}</div>
     <div class="board">${cols.map(colHTML).join('')}<section class="bcol archive" data-col="__archive">${icon('archive')}<span>Drop a card here to archive it</span></section></div>`;
 }
 function renderCal(main){
@@ -1273,7 +1395,7 @@ function renderCal(main){
     cells += `<button type="button" class="cell ${d.getMonth() !== m.getMonth() ? 'out' : ''} ${sameDay(d, today) ? 'today' : ''}" data-day="${d.getTime()}" aria-pressed="${S.ui.calDay === k}" aria-label="${d.toDateString()}: ${ns.length} notes, ${rs.length} reminders">
       <span class="dnum">${d.getDate()}</span>
       ${first ? `<span class="snip">${esc((first.text || first.items?.[0]?.t || 'Image').slice(0, 40))}</span>` : ''}
-      <span class="marks">${ns.length ? ns.length + (ns.length === 1 ? ' note' : ' notes') : ''}${rs.length ? `<span class="bell">${icon('bell')}${rs.length}</span>` : ''}</span>
+      <span class="marks">${ns.length ? `<span>${ns.length} ${plural(ns.length, 'note', 'notes')}</span>` : ''}${rs.length ? `<span class="bell">${rs.length} ${plural(rs.length, 'reminder', 'reminders')}</span>` : ''}</span>
     </button>`;
   }
   let day = '';
@@ -1285,10 +1407,9 @@ function renderCal(main){
       ${rs.map(n => reminderRow(n)).join('')}${ns.map(n => noteCard(n)).join('')}
       ${!ns.length && !rs.length ? '<p class="small">Nothing captured on this day.</p>' : ''}</div></div>`;
   }
-  main.innerHTML = `<div class="cal-head"><h2>${m.toLocaleDateString([], { month:'long', year:'numeric' })}</h2>
-      <button type="button" class="btn" data-act="calprev">${icon('left')}Previous</button>
-      <button type="button" class="btn" data-act="caltoday">Today</button>
-      <button type="button" class="btn" data-act="calnext">Next${icon('right')}</button></div>
+  const inMonth = notes.filter(n => !n.archived && new Date(n.createdAt).getMonth() === m.getMonth() && new Date(n.createdAt).getFullYear() === m.getFullYear());
+  const ctl = `<button type="button" class="btn" data-act="calprev">${icon('left')}Previous</button><button type="button" class="btn" data-act="caltoday">Today</button><button type="button" class="btn" data-act="calnext">Next${icon('right')}</button>`;
+  main.innerHTML = `${pageHead(m.toLocaleDateString([], { month:'long', year:'numeric' }), [[inMonth.length, plural(inMonth.length, 'note', 'notes')], ...remCells(inMonth)], ctl)}
     <div class="cal">${cells}</div>${day}`;
 }
 function reminderRow(n){
@@ -1297,10 +1418,9 @@ function reminderRow(n){
   return `<div class="rrow ${overdue ? 'overdue' : ''} ${r.sent ? 'sent' : ''} ${hex ? 'colored' : ''}" ${hex ? `style="--nc:${hex}"` : ''}>
     <span class="when"><b>${esc(fTime(r.at))}</b><span>${esc(fWhen(r.at).split(', ')[0])}${r.repeat ? ` · ${REPEAT_LABEL[r.repeat]}` : ''}</span></span>
     <span class="what">${rich(label || '(image)')}</span>
-    <div class="n-actions">
-      ${r.sent ? '' : actBtn(n, 'rdone', 'check', r.repeat ? 'Skip this one' : 'Done')}
-      ${tagSelect(n)}${actBtn(n, 'edit', 'edit', 'Edit')}${actBtn(n, 'colorpick', 'palette', 'Color', 'aria-expanded="false"')}
-      ${actBtn(n, 'rclear', 'bell', 'Remove reminder')}${actBtn(n, 'del', 'trash', 'Delete')}
+    <div class="n-band">
+      <div class="n-meta">${tagSelect(n)}</div>
+      <div class="n-actions">${r.sent ? '' : actBtn(n, 'rdone', 'check', r.repeat ? 'Skip this one' : 'Done')}${actBtn(n, 'edit', 'edit', 'Edit')}${actBtn(n, 'colorpick', 'palette', 'Color', 'aria-expanded="false"')}${actBtn(n, 'rclear', 'bell', 'Remove reminder')}${actBtn(n, 'del', 'trash', 'Delete')}</div>
     </div>
     <div class="swatches" hidden>${swatchRow(n.color, `data-act="setcolor" data-id="${n.id}"`)}</div>
   </div>`;
@@ -1312,8 +1432,9 @@ function renderRem(main){
   const up = ns.filter(n => !n.remind.sent && n.remind.at > now).sort((a, b) => a.remind.at - b.remind.at);
   const sent = ns.filter(n => n.remind.sent).sort((a, b) => b.remind.at - a.remind.at).slice(0, 30);
   const sec = (h, arr, kind = 'rem') => arr.length ? `<div class="rsec">${titleBlock(h, arr, kind)}${arr.map(reminderRow).join('')}</div>` : '';
-  main.innerHTML = `<div class="col rlist">${composerHTML()}
-    <div><h2>Reminders</h2><p class="small">Start a note with “remind me” and include a time: “in 20 minutes”, “tomorrow at 3pm”, “on Friday”, “every weekday at 8am”, “every month on the 1st”. Alerts show here while ${IN_ARTIFACT ? 'this page is open' : 'Catchall is open'}.</p></div>
+  const upN = up.length + over.length;
+  main.innerHTML = `<div class="col rlist">${pageHead('Reminders', [[upN, upN === 1 ? 'coming up' : 'coming up'], over.length ? [over.length, 'due now', true] : null])}${composerHTML()}
+    <p class="small rhint">Start a note with “remind me” and a time, like “tomorrow at 3pm”, “on Friday” or “every weekday at 8am”.</p>
     ${sec('Due now', over)}${sec('Upcoming', up)}${sec('Sent', sent, 'sent')}
     ${!ns.length ? '<div class="empty"><p>No reminders yet. Try typing <code>remind me to stretch in 30 minutes</code> above.</p></div>' : ''}
   </div>`;
@@ -1540,9 +1661,9 @@ function openSettings(){
   const total = liveNotes().length;
   $('#setBody').innerHTML = `<h2 id="setH">Settings <button type="button" class="ghost" data-set="close" aria-label="Close">${icon('x')}</button></h2>
     <div class="set-sec"><h3>Look</h3>
-      <div class="row">${seg('theme', [['system','System'],['light','Light'],['dark','Dark']])}</div>
-      <div class="row">${seg('font', [['legible','Standard'],['grotesk','Hyperlegible'],['mono','Typewriter']])}</div>
-      <div class="row">${seg('density', [['comfy','Comfortable'],['compact','Compact']])}</div>
+      <div class="row set-row"><span class="set-lbl">Theme</span>${seg('theme', [['system','Match device'],['light','Light'],['dark','Dark']])}</div>
+      <div class="row set-row"><span class="set-lbl">Font</span>${seg('font', [['legible','Standard'],['grotesk','Hyperlegible'],['mono','Typewriter']])}</div>
+      <div class="row set-row"><span class="set-lbl">Spacing</span>${seg('density', [['comfy','Comfortable'],['compact','Compact']])}</div>
     </div>
     <div class="set-sec"><h3>Reminders</h3>
       <div class="row">${seg('sound', [[true,'Chime on'],[false,'Chime off']])}
@@ -1574,7 +1695,7 @@ function renderTagRows(){
       <button type="button" class="swatch" style="--c:${esc(t.color)}" data-set="cycle" aria-label="Change color of ${esc(t.name)}" title="Change color"></button>
       <input type="text" value="${esc(t.name)}" data-tf="name" aria-label="Tag name" maxlength="30">
       <input type="text" value="${esc(t.keyword || '')}" data-tf="keyword" placeholder="Keyword" aria-label="Keyword for ${esc(t.name)}" maxlength="24">
-      <button type="button" class="btn danger" data-set="deltag">Delete</button></div>`).join('')
+      <button type="button" class="btn quiet-del" data-set="deltag">Delete</button></div>`).join('')
     : '<p class="small">No tags yet. Add one here, or type #something in a note.</p>';
 }
 async function withPhotos(ns){
@@ -1674,7 +1795,7 @@ document.addEventListener('click', e => {
     case 'edit': openEditor(id); break;
     case 'del': { const before = clone(n); delNote(id); render(); toast('Note deleted', { restore: before }); break; }
     case 'colorpick': {
-      const row = t.closest('.note, .rrow').querySelector('.swatches');
+      const row = t.closest('.note, .rrow').querySelector(':scope > .swatches');
       row.hidden = !row.hidden; t.setAttribute('aria-expanded', String(!row.hidden));
       if (!row.hidden) row.querySelector('[aria-pressed="true"]')?.focus();
       break;
@@ -1940,16 +2061,16 @@ window.__catchallTest = { parseReminder, parseCapture, parseStructure, nextOccur
 })();
 </script>
 
-<div id="__update-banner" style="display:none;position:fixed;left:0;right:0;bottom:0;z-index:99999;background:#101820;color:#e7eef5;font:600 14px/1.4 -apple-system,BlinkMacSystemFont,sans-serif;padding:12px 16px;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));align-items:center;justify-content:space-between;gap:12px;box-shadow:0 -2px 12px rgba(0,0,0,.4);">
+<div id="__update-banner" style="display:none;position:fixed;left:0;right:0;bottom:0;z-index:99999;background:var(--shell,#2f5a3c);color:var(--shell-fg,#eef5e6);font:600 14px/1.4 -apple-system,BlinkMacSystemFont,sans-serif;padding:12px 16px;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));align-items:center;justify-content:space-between;gap:12px;box-shadow:0 -2px 12px rgb(var(--sh-rgb,0 0 0)/.35);">
   <span id="__update-msg">A newer version of Catchall is available.</span>
   <span id="__update-actions" style="display:flex;gap:8px;flex-shrink:0;">
-    <button id="__update-btn" style="font:700 13px/1 -apple-system,sans-serif;background:#ff7a33;color:#1c0d04;border:0;border-radius:4px;padding:8px 14px;cursor:pointer;">Update</button>
-    <button id="__dismiss-btn" style="font:600 13px/1 -apple-system,sans-serif;background:transparent;color:#93a6b8;border:1px solid #324459;border-radius:4px;padding:8px 14px;cursor:pointer;">Later</button>
+    <button id="__update-btn" style="font:700 13px/1 -apple-system,sans-serif;background:var(--surface,#f8fbf3);color:var(--fg,#242b25);border:0;border-radius:4px;padding:8px 14px;cursor:pointer;">Update</button>
+    <button id="__dismiss-btn" style="font:600 13px/1 -apple-system,sans-serif;background:transparent;color:var(--shell-fg,#eef5e6);border:1px solid var(--shell-line,rgba(255,255,255,.24));border-radius:4px;padding:8px 14px;cursor:pointer;">Later</button>
   </span>
 </div>
 <script>
 (function () {
-  var CURRENT_VERSION = "19";
+  var CURRENT_VERSION = "20";
   var banner = document.getElementById('__update-banner');
   var updateBtn = document.getElementById('__update-btn');
   var dismissBtn = document.getElementById('__dismiss-btn');

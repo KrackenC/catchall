@@ -31,11 +31,11 @@ img{{max-width:100%}}
 <body>
 '''
 banner = '''
-<div id="__update-banner" style="display:none;position:fixed;left:0;right:0;bottom:0;z-index:99999;background:#101820;color:#e7eef5;font:600 14px/1.4 -apple-system,BlinkMacSystemFont,sans-serif;padding:12px 16px;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));align-items:center;justify-content:space-between;gap:12px;box-shadow:0 -2px 12px rgba(0,0,0,.4);">
+<div id="__update-banner" style="display:none;position:fixed;left:0;right:0;bottom:0;z-index:99999;background:var(--shell,#2f5a3c);color:var(--shell-fg,#eef5e6);font:600 14px/1.4 -apple-system,BlinkMacSystemFont,sans-serif;padding:12px 16px;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));align-items:center;justify-content:space-between;gap:12px;box-shadow:0 -2px 12px rgb(var(--sh-rgb,0 0 0)/.35);">
   <span id="__update-msg">A newer version of __APP__ is available.</span>
   <span id="__update-actions" style="display:flex;gap:8px;flex-shrink:0;">
-    <button id="__update-btn" style="font:700 13px/1 -apple-system,sans-serif;background:#ff7a33;color:#1c0d04;border:0;border-radius:4px;padding:8px 14px;cursor:pointer;">Update</button>
-    <button id="__dismiss-btn" style="font:600 13px/1 -apple-system,sans-serif;background:transparent;color:#93a6b8;border:1px solid #324459;border-radius:4px;padding:8px 14px;cursor:pointer;">Later</button>
+    <button id="__update-btn" style="font:700 13px/1 -apple-system,sans-serif;background:var(--surface,#f8fbf3);color:var(--fg,#242b25);border:0;border-radius:4px;padding:8px 14px;cursor:pointer;">Update</button>
+    <button id="__dismiss-btn" style="font:600 13px/1 -apple-system,sans-serif;background:transparent;color:var(--shell-fg,#eef5e6);border:1px solid var(--shell-line,rgba(255,255,255,.24));border-radius:4px;padding:8px 14px;cursor:pointer;">Later</button>
   </span>
 </div>
 <script>
