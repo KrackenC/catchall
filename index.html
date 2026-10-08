@@ -622,6 +622,59 @@ button.sync:hover{background:var(--shell-2)}
   .note.colored .acts-toggle,.rrow.colored .acts-toggle{background:color-mix(in srgb,var(--surface) 70%,transparent)}
   .note.open .acts-toggle,.rrow.open .acts-toggle{color:var(--blue);border-color:var(--blue)}
 }
+
+/* ---------- MindChuk-inspired: lists, code, video thumbs, grid layout, select, Sort ---------- */
+pre.code{margin:4px 0;padding:10px 12px;background:var(--surface-2);border:1px solid var(--line);border-radius:6px;overflow-x:auto;font:13px/1.5 var(--font-type);white-space:pre}
+code.ic{font:0.88em var(--font-type);background:var(--surface-2);border:1px solid var(--line);border-radius:4px;padding:0 4px}
+.vthumb{position:relative;display:block;width:min(320px,100%);aspect-ratio:16/9;border-radius:8px;overflow:hidden;background:var(--photo-bg);max-width:100%}
+.vthumb img{width:100%;height:100%;object-fit:cover;display:block}
+.vplay{position:absolute;left:8px;bottom:8px;display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border-radius:6px;background:var(--photo-scrim);color:var(--photo-fg);font:600 13px var(--font-display)}
+.vplay .i{width:14px;height:14px;transform:rotate(90deg)}
+.additem{display:flex;align-items:center;gap:8px;padding:4px 0 2px;color:var(--muted)}
+.additem .i{width:16px;height:16px}
+.additem input{flex:1;min-width:0;border:0;border-bottom:1px dashed var(--line);background:none;padding:6px 0;font:inherit;color:var(--fg);outline:none}
+.additem input:focus{border-bottom-color:var(--blue)}
+.done-group{border-top:1px solid var(--line);padding-top:6px}
+.done-head{display:flex;justify-content:space-between;align-items:center;font:600 13px var(--font-display);color:var(--muted);padding:2px 0 4px}
+.layout-seg{align-self:flex-start}
+.layout-seg button{display:inline-flex;align-items:center;gap:5px}
+.layout-seg .i{width:15px;height:15px}
+@media (min-width:1024px){ .rail .layout-seg{margin:6px 0 0;width:100%} .rail .layout-seg button{flex:1;justify-content:center} .rail #order{width:100%} }
+.desk-feed.grid .day{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:var(--gap);align-items:start}
+.desk-feed.grid .day > .tblock{grid-column:1/-1}
+.desk-feed.grid .note .n-body{max-width:none}
+@media (max-width:640px){ .desk-feed.grid .day{grid-template-columns:1fr 1fr;gap:8px} .desk-feed.grid .note{padding:12px 12px 8px} .desk-feed.grid .n-band .n-meta{flex-wrap:wrap} }
+.selecting .note{cursor:pointer;outline:1.5px dashed transparent;outline-offset:2px}
+.selecting .note .n-actions,.selecting .note .acts-toggle{display:none!important}
+.selecting .note.picked{outline-color:var(--blue);background:color-mix(in srgb,var(--blue-wash) 60%,var(--surface))}
+.selmark{position:absolute;top:10px;right:12px;display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border:1.5px solid var(--line);border-radius:4px;font:700 12px/1 var(--font-display);color:var(--muted);background:var(--surface)}
+.selmark .i{width:13px;height:13px}
+.note.picked .selmark{border-color:var(--blue);color:var(--blue)}
+.selecting .note .pin-flag{display:none}
+.selbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:40;display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;padding:8px 10px;background:var(--surface);border:1.5px solid var(--rule);border-radius:10px;box-shadow:0 12px 30px -10px rgb(var(--sh-rgb)/.45);width:min(720px,calc(100vw - 32px))}
+.selbar .sel-n{font:500 14px var(--font-display);margin-right:auto}
+body:has(.selbar) .toasts{bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+.selbar .act{border:0;background:none;color:var(--fg);padding:8px 9px;min-height:36px}
+.selbar .act:disabled{opacity:.4}
+.selbar .act.del{color:var(--red)}
+.selbar .tagsel{border:1px solid var(--line);border-radius:6px;padding-left:8px}
+.sortview{gap:14px}
+.sortcard{min-height:140px;font-size:18px;touch-action:pan-y;transition:transform .2s ease}
+.sortcard .n-body{font-size:19px}
+.sortcard[data-dir="keep"]{box-shadow:0 0 0 2px var(--blue)}
+.sortcard[data-dir="left"]{box-shadow:0 0 0 2px var(--red)}
+.sort-file{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.sort-acts{display:flex;flex-wrap:wrap;gap:8px}
+.sort-acts .btn{min-height:44px;padding:8px 16px}
+.sort-hint{margin:0}
+@media (hover:hover) and (pointer:fine){ .sort-hint{display:none} }
+.empty.sorted h3{font:700 26px/1.1 var(--font-display)}
+.trow{grid-template-columns:28px minmax(0,1fr) minmax(0,110px);row-gap:6px}
+.trow-ctl{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}
+.btn.mini{padding:4px 9px;font-size:13px;gap:4px}
+.btn.mini .i{width:14px;height:14px}
+.btn.mini[aria-pressed="true"]{color:var(--blue);border-color:var(--blue);background:var(--blue-wash)}
+@media (max-width:640px){ .views button{font-size:13px;padding:8px 2px} .selbar .act span{font-size:13px} }
 </style>
 
 <header class="top">
@@ -664,6 +717,9 @@ const P = {
   list:'<path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/>',
   cal:'<rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/>',
   board:'<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/><path d="M15 3v18"/>',
+  swipe:'<path d="m8 7-5 5 5 5"/><path d="m16 7 5 5-5 5"/><path d="M3 12h18"/>',
+  grid:'<rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/>',
+  up:'<path d="m18 15-6-6-6 6"/>', down:'<path d="m6 9 6 6 6-6"/>', code:'<path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/>',
   feed:'<path d="M3 6h18"/><path d="M3 12h18"/><path d="M3 18h12"/>',
   download:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/>',
   repeat:'<path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/>',
@@ -694,7 +750,7 @@ const NOTE_COLORS = [['none','No color',''],['yellow','Yellow','#f2cf3a'],['oran
   ['purple','Purple','#6e56cf'],['blue','Blue','#3e63dd'],['teal','Teal','#12a594'],['green','Green','#30a46c'],['gray','Gray','#868c99']];
 const noteHex = key => (NOTE_COLORS.find(c => c[0] === key) || [])[2] || '';
 const swatchRow = (cur, attrs) => NOTE_COLORS.map(([k, label, hex]) => `<button type="button" class="nswatch ${k === 'none' ? 'none' : ''}" style="--nc:${hex || 'transparent'}" ${attrs} data-c="${k}" aria-pressed="${(cur || 'none') === k}" aria-label="${label}" title="${label}"></button>`).join('');
-const DEFAULT_SETTINGS = { theme:'system', font:'legible', density:'comfy', boardTags:[], sound:true, view:'feed' };
+const DEFAULT_SETTINGS = { theme:'system', font:'legible', density:'comfy', boardTags:[], sound:true, view:'feed', layout:'list', order:'new', listClear:'keep', sentRem:'keep', swipeLeft:'archive' };
 const S = {
   notes: new Map(), tags: [], tagsUpdatedAt: 0,
   settings: Object.assign({}, DEFAULT_SETTINGS, LS.get('settings', {})),
@@ -1284,7 +1340,14 @@ function fWhen(t){
 }
 const REPEAT_LABEL = { day:'daily', weekday:'weekdays', week:'weekly', month:'monthly', year:'yearly' };
 const URL_RE = /\bhttps?:\/\/[^\s<>"']+[^\s<>"'.,;:!?)\]]/gi;
+/* Text with links made clickable, ```fenced code``` as a block and `inline code` in code type. */
 function rich(raw){
+  return String(raw).split(/(```[\s\S]*?```)/).map(part => {
+    if (part.startsWith('```') && part.endsWith('```') && part.length >= 6) return `<pre class="code"><code>${esc(part.slice(3, -3).replace(/^[\w-]*\n/, ''))}</code></pre>`;
+    return part.split(/(`[^`\n]+`)/).map(seg => seg.length > 2 && seg[0] === '`' && seg.endsWith('`') ? `<code class="ic">${esc(seg.slice(1, -1))}</code>` : linkify(seg)).join('');
+  }).join('');
+}
+function linkify(raw){
   let out = '', last = 0;
   for (const m of raw.matchAll(URL_RE)){
     out += esc(raw.slice(last, m.index));
@@ -1300,6 +1363,8 @@ function videoLink(n){
   const m = (n.text || '').match(/https?:\/\/(?:www\.)?(youtube\.com\/watch\?[^\s]*v=|youtu\.be\/|vimeo\.com\/|loom\.com\/share\/)[^\s]+/i);
   if (!m) return '';
   const host = /youtu/i.test(m[1]) ? 'YouTube' : /vimeo/i.test(m[1]) ? 'Vimeo' : 'Loom';
+  const yt = host === 'YouTube' && (m[0].match(/[?&]v=([\w-]{6,})/) || m[0].match(/youtu\.be\/([\w-]{6,})/));
+  if (yt) return `<a class="vthumb" href="${esc(m[0])}" target="_blank" rel="noopener noreferrer"><img src="https://i.ytimg.com/vi/${esc(yt[1])}/hqdefault.jpg" alt="" loading="lazy"><span class="vplay">${icon('send')}Watch on YouTube</span></a>`;
   return `<a class="linkchip" href="${esc(m[0])}" target="_blank" rel="noopener noreferrer">${icon('link')}<span>Watch on ${host}</span></a>`;
 }
 
@@ -1336,8 +1401,11 @@ function noteBody(n){
   let h = '';
   if (n.kind === 'list'){
     if (n.text) h += `<div class="n-body n-title">${rich(n.text)}</div>`;
-    h += `<ul class="items">${(n.items || []).map((it, i) => `<li class="${it.done ? 'done' : ''}"><button type="button" class="cbox" role="checkbox" aria-checked="${!!it.done}" aria-label="${esc(it.t)}" data-act="item" data-id="${n.id}" data-i="${i}">${it.done ? icon('check') : ''}</button><span class="n-body">${rich(it.t)}</span><button type="button" class="ghost item-x" data-act="itemdel" data-id="${n.id}" data-i="${i}" aria-label="Remove ${esc(it.t)}" title="Remove item">${icon('x')}</button></li>`).join('')}</ul>`;
-    if ((n.items || []).some(it => it.done)) h += `<div><button type="button" class="btn" data-act="cleardone" data-id="${n.id}" style="font-size:13px;padding:4px 10px">${icon('check')}Remove checked items</button></div>`;
+    const row = (it, i) => `<li class="${it.done ? 'done' : ''}"><button type="button" class="cbox" role="checkbox" aria-checked="${!!it.done}" aria-label="${esc(it.t)}" data-act="item" data-id="${n.id}" data-i="${i}">${it.done ? icon('check') : ''}</button><span class="n-body">${rich(it.t)}</span><button type="button" class="ghost item-x" data-act="itemdel" data-id="${n.id}" data-i="${i}" aria-label="Remove ${esc(it.t)}" title="Remove item">${icon('x')}</button></li>`;
+    const all = (n.items || []).map((it, i) => [it, i]), open = all.filter(([it]) => !it.done), done = all.filter(([it]) => it.done);
+    h += `<ul class="items">${open.map(([it, i]) => row(it, i)).join('')}</ul>`;
+    h += `<label class="additem"><span class="sr">Add an item to ${esc(n.text || 'this list')}</span>${icon('plus')}<input type="text" data-additem="${n.id}" placeholder="Add item" autocomplete="off" enterkeyhint="done"></label>`;
+    if (done.length) h += `<div class="done-group"><div class="done-head"><span>Completed · ${done.length}</span><button type="button" class="linkbtn" data-act="cleardone" data-id="${n.id}">Remove checked items</button></div><ul class="items">${done.map(([it, i]) => row(it, i)).join('')}</ul></div>`;
   } else if (n.text) h += `<div class="n-body">${rich(n.text)}</div>`;
   const v = videoLink(n); if (v) h += `<div>${v}</div>`;
   if ((n.images || []).length) h += `<div class="n-imgs">${n.images.map((src, i) => `<button type="button" data-act="zoom" data-id="${n.id}" data-i="${i}" aria-label="Open image">${imgTag(src, 'alt=""')}</button>`).join('')}</div>`;
@@ -1377,7 +1445,8 @@ function noteCard(n, board, moves = ''){
   const acts = btn('pin', 'pin', n.pinned ? 'Unpin' : 'Pin', n.pinned ? 'aria-pressed="true"' : '') + btn('edit', 'edit', 'Edit')
     + btn('archive', 'archive', n.archived ? 'Unarchive' : 'Archive') + delBtn;
   const hex = noteHex(n.color);
-  return `<article class="note ${S.ui.openNote === n.id ? 'open' : ''} ${n.pinned ? 'pinned' : ''} ${n.archived ? 'arch' : ''} ${hex ? 'colored' : ''}" data-id="${n.id}" ${hex ? `style="--nc:${hex}"` : ''} ${board ? 'draggable="true"' : ''}>
+  return `<article class="note ${S.ui.selecting && S.ui.sel && S.ui.sel.has(n.id) ? 'picked' : ''} ${S.ui.openNote === n.id ? 'open' : ''} ${n.pinned ? 'pinned' : ''} ${n.archived ? 'arch' : ''} ${hex ? 'colored' : ''}" data-id="${n.id}" ${hex ? `style="--nc:${hex}"` : ''} ${board ? 'draggable="true"' : ''}>
+    ${S.ui.selecting && !board ? `<span class="selmark">${icon('check')}${S.ui.sel && S.ui.sel.has(n.id) ? 'Selected' : 'Select'}</span>` : ''}
     ${n.pinned ? `<span class="pin-flag">${icon('pin')}Pinned</span>` : ''}
     ${noteBody(n)}
     <div class="n-band">
@@ -1392,7 +1461,7 @@ function renderViews(){
   const due = liveNotes().filter(n => n.remind && !n.remind.sent && !n.archived && n.remind.at <= Date.now()).length;
   const v = S.settings.view;
   const b = (id, ic, label, extra='') => `<button type="button" data-view="${id}" aria-pressed="${v === id}">${icon(ic)}<span class="lbl">${label}</span>${extra}</button>`;
-  $('#views').innerHTML = b('feed','feed','Feed') + b('board','board','Board') + b('cal','cal','Calendar') + b('rem','bell','Reminders', due ? `<span class="badge">${due}</span>` : '');
+  $('#views').innerHTML = b('feed','feed','Feed') + b('sort','swipe','Sort') + b('board','board','Board') + b('cal','cal','Calendar') + b('rem','bell','Reminders', due ? `<span class="badge">${due}</span>` : '');
 }
 function composerHTML(){
   return `<section class="composer" id="composer" aria-label="Capture a note">
@@ -1415,7 +1484,7 @@ function filtersHTML(){
   const tog = (k, ic, label) => `<button type="button" class="ftog" data-tog="${k}" aria-pressed="${!!u[k]}">${icon(ic)}${label}</button>`;
   return `<div class="tagbar" role="toolbar" aria-label="Tags">
       ${chip('all', 'All', all.length)}${chip('pinned', 'Pinned', count(n => n.pinned))}
-      ${S.tags.map(t => chip(t.id, t.name, count(n => (n.tags || []).includes(t.id)), t.color)).join('')}
+      ${S.tags.filter(t => !t.hidden || u.tag === t.id).map(t => chip(t.id, t.name, count(n => (n.tags || []).includes(t.id)), t.color)).join('')}
       ${S.tags.length && (count(n => !(n.tags || []).length) || u.tag === 'untagged') ? chip('untagged', 'No tag', count(n => !(n.tags || []).length)) : ''}
       <button type="button" class="chip add" data-act="newtag">${icon('plus')}New tag</button>
     </div>
@@ -1425,6 +1494,9 @@ function filtersHTML(){
       ${tog('link','link','Links')}${tog('image','image','Images')}${tog('list','list','Lists')}${tog('archived','archive','Archived')}
       <label class="sr" for="range">Date range</label>
       <select id="range" class="fsel">${[['all','All time'],['7','Last 7 days'],['30','Last 30 days'],['90','Last 90 days']].map(([v, l]) => `<option value="${v}" ${u.range === v ? 'selected' : ''}>${l}</option>`).join('')}</select>
+      <label class="sr" for="order">Order</label>
+      <select id="order" class="fsel"><option value="new" ${S.settings.order !== 'old' ? 'selected' : ''}>Newest first</option><option value="old" ${S.settings.order === 'old' ? 'selected' : ''}>Oldest first</option></select>
+      <div class="seg layout-seg" role="group" aria-label="Layout"><button type="button" data-layout="list" aria-pressed="${S.settings.layout !== 'grid'}">${icon('feed')}List</button><button type="button" data-layout="grid" aria-pressed="${S.settings.layout === 'grid'}">${icon('grid')}Grid</button></div>
     </div>`;
 }
 const TRIES = [
@@ -1471,8 +1543,73 @@ function remCells(ns){
   const pend = ns.filter(n => n.remind && !n.remind.sent), due = pend.filter(n => n.remind.at <= Date.now()).length;
   return pend.length ? [due ? [due, 'due now', true] : [pend.length, plural(pend.length, 'reminder', 'reminders')]] : [];
 }
+/* Select several notes: tap cards to pick them, then tag, pin, archive or delete them together. */
+function selectBarHTML(){
+  const k = S.ui.sel.size;
+  return `<div class="selbar" role="region" aria-label="Selected notes"><span class="sel-n"><b>${k}</b> selected</span>
+    <label class="act tagsel"><span class="sr">Tag the selected notes</span>${icon('tag')}<select data-bulktag="1" ${k ? '' : 'disabled'}><option value="">Tag…</option>${S.tags.map(t => `<option value="${t.id}">${esc(t.name)}</option>`).join('')}<option value="__none">No tag</option></select></label>
+    <button type="button" class="act" data-act="bulk" data-do="pin" ${k ? '' : 'disabled'}>${icon('pin')}<span>Pin</span></button>
+    <button type="button" class="act" data-act="bulk" data-do="archive" ${k ? '' : 'disabled'}>${icon('archive')}<span>Archive</span></button>
+    <button type="button" class="act del" data-act="bulk" data-do="delete" ${k ? '' : 'disabled'}>${icon('trash')}<span>Delete</span></button>
+    <button type="button" class="btn" data-act="selmode">Done</button></div>`;
+}
+function bulkAction(what, tid){
+  const ids = [...(S.ui.sel || [])].filter(id => S.notes.get(id) && !S.notes.get(id).deleted); if (!ids.length) return;
+  const before = ids.map(id => clone(S.notes.get(id)));
+  const undo = () => { before.forEach(n => putNote(clone(n))); render(); };
+  for (const id of ids){
+    const n = S.notes.get(id);
+    if (what === 'pin') putNote({ ...n, pinned: true });
+    else if (what === 'archive') putNote({ ...n, archived: true });
+    else if (what === 'delete') delNote(id);
+    else if (what === 'tag'){ if (!tid) continue; const cur = mainTag(n); let tags = (n.tags || []).filter(x => x !== cur); if (tid === '__none') tags = []; else if (!tags.includes(tid)) tags.unshift(tid); putNote({ ...n, tags }); }
+  }
+  const word = { pin:'Pinned', archive:'Archived', delete:'Deleted', tag: tid && tid !== '__none' ? `Tagged “${tagById(tid)?.name}”` : 'Removed tags from' }[what];
+  S.ui.sel = new Set(); if (what !== 'tag' && what !== 'pin') S.ui.selecting = false;
+  render(); toast(`${word} ${ids.length} ${plural(ids.length, 'note', 'notes')}`, { undoFn: undo });
+}
+/* Sort: one note at a time, oldest first, to file under a tag, keep, pin, archive or delete. Swipe on a phone. */
+function sortQueue(){
+  const seen = S.ui.sortSeen || (S.ui.sortSeen = new Set());
+  const only = S.ui.sortOnly !== 'all';
+  return liveNotes().filter(n => !n.archived && !seen.has(n.id) && (!only || !(n.tags || []).length)).sort((a, b) => a.createdAt - b.createdAt);
+}
+function sortNext(id, what){
+  const n = S.notes.get(id); if (!n) return;
+  const before = clone(n);
+  (S.ui.sortSeen || (S.ui.sortSeen = new Set())).add(id); S.ui.sortDone = (S.ui.sortDone || 0) + 1;
+  if (what === 'pin') putNote({ ...n, pinned: true });
+  if (what === 'archive') putNote({ ...n, archived: true });
+  if (what === 'delete') delNote(id);
+  render();
+  const msg = { keep:'Kept', pin:'Pinned', archive:'Archived', delete:'Deleted', filed:'Filed' }[what];
+  toast(msg, { undoFn: () => { S.ui.sortSeen.delete(id); S.ui.sortDone--; putNote(clone(before)); render(); } });
+}
+function renderSort(main){
+  const q = sortQueue(), n = q[0];
+  const ctl = `<div class="seg" role="group" aria-label="Which notes"><button type="button" data-sortonly="untagged" aria-pressed="${S.ui.sortOnly !== 'all'}">No tag yet</button><button type="button" data-sortonly="all" aria-pressed="${S.ui.sortOnly === 'all'}">Everything</button></div>`;
+  const head = pageHead('Sort', [[q.length, 'to go'], S.ui.sortDone ? [S.ui.sortDone, 'sorted'] : null], ctl);
+  if (!n){
+    main.innerHTML = `<div class="col sortview">${head}<div class="empty sorted"><h3>All sorted.</h3><p>${S.ui.sortDone ? `You sorted ${S.ui.sortDone} ${plural(S.ui.sortDone, 'note', 'notes')}. ` : ''}Nothing ${S.ui.sortOnly === 'all' ? '' : 'untagged '}is waiting.</p><div class="row"><button type="button" class="btn" data-view="feed">${icon('feed')}Back to Feed</button>${S.ui.sortDone ? `<button type="button" class="btn" data-act="sortreset">Start over</button>` : ''}</div></div></div>`;
+    return;
+  }
+  const leftWord = S.settings.swipeLeft === 'delete' ? 'delete' : 'archive';
+  main.innerHTML = `<div class="col sortview">${head}
+    <article class="note sortcard ${noteHex(n.color) ? 'colored' : ''}" data-sortcard="${n.id}" ${noteHex(n.color) ? `style="--nc:${noteHex(n.color)}"` : ''}>
+      ${noteBody(n)}
+      <div class="n-band"><div class="n-meta"><time>${esc(fDay(n.createdAt))}, ${esc(fTime(n.createdAt))}</time>${tagChips(n)}${remPill(n)}</div></div>
+    </article>
+    <div class="sort-file"><span class="set-lbl" style="width:auto">File under</span>${S.tags.filter(t => !t.hidden).map(t => `<button type="button" class="chip" style="--c:${esc(t.color)}" data-sorttag="${t.id}" data-sortid="${n.id}"><span class="dot"></span>${esc(t.name)}</button>`).join('')}<button type="button" class="chip add" data-act="newtag">${icon('plus')}New tag</button></div>
+    <div class="sort-acts">
+      <button type="button" class="btn" data-act="sortkeep" data-id="${n.id}">${icon('right')}Keep</button>
+      <button type="button" class="btn" data-act="sortpin" data-id="${n.id}">${icon('pin')}Pin</button>
+      <button type="button" class="btn" data-act="sortarch" data-id="${n.id}">${icon('archive')}Archive</button>
+      <button type="button" class="btn quiet-del" data-act="sortdel" data-id="${n.id}">${icon('trash')}Delete</button>
+    </div>
+    <p class="small sort-hint">On a phone, swipe the card right to keep it or left to ${leftWord} it.</p></div>`;
+}
 function renderFeed(main){
-  const list = liveNotes().filter(matches).sort(byNewest);
+  const list = liveNotes().filter(matches).sort(S.settings.order === 'old' ? (a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) || a.createdAt - b.createdAt : byNewest);
   let body = '';
   if (!liveNotes().length) body = emptyHTML();
   else if (!list.length) body = `<p class="small" style="text-align:center;padding:24px 0">No notes match. <button type="button" class="btn" data-act="clearf">Clear filters</button></p>`;
@@ -1486,9 +1623,10 @@ function renderFeed(main){
     if (list.length > shown.length) body += `<button type="button" class="btn more" data-act="more">Show ${Math.min(60, list.length - shown.length)} more</button>`;
   }
   const live = liveNotes().filter(n => !n.archived);
-  const head = pageHead(S.ui.archived ? 'Archive' : 'Feed', [[list.length, plural(list.length, 'note', 'notes') + (list.length !== live.length && !S.ui.archived ? ' shown' : '')], ...remCells(live)]);
+  const head = pageHead(S.ui.archived ? 'Archive' : 'Feed', [[list.length, plural(list.length, 'note', 'notes') + (list.length !== live.length && !S.ui.archived ? ' shown' : '')], ...remCells(live)],
+    list.length ? `<button type="button" class="btn" data-act="selmode" aria-pressed="${!!S.ui.selecting}">${icon('check')}${S.ui.selecting ? 'Done selecting' : 'Select'}</button>` : '');
   // desk layout: tags and filters in a rail beside the feed on wide screens, stacked under capture on phones
-  main.innerHTML = `<div class="desk"><div class="desk-head">${head}</div><div class="desk-cap">${composerHTML()}</div><aside class="rail" aria-label="Tags and filters">${filtersHTML()}</aside><div class="col desk-feed" id="feed">${body}</div></div>`;
+  main.innerHTML = `<div class="desk"><div class="desk-head">${head}</div><div class="desk-cap">${composerHTML()}</div><aside class="rail" aria-label="Tags and filters">${filtersHTML()}</aside><div class="col desk-feed ${S.settings.layout === 'grid' ? 'grid' : ''} ${S.ui.selecting ? 'selecting' : ''}" id="feed">${body}</div></div>${S.ui.selecting ? selectBarHTML() : ''}`;
 }
 function renderBoard(main){
   const cols = S.settings.boardTags.map(tagById).filter(Boolean);
@@ -1580,7 +1718,7 @@ function render(){
   const qf = document.activeElement && document.activeElement.id === 'q' ? $('#q').selectionStart : null;
   renderViews();
   const v = S.settings.view;
-  if (v === 'board') renderBoard(main); else if (v === 'cal') renderCal(main); else if (v === 'rem') renderRem(main); else renderFeed(main);
+  if (v === 'board') renderBoard(main); else if (v === 'cal') renderCal(main); else if (v === 'rem') renderRem(main); else if (v === 'sort') renderSort(main); else renderFeed(main);
   const cap = $('#cap');
   if (cap){
     if (keep){ cap.value = keep.v; if (keep.f){ cap.focus(); try { cap.setSelectionRange(keep.s, keep.s); } catch(e){} } }
@@ -1600,7 +1738,7 @@ function updatePreview(){
   const c = $('#cap'), p = $('#preview'); if (!c || !p) return;
   const raw = c.value;
   if (!raw.trim()){
-    p.innerHTML = `<span class="hint"><span class="kbd-hint"><kbd>Enter</kbd> saves · <kbd>Shift</kbd>+<kbd>Enter</kbd> new line · </span><button type="button" class="linkbtn" data-act="shortcuts">${icon('bolt')}Typing shortcuts</button></span>`;
+    p.innerHTML = `<span class="hint"><span class="kbd-hint"><kbd>Enter</kbd> saves · <kbd>Shift</kbd>+<kbd>Enter</kbd> new line · </span><button type="button" class="linkbtn" data-act="mklist">${icon('list')}Make a list</button> <button type="button" class="linkbtn" data-act="shortcuts">${icon('bolt')}Typing shortcuts</button></span>`;
     return;
   }
   const r = parseCapture(raw); let h = '';
@@ -1617,7 +1755,8 @@ function renderThumbs(){
 function capture(){
   const c = $('#cap'); if (!c) return;
   stopDictation(); S.ui.dictHint = false;
-  const raw = c.value;
+  const raw = c.value.replace(/\n- \s*$/, '');
+  S.ui.listMode = false;
   if (!raw.trim() && !S.ui.pending.length) { c.focus(); return; }
   const r = parseCapture(raw);
   const tags = [...r.tagIds];
@@ -1702,7 +1841,7 @@ function completeReminder(id, snoozeMin){
   if (snoozeMin) r.at = Date.now() + snoozeMin * 60e3;
   else if (r.repeat) r.at = nextOccurrence(r.at, r.repeat);
   else r.sent = true;
-  putNote({ ...n, remind: r }); render();
+  putNote({ ...n, remind: r.sent && S.settings.sentRem === 'clear' ? null : r }); render();
 }
 
 /* ---------- toasts ---------- */
@@ -1811,6 +1950,11 @@ function openSettings(){
       <div class="row">${seg('sound', [[true,'Chime on'],[false,'Chime off']])}
       ${(!IN_ARTIFACT && 'Notification' in window) ? `<button type="button" class="btn" data-set="notif">${Notification.permission === 'granted' ? 'System alerts on' : 'Turn on system alerts'}</button>` : ''}</div>
       <p class="small">Alerts pop up in Catchall while it's open in a tab.</p>
+      <div class="row set-row"><span class="set-lbl" style="width:auto">After a reminder is done</span>${seg('sentRem', [['keep','Keep it, crossed off'],['clear','Remove it']])}</div>
+    </div>
+    <div class="set-sec"><h3>Lists and sorting</h3>
+      <div class="row set-row"><span class="set-lbl" style="width:auto">Checked list items</span>${seg('listClear', [['keep','Keep in Completed'],['clear','Remove them']])}</div>
+      <div class="row set-row"><span class="set-lbl" style="width:auto">In Sort, swiping left</span>${seg('swipeLeft', [['archive','Archives the note'],['delete','Deletes the note']])}</div>
     </div>
     <div class="set-sec"><h3>Tags</h3>
       <p class="small">A keyword files notes for you: start a note with it, like “GROCERY oat milk”, and it's saved under that tag.</p>
@@ -1839,7 +1983,7 @@ function renderTagRows(){
       <button type="button" class="swatch" style="--c:${esc(t.color)}" data-set="cycle" aria-label="Change color of ${esc(t.name)}" title="Change color"></button>
       <input type="text" value="${esc(t.name)}" data-tf="name" aria-label="Tag name" maxlength="30">
       <input type="text" value="${esc(t.keyword || '')}" data-tf="keyword" placeholder="Keyword" aria-label="Keyword for ${esc(t.name)}" maxlength="24">
-      <button type="button" class="btn quiet-del" data-set="deltag">Delete</button></div>`).join('')
+      <span class="trow-ctl"><button type="button" class="btn mini" data-set="tagup" title="Move up" ${S.tags[0] === t ? 'disabled' : ''}>${icon('up')}Up</button><button type="button" class="btn mini" data-set="tagdown" title="Move down" ${S.tags.at(-1) === t ? 'disabled' : ''}>${icon('down')}Down</button><button type="button" class="btn mini" data-set="taghide" aria-pressed="${!!t.hidden}">${t.hidden ? 'Hidden' : 'Hide'}</button><button type="button" class="btn quiet-del" data-set="deltag">Delete</button></span></div>`).join('')
     : '<p class="small">No tags yet. Add one here, or type #something in a note.</p>';
 }
 async function withPhotos(ns){
@@ -1905,6 +2049,10 @@ async function importFile(file){
 
 /* ---------- events ---------- */
 document.addEventListener('click', e => {
+  if (S.ui.selecting && S.settings.view === 'feed'){
+    const card = e.target.closest('#feed .note[data-id]');
+    if (card){ e.preventDefault(); const id = card.dataset.id; S.ui.sel.has(id) ? S.ui.sel.delete(id) : S.ui.sel.add(id); render(); return; }
+  }
   // On phones a tap anywhere on a note sheet shows that note's actions (and hides the others').
   if (matchMedia('(max-width:640px)').matches && !e.target.closest('button, a, select, input, label, textarea')){
     const sheet = e.target.closest('.note[data-id], .rrow');
@@ -1913,7 +2061,10 @@ document.addEventListener('click', e => {
   }
   const t = e.target.closest('button, [data-day]'); if (!t) return;
   const d = t.dataset;
-  if (d.view){ S.settings.view = d.view; saveSettings(); render(); window.scrollTo(0, 0); return; }
+  if (d.view){ S.settings.view = d.view; S.ui.selecting = false; saveSettings(); render(); window.scrollTo(0, 0); return; }
+  if (d.layout){ S.settings.layout = d.layout; saveSettings(); render(); return; }
+  if (d.sortonly){ S.ui.sortOnly = d.sortonly; render(); return; }
+  if (d.sorttag){ applyTag(d.sortid, d.sorttag); sortNext(d.sortid, 'filed'); return; }
   if (d.tagf){ S.ui.tag = d.tagf; S.ui.limit = 60; render(); return; }
   if (d.tog){ S.ui[d.tog] = !S.ui[d.tog]; render(); return; }
   if (d.try != null){ if ($('#setDlg').open) $('#setDlg').close(); const c = $('#cap'); if (!c) return; c.value = d.try; autosize(); updatePreview(); c.focus(); return; }
@@ -1938,6 +2089,15 @@ document.addEventListener('click', e => {
     case 'dicthintx': S.ui.dictHint = false; $('.dict-hint')?.remove(); break;
     case 'more': S.ui.limit += 60; render(); break;
     case 'shortcuts': openShortcuts(); break;
+    case 'mklist': { const c = $('#cap'); if (!c) break; S.ui.listMode = true; if (!c.value.trim()) c.value = 'List title\n- '; else if (!/\n- $/.test(c.value)) c.value = c.value.replace(/\s*$/, '') + '\n- '; c.focus(); if (c.value.startsWith('List title')) c.setSelectionRange(0, 10); else c.setSelectionRange(c.value.length, c.value.length); autosize(); updatePreview(); toast('Enter adds the next item. Tap Save when the list is done.'); break; }
+    case 'selmode': S.ui.selecting = !S.ui.selecting; S.ui.sel = new Set(); render(); break;
+    case 'bulk': bulkAction(d.do); break;
+    case 'sortkeep': sortNext(id, 'keep'); break;
+    case 'sortpin': sortNext(id, 'pin'); break;
+    case 'sortarch': sortNext(id, 'archive'); break;
+    case 'sortdel': sortNext(id, 'delete'); break;
+    case 'sortreset': S.ui.sortSeen = new Set(); S.ui.sortDone = 0; render(); break;
+    case 'tagup': case 'tagdown': break;
     case 'openacts': S.ui.openNote = S.ui.openNote === id ? null : id; render(); break;
     case 'filters': S.ui.filtersOpen = !S.ui.filtersOpen; render(); break;
     case 'clearf': Object.assign(S.ui, { tag:'all', q:'', link:false, image:false, list:false, archived:false, range:'all' }); render(); break;
@@ -1960,7 +2120,11 @@ document.addEventListener('click', e => {
       toast(d.act === 'itemdel' ? 'Item removed' : 'Checked items removed', { restore: before });
       break;
     }
-    case 'item': { const items = n.items.map((x, i) => i === +d.i ? { ...x, done: !x.done } : x); putNote({ ...n, items }); render(); break; }
+    case 'item': {
+      const before = clone(n), checking = !n.items[+d.i].done;
+      if (checking && S.settings.listClear === 'clear'){ const items = n.items.filter((_, i) => i !== +d.i); putNote({ ...n, items }); render(); toast('Checked off and removed', { restore: before }); break; }
+      const items = n.items.map((x, i) => i === +d.i ? { ...x, done: !x.done } : x); putNote({ ...n, items }); render(); break;
+    }
     case 'zoom': {
       const v = n.images[+d.i], dlg = $('#lbDlg');
       dlg.classList.remove('zoomed');
@@ -2024,6 +2188,12 @@ function setAction(a, t){
       .catch(e => { gist.token = ''; t.disabled = false; t.textContent = 'Connect';
         msg.textContent = e && e.code === 'auth' ? 'GitHub did not accept that token. Check you copied all of it.' : e && e.code === 'scope' ? 'That token cannot use gists. Make a new one with the gist box ticked.' : 'Could not reach GitHub. Check your connection and try again.'; });
     return;
+  }
+  if (a === 'tagup' || a === 'tagdown' || a === 'taghide'){
+    const id = t.closest('[data-tid]').dataset.tid, i = S.tags.findIndex(x => x.id === id);
+    if (a === 'taghide'){ S.tags[i] = { ...S.tags[i], hidden: !S.tags[i].hidden }; }
+    else { const j = a === 'tagup' ? i - 1 : i + 1; if (j < 0 || j >= S.tags.length) return; [S.tags[i], S.tags[j]] = [S.tags[j], S.tags[i]]; }
+    commitTags(); renderTagRows(); render(); return;
   }
   if (a === 'inboxon'){
     let topic = S.inbox.topic;
@@ -2096,6 +2266,8 @@ function setAction(a, t){
 document.addEventListener('change', e => {
   const t = e.target;
   if (t.id === 'range'){ S.ui.range = t.value; render(); }
+  else if (t.id === 'order'){ S.settings.order = t.value; saveSettings(); render(); }
+  else if (t.dataset.bulktag){ bulkAction('tag', t.value); }
   else if (t.dataset.tagset){ applyTag(t.dataset.tagset, t.value); }
   else if (t.dataset.moveto){
     const n = S.notes.get(t.dataset.moveto), to = t.value; if (!n || !to) return;
@@ -2121,7 +2293,14 @@ document.addEventListener('input', e => {
 const coarse = matchMedia('(hover: none)').matches;
 document.addEventListener('keydown', e => {
   const t = e.target;
+  // In list mode Enter starts the next "- " item; Save (or Ctrl/Cmd+Enter) saves the list.
+  if (t.id === 'cap' && e.key === 'Enter' && S.ui.listMode && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.isComposing){ e.preventDefault(); const p = t.selectionStart; t.value = t.value.slice(0, p) + '\n- ' + t.value.slice(t.selectionEnd); t.setSelectionRange(p + 3, p + 3); autosize(); updatePreview(); return; }
   if (t.id === 'cap' && e.key === 'Enter' && (e.metaKey || e.ctrlKey || (!e.shiftKey && !coarse && !e.isComposing))){ e.preventDefault(); capture(); return; }
+  if (t.dataset && t.dataset.additem && e.key === 'Enter' && !e.isComposing){
+    e.preventDefault(); const n = S.notes.get(t.dataset.additem), v = t.value.trim(); if (!n || !v) return;
+    putNote({ ...n, kind:'list', items: [...(n.items || []), { t: v, done:false }] }); render();
+    const again = document.querySelector(`[data-additem="${t.dataset.additem}"]`); if (again) again.focus(); return;
+  }
   if (t.id === 'cap' && e.key === 'Escape'){ t.blur(); return; }
   if (t.id === 'ntName' && e.key === 'Enter'){ e.preventDefault(); setAction('createtag'); return; }
   if (/INPUT|TEXTAREA|SELECT/.test(t.tagName) || document.querySelector('dialog[open]')) return;
@@ -2225,6 +2404,19 @@ function dictate(){
   micUI();
 }
 
+/* Swipe the Sort card: right keeps it, left archives (or deletes, per Settings). */
+(() => {
+  let sx = 0, sy = 0, card = null;
+  document.addEventListener('touchstart', e => { card = e.target.closest('[data-sortcard]'); if (!card) return; sx = e.touches[0].clientX; sy = e.touches[0].clientY; card.style.transition = 'none'; }, { passive:true });
+  document.addEventListener('touchmove', e => { if (!card) return; const dx = e.touches[0].clientX - sx, dy = e.touches[0].clientY - sy; if (Math.abs(dy) > Math.abs(dx)) return; card.style.transform = `translateX(${dx}px) rotate(${dx / 40}deg)`; card.dataset.dir = dx > 40 ? 'keep' : dx < -40 ? 'left' : ''; }, { passive:true });
+  document.addEventListener('touchend', e => {
+    if (!card) return; const c = card; card = null; c.style.transition = '';
+    const dx = (e.changedTouches[0]?.clientX || sx) - sx;
+    if (Math.abs(dx) < 90){ c.style.transform = ''; c.dataset.dir = ''; return; }
+    sortNext(c.dataset.sortcard, dx > 0 ? 'keep' : (S.settings.swipeLeft === 'delete' ? 'delete' : 'archive'));
+  });
+})();
+
 /* ---------- boot ---------- */
 $('#brandmark').innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><g transform="rotate(-7 12 13)"><path d="M4 5h16v11l-5 5H4z" fill="#ffd648"/><path d="M15 21v-5h5z" fill="#e2b228"/></g><circle cx="12" cy="6.2" r="3.1" fill="#e5484d"/><circle cx="11" cy="5.2" r="1" fill="#ff9696"/></svg>';
 $('#openSettings').innerHTML = icon('sliders') + '<span>Settings</span>';
@@ -2250,7 +2442,7 @@ window.__catchallTest = { parseReminder, parseCapture, parseStructure, nextOccur
 </div>
 <script>
 (function () {
-  var CURRENT_VERSION = "24";
+  var CURRENT_VERSION = "25";
   var banner = document.getElementById('__update-banner');
   var updateBtn = document.getElementById('__update-btn');
   var dismissBtn = document.getElementById('__dismiss-btn');
