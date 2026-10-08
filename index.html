@@ -8,8 +8,8 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Catchall">
-<meta name="theme-color" content="#eaeef4" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0d1119" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#4b6152" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#2f3c32" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" href="favicon-32.png">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -25,13 +25,13 @@ img{max-width:100%}
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Barlow+Semi+Condensed:wght@500;600;700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: a pad-green desk ruled with the computation pad's grid; a deep green header; notes are light sheets; every day, sheet and Board column opens with a ruled title block.
+/* Layout: a linen desk ruled with the computation pad's grid; a sage header; notes are light sheets; every day, sheet and Board column opens with a ruled title block.
    Ink is graphite. Red pencil is spent only on Save, Delete and what's due; non-photo blue marks pins, selection and focus. */
 :root{
-  --bg:#dfe8d2; --grid:#cbdabb; --surface:#f8fbf3; --surface-2:#e9f0df; --fg:#242b25; --muted:#526056; --line:#c3d3b4;
-  --shell:#2f5a3c; --shell-2:#264b31; --shell-fg:#eef5e6; --shell-muted:#b9cdb4; --rule:#3d7350;
-  --red:#c2392a; --red-fg:#ffffff; --blue:#1f74a3; --blue-wash:#d3ecf7;
-  --accent:var(--blue); --accent-fg:#ffffff; --hi:var(--blue-wash); --danger:var(--red); --ok:#2e7d4f;
+  --bg:#eceae2; --grid:#e0ddd2; --surface:#fbfaf6; --surface-2:#f1eee6; --fg:#2c312b; --muted:#5b6258; --line:#d8d4c8;
+  --shell:#4b6152; --shell-2:#3f5346; --shell-fg:#f5f3ec; --shell-muted:#dbe5d9; --rule:#7d917f;
+  --red:#a85638; --red-fg:#ffffff; --blue:#3d6f7d; --blue-wash:#dbe9ed;
+  --accent:var(--blue); --accent-fg:#ffffff; --hi:var(--blue-wash); --danger:var(--red); --ok:#4d7d52;
   --sh-rgb:36 60 40;
   --shell-ok:#7bd88f; --shell-err:#ff8a78; --shell-err-fg:#ffd0c8; --shell-line:rgb(255 255 255/.24);
   --scrim:rgb(20 32 22/.55); --photo-bg:#000000; --photo-scrim:rgb(0 0 0/.65); --photo-fg:#ffffff;
@@ -44,15 +44,15 @@ img{max-width:100%}
   color-scheme:light;
 }
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
-  --bg:#141b15; --grid:#1c261d; --surface:#1d261e; --surface-2:#253027; --fg:#e2eadb; --muted:#9db0a0; --line:#334237;
-  --shell:#1f3a27; --shell-2:#18301f; --shell-fg:#e2eadb; --shell-muted:#9fb9a3; --rule:#5d9a70;
-  --red:#ff7a66; --red-fg:#1a0d0a; --blue:#6cc4ea; --blue-wash:#173c4b;
-  --accent:var(--blue); --accent-fg:#0b1a21; --hi:var(--blue-wash); --danger:var(--red); --ok:#5cc489; --sh-rgb:0 0 0; --scrim:rgb(0 0 0/.62); color-scheme:dark; } }
+  --bg:#171a17; --grid:#1f231f; --surface:#21251f; --surface-2:#2a2f28; --fg:#e8e9e1; --muted:#a8b1a5; --line:#363c34;
+  --shell:#2f3c32; --shell-2:#26312a; --shell-fg:#e8e9e1; --shell-muted:#b3c2b4; --rule:#6f8572;
+  --red:#e19478; --red-fg:#1d0f09; --blue:#8cc1cf; --blue-wash:#1f3238;
+  --accent:var(--blue); --accent-fg:#0b1a21; --hi:var(--blue-wash); --danger:var(--red); --ok:#93c49a; --sh-rgb:0 0 0; --scrim:rgb(0 0 0/.62); color-scheme:dark; } }
 :root[data-theme="dark"]{
-  --bg:#141b15; --grid:#1c261d; --surface:#1d261e; --surface-2:#253027; --fg:#e2eadb; --muted:#9db0a0; --line:#334237;
-  --shell:#1f3a27; --shell-2:#18301f; --shell-fg:#e2eadb; --shell-muted:#9fb9a3; --rule:#5d9a70;
-  --red:#ff7a66; --red-fg:#1a0d0a; --blue:#6cc4ea; --blue-wash:#173c4b;
-  --accent:var(--blue); --accent-fg:#0b1a21; --hi:var(--blue-wash); --danger:var(--red); --ok:#5cc489; --sh-rgb:0 0 0; --scrim:rgb(0 0 0/.62); color-scheme:dark; }
+  --bg:#171a17; --grid:#1f231f; --surface:#21251f; --surface-2:#2a2f28; --fg:#e8e9e1; --muted:#a8b1a5; --line:#363c34;
+  --shell:#2f3c32; --shell-2:#26312a; --shell-fg:#e8e9e1; --shell-muted:#b3c2b4; --rule:#6f8572;
+  --red:#e19478; --red-fg:#1d0f09; --blue:#8cc1cf; --blue-wash:#1f3238;
+  --accent:var(--blue); --accent-fg:#0b1a21; --hi:var(--blue-wash); --danger:var(--red); --ok:#93c49a; --sh-rgb:0 0 0; --scrim:rgb(0 0 0/.62); color-scheme:dark; }
 :root[data-font="grotesk"]{ --font-body:var(--font-hyper); }
 :root[data-font="mono"]{ --font-body:var(--font-type); }
 :root[data-density="compact"]{ --gap:8px; --pad:10px; }
@@ -2442,7 +2442,7 @@ window.__catchallTest = { parseReminder, parseCapture, parseStructure, nextOccur
 </div>
 <script>
 (function () {
-  var CURRENT_VERSION = "25";
+  var CURRENT_VERSION = "26";
   var banner = document.getElementById('__update-banner');
   var updateBtn = document.getElementById('__update-btn');
   var dismissBtn = document.getElementById('__dismiss-btn');

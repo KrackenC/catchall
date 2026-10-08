@@ -16,8 +16,8 @@ head = f'''<!DOCTYPE html>
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="{title}">
-<meta name="theme-color" content="#eaeef4" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0d1119" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#4b6152" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#2f3c32" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" href="favicon-32.png">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -143,7 +143,7 @@ open(os.path.join(site, 'index.html'), 'w').write(head + frag + banner)
 json.dump({'version': version}, open(os.path.join(site, 'version.json'), 'w'), indent=2)
 manifest = {
   'name': title, 'short_name': title, 'start_url': './', 'scope': './', 'display': 'standalone',
-  'background_color': '#eaeef4', 'theme_color': '#2a43c4',
+  'background_color': '#eceae2', 'theme_color': '#4b6152',
   'icons': [
     {'src': 'icon-192.png', 'sizes': '192x192', 'type': 'image/png'},
     {'src': 'icon-512.png', 'sizes': '512x512', 'type': 'image/png'},

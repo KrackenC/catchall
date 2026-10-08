@@ -2,39 +2,39 @@
 name: Catchall
 description: A personal capture inbox drawn on an engineer's computation pad.
 colors:
-  pad-green: "#dfe8d2"
-  pad-grid: "#cbdabb"
-  sheet: "#f8fbf3"
-  sheet-tint: "#e9f0df"
-  graphite: "#242b25"
-  graphite-soft: "#526056"
-  hairline: "#c3d3b4"
-  shell-green: "#2f5a3c"
-  shell-green-deep: "#264b31"
-  shell-ink: "#eef5e6"
-  shell-ink-soft: "#b9cdb4"
-  rule-green: "#3d7350"
-  red-pencil: "#c2392a"
+  pad-green: "#eceae2"
+  pad-grid: "#e0ddd2"
+  sheet: "#fbfaf6"
+  sheet-tint: "#f1eee6"
+  graphite: "#2c312b"
+  graphite-soft: "#5b6258"
+  hairline: "#d8d4c8"
+  shell-green: "#4b6152"
+  shell-green-deep: "#3f5346"
+  shell-ink: "#f5f3ec"
+  shell-ink-soft: "#dbe5d9"
+  rule-green: "#7d917f"
+  red-pencil: "#a85638"
   red-pencil-ink: "#ffffff"
-  nonphoto-blue: "#1f74a3"
-  nonphoto-wash: "#d3ecf7"
-  ok-green: "#2e7d4f"
-  pad-green-dark: "#141b15"
-  pad-grid-dark: "#1c261d"
-  sheet-dark: "#1d261e"
-  sheet-tint-dark: "#253027"
-  graphite-dark: "#e2eadb"
-  graphite-soft-dark: "#9db0a0"
-  hairline-dark: "#334237"
-  shell-green-dark: "#1f3a27"
-  shell-green-deep-dark: "#18301f"
-  shell-ink-soft-dark: "#9fb9a3"
-  rule-green-dark: "#5d9a70"
-  red-pencil-dark: "#ff7a66"
-  red-pencil-ink-dark: "#1a0d0a"
-  nonphoto-blue-dark: "#6cc4ea"
-  nonphoto-wash-dark: "#173c4b"
-  ok-green-dark: "#5cc489"
+  nonphoto-blue: "#3d6f7d"
+  nonphoto-wash: "#dbe9ed"
+  ok-green: "#4d7d52"
+  pad-green-dark: "#171a17"
+  pad-grid-dark: "#1f231f"
+  sheet-dark: "#21251f"
+  sheet-tint-dark: "#2a2f28"
+  graphite-dark: "#e8e9e1"
+  graphite-soft-dark: "#a8b1a5"
+  hairline-dark: "#363c34"
+  shell-green-dark: "#2f3c32"
+  shell-green-deep-dark: "#26312a"
+  shell-ink-soft-dark: "#b3c2b4"
+  rule-green-dark: "#6f8572"
+  red-pencil-dark: "#e19478"
+  red-pencil-ink-dark: "#1d0f09"
+  nonphoto-blue-dark: "#8cc1cf"
+  nonphoto-wash-dark: "#1f3238"
+  ok-green-dark: "#93c49a"
   shell-ok: "#7bd88f"
   shell-alert: "#ff8a78"
   shell-alert-ink: "#ffd0c8"
@@ -220,7 +220,7 @@ Catchall is drawn on the green-tinted, gridded pad a builder plans projects on. 
 
 The world is plain and workmanlike rather than cute. It turns away from both the sticky-note-on-cork convention and the grey notes app with a single accent. Density is moderate: sheets have 14px insets, a 12px gap between sheets, and comfortable 36px controls, with a compact setting that tightens to 8px and 10px. Labels are condensed engineering lettering (Barlow Semi Condensed), body text is Barlow, and every count and time is set in tabular figures so digits line up like a schedule.
 
-Light and dark both follow the device. Dark mode is the same pad at night: near-black green paper, a darker shell, and the pencils brightened to hold contrast (red #ff7a66, blue #6cc4ea).
+Light and dark both follow the device. Dark mode is the same pad at night: near-black green paper, a darker shell, and the pencils brightened to hold contrast (red #e19478, blue #8cc1cf).
 
 **Key Characteristics:**
 - Pad-green ground with a 20px grid on the page background, never on the sheets.
@@ -233,25 +233,27 @@ Light and dark both follow the device. Dark mode is the same pad at night: near-
 
 ## Colors
 
+Palette: **Linen & Sage** (chosen 2026-10-08 for a calmer, warmer feel): linen paper, a sage header, clay for Save, Delete and anything due, and dusty teal for pins, selection and focus. The token names below keep their original wording (pad green, red pencil, non-photo blue), but their values are the Linen & Sage colours.
+
 A two-pencil palette on green engineering paper: graphite ink, a sparing red, a sparing blue, and everything else in pad greens.
 
 ### Primary
-- **Red Pencil** (#c2392a light, #ff7a66 dark): the Save button, Delete (outlined at rest, filled on hover), armed confirmations, the active Dictate mic, due reminder pills, the "due now" title-block cell, the overdue time in Reminders, the reminders badge on the view tab, alarm toasts, and the text caret. Ink on it is white (#ffffff) in light mode and near-black (#1a0d0a) in dark.
+- **Red Pencil** (#a85638 light, #e19478 dark): the Save button, Delete (outlined at rest, filled on hover), armed confirmations, the active Dictate mic, due reminder pills, the "due now" title-block cell, the overdue time in Reminders, the reminders badge on the view tab, alarm toasts, and the text caret. Ink on it is white (#ffffff) in light mode and near-black (#1d0f09) in dark.
 
 ### Secondary
-- **Non-Photo Blue** (#1f74a3 light, #6cc4ea dark): focus rings, pressed toggles (Pin, filter toggles), checked checkboxes, today's date in the calendar, the selected calendar cell, the pin flag, links, and the drop target outline on the Board.
-- **Non-Photo Wash** (#d3ecf7 light, #173c4b dark): the fill behind pressed toggles, pinned sheets (mixed 55% into the sheet), reminder pills that are not due, text selection, and the dictation hint.
+- **Non-Photo Blue** (#3d6f7d light, #8cc1cf dark): focus rings, pressed toggles (Pin, filter toggles), checked checkboxes, today's date in the calendar, the selected calendar cell, the pin flag, links, and the drop target outline on the Board.
+- **Non-Photo Wash** (#dbe9ed light, #1f3238 dark): the fill behind pressed toggles, pinned sheets (mixed 55% into the sheet), reminder pills that are not due, text selection, and the dictation hint.
 
 ### Tertiary
-- **Shell Green** (#2f5a3c): the header band and the active filter chip. **Shell Green Deep** (#264b31) is the tab tray and the brand-mark tile inside the header. **Shell Ink** (#eef5e6) and **Shell Ink Soft** (#b9cdb4) are the header's text and inactive tabs.
-- **Rule Green** (#3d7350 light, #5d9a70 dark): the ink of every title block and Board column rule, and the empty-state dashed border.
-- **OK Green** (#2e7d4f): the synced state in Settings. In the header, the synced dot is a lighter green so it reads on the shell.
+- **Shell Green** (#4b6152): the header band and the active filter chip. **Shell Green Deep** (#3f5346) is the tab tray and the brand-mark tile inside the header. **Shell Ink** (#f5f3ec) and **Shell Ink Soft** (#dbe5d9) are the header's text and inactive tabs.
+- **Rule Green** (#7d917f light, #6f8572 dark): the ink of every title block and Board column rule, and the empty-state dashed border.
+- **OK Green** (#4d7d52): the synced state in Settings. In the header, the synced dot is a lighter green so it reads on the shell.
 
 ### Neutral
-- **Pad Green** (#dfe8d2): the page ground. **Pad Grid** (#cbdabb): the 1px grid lines over it.
-- **Sheet** (#f8fbf3): notes, the capture box, reminder rows, calendar cells, dialogs, controls at rest. **Sheet Tint** (#e9f0df): hover fill, Board column paper, segmented-control tray, preview pills.
-- **Graphite** (#242b25): all body ink. **Graphite Soft** (#526056): metadata, counts, placeholders, inactive labels.
-- **Hairline** (#c3d3b4): control borders and the rules inside a sheet.
+- **Pad Green** (#eceae2): the page ground. **Pad Grid** (#e0ddd2): the 1px grid lines over it.
+- **Sheet** (#fbfaf6): notes, the capture box, reminder rows, calendar cells, dialogs, controls at rest. **Sheet Tint** (#f1eee6): hover fill, Board column paper, segmented-control tray, preview pills.
+- **Graphite** (#2c312b): all body ink. **Graphite Soft** (#5b6258): metadata, counts, placeholders, inactive labels.
+- **Hairline** (#d8d4c8): control borders and the rules inside a sheet.
 
 Note colors (nine, plus none) and tag colors come from a fixed user palette and tint a sheet by mixing 24% into Sheet. They are content color, not system color. The "no color" swatch is marked with a Graphite Soft slash, never red.
 
@@ -306,7 +308,7 @@ Two layers of material and nothing in between. Paper on the pad lifts by one sof
 
 ### Shadow Vocabulary
 - **Sheet** (`box-shadow: 0 1px 2px rgb(36 60 40/.14), 0 6px 16px -8px rgb(36 60 40/.30)`): notes, the capture box, reminder rows, calendar cells.
-- **Sheet focused** (`0 1px 2px rgb(36 60 40/.14), 0 10px 24px -10px rgb(36 60 40/.38), 0 0 0 2px #1f74a3`): the capture box while typing.
+- **Sheet focused** (`0 1px 2px rgb(36 60 40/.14), 0 10px 24px -10px rgb(36 60 40/.38), 0 0 0 2px #3d6f7d`): the capture box while typing.
 - **Shell** (`0 2px 8px -2px rgb(36 60 40/.35)`): under the header band.
 - **Dialog** (`0 24px 60px -20px rgb(36 60 40/.55)`): dialogs, over a green-black scrim.
 
@@ -357,8 +359,8 @@ The ruled heading box from a computation sheet, built by `titleBlock()`. A 1.5px
 ### Do:
 - **Do** open every group of notes with the ruled title block, with tabular counts in its cells.
 - **Do** keep the 20px grid on the page ground and keep sheets clean paper.
-- **Do** spend red pencil (#c2392a) only on Save, Delete, and anything due or overdue.
-- **Do** use non-photo blue (#1f74a3) for pinned, selected, pressed and focused states.
+- **Do** spend red pencil (#a85638) only on Save, Delete, and anything due or overdue.
+- **Do** use non-photo blue (#3d6f7d) for pinned, selected, pressed and focused states.
 - **Do** give every action a visible word; an icon may sit beside the word, never replace it.
 - **Do** set counts, dates and times in Barlow Semi Condensed with tabular figures.
 - **Do** lift sheets with the one Sheet shadow and divide their insides with 1px hairline rules.
