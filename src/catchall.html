@@ -586,6 +586,20 @@ button.sync:hover{background:var(--shell-2)}
   .note:hover .n-actions,.note:focus-within .n-actions,.rrow:hover .n-actions,.rrow:focus-within .n-actions{opacity:1}
 }
 @media (prefers-reduced-motion:reduce){ .note .n-actions,.rrow .n-actions{transition:none} }
+
+/* ---------- open items: one message at a time, phone Actions, typing shortcuts ---------- */
+.linkbtn{border:0;background:none;padding:2px 4px;margin:-2px 0;color:var(--blue);font:600 13px var(--font-display);display:inline-flex;align-items:center;gap:4px;border-radius:4px;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+.linkbtn .i{width:13px;height:13px}
+.linkbtn:hover{background:var(--blue-wash)}
+@media (max-width:640px){
+  .preview .hint{display:inline}
+  .preview .kbd-hint{display:none}
+  .comp-row .preview{flex-basis:100%;margin-right:0}
+  .comp-row{justify-content:flex-end}
+  .acts-toggle{min-height:44px;padding:0 12px;font:600 14px/1 var(--font-body);color:var(--fg);border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+  .note.colored .acts-toggle,.rrow.colored .acts-toggle{background:color-mix(in srgb,var(--surface) 70%,transparent)}
+  .note.open .acts-toggle,.rrow.open .acts-toggle{color:var(--blue);border-color:var(--blue)}
+}
 </style>
 
 <header class="top">
@@ -1338,10 +1352,19 @@ const TRIES = [
   ['remind me to take out the bins every monday at 7pm', 'A repeating reminder'],
   ['https://www.youtube.com/watch?v=dQw4w9WgXcQ watch later', 'Links are kept clickable and can be filtered']
 ];
+function openShortcuts(){
+  const touch = matchMedia('(hover: none)').matches;
+  $('#setBody').innerHTML = `<h2 id="setH">Typing shortcuts <button type="button" class="btn dlg-close" data-set="close">${icon('x')}Close</button></h2>
+    <p class="small">Type these straight into the capture box. Tap one to try it.</p>
+    <div class="tries">${TRIES.map(([c, s]) => `<button type="button" class="try" data-try="${esc(c)}"><code>${esc(c.split('\n')[0])}${c.includes('\n') ? ' …' : ''}</code><small>${esc(s)}</small></button>`).join('')}</div>
+    <div class="set-sec"><h3>Tag keywords</h3><p class="small">Give a tag a keyword in Settings, then start a note with it: “GROCERY oat milk” files “oat milk” under that tag. Typing #anything also tags a note.</p></div>
+    ${touch ? '' : `<div class="set-sec"><h3>Keys</h3><p class="small"><kbd>Enter</kbd> saves · <kbd>Shift</kbd>+<kbd>Enter</kbd> starts a new line · <kbd>/</kbd> jumps to search · <kbd>N</kbd> jumps to the capture box · <kbd>Esc</kbd> leaves it</p></div>`}`;
+  if (!$('#setDlg').open) $('#setDlg').showModal();
+}
 function emptyHTML(){
   return `<div class="empty">
     <h3>Get it out of your head.</h3>
-    <p>Type anything into the box above and press Enter. Plain words work, and a few shortcuts do extra work for you. Tap one to try it.</p>
+    <p>Type anything into the box above and ${matchMedia('(hover: none)').matches ? 'tap Save' : 'press Enter'}. Plain words work, and a few shortcuts do extra work for you. Tap one to try it.</p>
     <div class="tries">${TRIES.map(([c, s]) => `<button type="button" class="try" data-try="${esc(c)}"><code>${esc(c.split('\n')[0])}${c.includes('\n') ? ' …' : ''}</code><small>${esc(s)}</small></button>`).join('')}</div>
   </div>`;
 }
@@ -1494,7 +1517,7 @@ function updatePreview(){
   const c = $('#cap'), p = $('#preview'); if (!c || !p) return;
   const raw = c.value;
   if (!raw.trim()){
-    p.innerHTML = `<span class="hint"><kbd>Enter</kbd> saves · <kbd>Shift</kbd>+<kbd>Enter</kbd> new line · start with “remind me” for a reminder</span>`;
+    p.innerHTML = `<span class="hint"><span class="kbd-hint"><kbd>Enter</kbd> saves · <kbd>Shift</kbd>+<kbd>Enter</kbd> new line · </span><button type="button" class="linkbtn" data-act="shortcuts">${icon('bolt')}Typing shortcuts</button></span>`;
     return;
   }
   const r = parseCapture(raw); let h = '';
@@ -1525,7 +1548,7 @@ function capture(){
   try { sessionStorage.removeItem('catchall.draft'); } catch(e){}
   if (S.ui.archived){ S.ui.archived = false; }
   render(); $('#cap')?.focus();
-  toast(r.remind ? `Reminder set for ${fWhen(r.remind.at)}` : 'Saved', { undo: n.id });
+  toast(r.remind ? `Reminder set for ${fWhen(r.remind.at)}` : 'Saved', { undo: n.id, key: r.remind ? '' : 'save' });
 }
 
 /* images */
@@ -1600,19 +1623,29 @@ function completeReminder(id, snoozeMin){
 }
 
 /* ---------- toasts ---------- */
+/* One message at a time: a new message replaces the previous one (reminder alarms keep their own
+   place). Saves made in quick succession count up in a single message whose Undo removes the last. */
+const saveRun = { el: null, n: 0 };
 function toast(msg, opt = {}){
   const box = $('#toasts'), el = document.createElement('div');
+  if (opt.key === 'save'){
+    saveRun.n = saveRun.el && saveRun.el.isConnected ? saveRun.n + 1 : 1;
+    if (saveRun.n > 1){ msg = `Saved ${saveRun.n} notes`; opt.undoLabel = 'Undo last'; }
+    saveRun.el = el;
+  }
+  if (!opt.alarm) box.querySelectorAll('.toast:not(.alarm)').forEach(t => t.remove());
   el.className = 'toast' + (opt.alarm ? ' alarm' : '');
   el.innerHTML = `${opt.alarm ? icon('bell') : ''}<span class="msg"></span>`;
   el.querySelector('.msg').textContent = msg;
   const btn = (label, fn) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = label; b.onclick = () => { fn(); el.remove(); }; el.appendChild(b); };
-  if (opt.undo) btn('Undo', () => { delNote(opt.undo); render(); });
+  if (opt.undo) btn(opt.undoLabel || 'Undo', () => { delNote(opt.undo); render(); });
+  if (opt.undoFn) btn('Undo', opt.undoFn);
   if (opt.restore) btn('Undo', () => { putNote(clone(opt.restore)); render(); toast('Note restored'); });
   if (opt.alarm){ btn('Snooze 10 min', () => completeReminder(opt.alarm, 10)); btn('Done', () => completeReminder(opt.alarm)); }
   else btn('Dismiss', () => {});
   box.appendChild(el);
   while (box.children.length > 4) box.firstChild.remove();
-  if (!opt.alarm) setTimeout(() => el.remove(), opt.ms || (opt.undo || opt.restore ? 7000 : 4000));
+  if (!opt.alarm) setTimeout(() => el.remove(), opt.ms || (opt.undo || opt.restore || opt.undoFn ? 7000 : 4000));
 }
 
 /* ---------- editor ---------- */
@@ -1697,6 +1730,7 @@ function openSettings(){
       <p class="small">Alerts pop up in Catchall while it's open in a tab.</p>
     </div>
     <div class="set-sec"><h3>Tags</h3>
+      <p class="small">A keyword files notes for you: start a note with it, like “GROCERY oat milk”, and it's saved under that tag.</p>
       <div id="tagRows" style="display:flex;flex-direction:column;gap:6px"></div>
       <div class="row"><button type="button" class="btn" data-set="newtag">${icon('plus')}New tag</button></div>
     </div>
@@ -1798,7 +1832,7 @@ document.addEventListener('click', e => {
   if (d.view){ S.settings.view = d.view; saveSettings(); render(); window.scrollTo(0, 0); return; }
   if (d.tagf){ S.ui.tag = d.tagf; S.ui.limit = 60; render(); return; }
   if (d.tog){ S.ui[d.tog] = !S.ui[d.tog]; render(); return; }
-  if (d.try != null){ const c = $('#cap'); c.value = d.try; autosize(); updatePreview(); c.focus(); return; }
+  if (d.try != null){ if ($('#setDlg').open) $('#setDlg').close(); const c = $('#cap'); if (!c) return; c.value = d.try; autosize(); updatePreview(); c.focus(); return; }
   if (d.bpick){
     const b = S.settings.boardTags, i = b.indexOf(d.bpick);
     if (i >= 0) b.splice(i, 1); else if (b.length < 5) b.push(d.bpick); else { toast('A board holds up to 5 columns.'); return; }
@@ -1819,12 +1853,13 @@ document.addEventListener('click', e => {
     case 'mic': dictate(); break;
     case 'dicthintx': S.ui.dictHint = false; $('.dict-hint')?.remove(); break;
     case 'more': S.ui.limit += 60; render(); break;
+    case 'shortcuts': openShortcuts(); break;
     case 'openacts': S.ui.openNote = S.ui.openNote === id ? null : id; render(); break;
     case 'filters': S.ui.filtersOpen = !S.ui.filtersOpen; render(); break;
     case 'clearf': Object.assign(S.ui, { tag:'all', q:'', link:false, image:false, list:false, archived:false, range:'all' }); render(); break;
     case 'newtag': openNewTag(); break;
     case 'pin': putNote({ ...n, pinned: !n.pinned }); render(); break;
-    case 'archive': putNote({ ...n, archived: !n.archived }); render(); toast(n.archived ? 'Moved back to the feed' : 'Archived'); break;
+    case 'archive': { const before = clone(n); putNote({ ...n, archived: !n.archived }); render(); toast(n.archived ? 'Moved back to the feed' : 'Archived', { undoFn: () => { putNote(clone(before)); render(); } }); break; }
     case 'edit': openEditor(id); break;
     case 'del': { const before = clone(n); delNote(id); render(); toast('Note deleted', { restore: before }); break; }
     case 'colorpick': {
