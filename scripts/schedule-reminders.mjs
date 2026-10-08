@@ -27,7 +27,7 @@ const active = n => n && !n.deleted && !n.archived && n.remind && !n.remind.sent
 const label = n => n.kind === 'list' ? (n.text || (n.items || []).map(i => i.t).join(', ') || 'List') : (n.text || 'Reminder');
 
 async function loadData() {
-  if (process.env.DATA_FILE) return JSON.parse(fs.readFileSync(process.env.DATA_FILE, 'utf8'));
+  if (process.env.DATA_FILE && fs.existsSync(process.env.DATA_FILE)) return JSON.parse(fs.readFileSync(process.env.DATA_FILE, 'utf8'));
   if (!GIST_ID) throw new Error('GIST_ID is not set');
   const r = await fetch(`https://gist.githubusercontent.com/${GIST_OWNER}/${GIST_ID}/raw/catchall.json?t=${Date.now()}`, { cache: 'no-store' });
   if (!r.ok) throw new Error('Could not read the gist: HTTP ' + r.status);

@@ -1,4 +1,4 @@
-name: Queue phone reminders
+name: Queue phone reminders and file iPhone notes
 
 on:
   schedule:
@@ -29,10 +29,17 @@ jobs:
           path: .push-state
           key: push-state-${{ github.run_id }}
           restore-keys: push-state-
+      - name: File notes sent from iPhone
+        env:
+          GIST_ID: ${{ secrets.GIST_ID }}
+          GIST_TOKEN: ${{ secrets.GIST_TOKEN }}
+          OUT_FILE: .inbox-data.json
+        run: node scripts/ingest-inbox.mjs
       - name: Queue reminders with ntfy
         env:
           GIST_ID: ${{ secrets.GIST_ID }}
           GIST_OWNER: ${{ github.repository_owner }}
+          DATA_FILE: .inbox-data.json
         run: node scripts/schedule-reminders.mjs
       - name: Remember what was queued
         if: always() && hashFiles('.push-state/state.json') != ''
