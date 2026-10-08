@@ -120,7 +120,6 @@ main{max-width:1200px;margin:0 auto;padding:18px 16px 80px}
 /* feed */
 .day{display:flex;flex-direction:column;gap:var(--gap)}
 .note{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:var(--pad) var(--pad) 10px;display:flex;flex-direction:column;gap:8px;position:relative;min-width:0}
-.note.pinned{background:color-mix(in srgb,var(--hi) 11%,var(--surface));border-color:color-mix(in srgb,var(--hi) 55%,var(--line))}
 .note.arch{opacity:.7}
 .note.colored{background:color-mix(in srgb,var(--nc) 22%,var(--surface));border-color:color-mix(in srgb,var(--nc) 60%,var(--line))}
 .swatches{display:flex;flex-wrap:wrap;gap:6px;padding:4px 0}
@@ -167,7 +166,6 @@ main{max-width:1200px;margin:0 auto;padding:18px 16px 80px}
 .tagsel:focus-within{outline:2px solid var(--accent);outline-offset:2px}
 .act.del{color:var(--danger);border-color:color-mix(in srgb,var(--danger) 40%,var(--line))}
 .note.colored .act{background:color-mix(in srgb,var(--surface) 80%,transparent)}
-.pin-flag{position:absolute;top:10px;right:10px;color:color-mix(in srgb,var(--hi) 70%,var(--fg))}
 .pin-flag .i{width:15px;height:15px}
 .note.pinned .n-body{padding-right:20px}
 
@@ -291,9 +289,7 @@ b,strong{font-weight:600}
 #cap{font:400 19px/1.45 var(--font-body)}
 #cap::placeholder{color:var(--muted)}
 .note{border-radius:var(--r);padding:var(--pad) var(--pad) 12px;gap:10px}
-.note.pinned{background:color-mix(in srgb,var(--blue-wash) 55%,var(--surface))}
 .note.colored,.rrow.colored{background:color-mix(in srgb,var(--nc) 24%,var(--surface))}
-.pin-flag{top:12px;right:12px;color:var(--blue)}
 .n-body{font-size:17px;line-height:1.45}
 .n-title{font:600 17px/1.45 var(--font-body)}
 .n-meta{font-size:13px;gap:8px}
@@ -558,6 +554,38 @@ button.sync:hover{background:var(--shell-2)}
   .note.open .n-moves{flex-basis:100%}
   .bcol .n-band{flex-direction:row}
 }
+
+/* ---------- third critique: actions on hover/focus (Mac), tag as lettering, pinned as a marking ---------- */
+/* Pinned is a ruled lettering cell in the sheet's corner, so the fill always means the colour you chose */
+.pin-flag{position:absolute;top:10px;right:12px;display:inline-flex;align-items:center;gap:4px;padding:3px 7px;border:1.5px solid var(--blue);border-radius:4px;font:700 12px/1 var(--font-display);color:var(--blue);background:var(--surface)}
+.pin-flag .i{width:13px;height:13px}
+.note.pinned .n-body{padding-right:84px}
+/* the tag reads as its own lettering: colour dot and name; the menu opens on click */
+.n-meta .tagsel{border:1px solid transparent;background:none;padding:0 2px 0 6px;min-height:30px;gap:6px;border-radius:6px}
+.n-meta .tagsel:hover,.n-meta .tagsel:focus-within{border-color:var(--line);background:var(--surface)}
+.n-meta .tagsel select{appearance:none;-webkit-appearance:none;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23526056' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 2px center/14px;padding:0 20px 0 0;font:600 14px/1 var(--font-display);color:var(--fg);height:28px}
+.n-meta .tagsel.none select{color:var(--muted);font-weight:500}
+.n-meta .tagsel .cdot{width:9px;height:9px}
+.note.colored .n-meta .tagsel,.rrow.colored .n-meta .tagsel{background:none}
+.note.colored .acts-toggle,.rrow.colored .acts-toggle{background:none}
+.note.colored .n-meta .tagsel:hover,.note.colored .n-meta .tagsel:focus-within{background:color-mix(in srgb,var(--surface) 70%,transparent)}
+.mvsel select{appearance:none;-webkit-appearance:none;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23526056' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 4px center/14px;padding-right:22px}
+.bcol .n-meta{flex-wrap:wrap}
+.bcol .n-actions{display:flex;flex-wrap:wrap;justify-content:flex-start;margin:0 -6px}
+.bcol .n-actions .act{padding:7px 7px;font-size:13px}
+.bcol .n-actions .act .i{display:none}
+.bcol .n-actions .act + .act::before{display:block}
+.bcol .n-actions .act.del{margin-left:auto}
+.bcol .n-actions .act.del::before{display:none}
+.bcol .n-band{flex-direction:column;align-items:stretch}
+/* On a computer each sheet's labeled actions appear when you point at it or move to it with the keyboard;
+   they keep their space, so nothing jumps. Touch screens keep them visible (phones use tap-to-show). */
+@media (hover:hover) and (pointer:fine) and (min-width:641px){
+  .note .n-actions,.rrow .n-actions{opacity:0;transition:opacity .15s ease}
+  .bcol .note .n-actions{opacity:1}
+  .note:hover .n-actions,.note:focus-within .n-actions,.rrow:hover .n-actions,.rrow:focus-within .n-actions{opacity:1}
+}
+@media (prefers-reduced-motion:reduce){ .note .n-actions,.rrow .n-actions{transition:none} }
 </style>
 
 <header class="top">
@@ -1222,8 +1250,8 @@ const actBtn = (n, act, ic, label, extra = '') => `<button type="button" class="
 /* The Tag dropdown swaps the note's main tag (the one it shows here) for another; any other tags stay. */
 const mainTag = n => (n.tags || []).find(id => S.settings.boardTags.includes(id) && tagById(id)) || (n.tags || []).find(tagById) || '';
 function tagSelect(n){
-  const cur = mainTag(n);
-  return `<label class="act tagsel" title="Choose a tag. Each tag is a column on the Board.">${icon('tag')}<span class="sr">Tag for this note</span><select data-tagset="${n.id}">
+  const cur = mainTag(n), t = cur && tagById(cur);
+  return `<label class="act tagsel ${t ? '' : 'none'}" title="Change the tag. Each tag is a column on the Board.">${t ? `<span class="cdot" style="--c:${esc(t.color)}"></span>` : icon('tag')}<span class="sr">Tag for this note</span><select data-tagset="${n.id}">
     <option value="" ${cur ? '' : 'selected'}>No tag</option>
     ${S.tags.map(t => `<option value="${t.id}" ${t.id === cur ? 'selected' : ''}>${esc(t.name)}</option>`).join('')}
     <option value="__new">+ New tag…</option></select></label>`;
@@ -1253,12 +1281,12 @@ function noteCard(n, board, moves = ''){
     + btn('archive', 'archive', n.archived ? 'Unarchive' : 'Archive') + delBtn;
   const hex = noteHex(n.color);
   return `<article class="note ${S.ui.openNote === n.id ? 'open' : ''} ${n.pinned ? 'pinned' : ''} ${n.archived ? 'arch' : ''} ${hex ? 'colored' : ''}" data-id="${n.id}" ${hex ? `style="--nc:${hex}"` : ''} ${board ? 'draggable="true"' : ''}>
-    ${n.pinned ? `<span class="pin-flag" title="Pinned">${icon('pin')}</span>` : ''}
+    ${n.pinned ? `<span class="pin-flag">${icon('pin')}Pinned</span>` : ''}
     ${noteBody(n)}
     <div class="n-band">
-      <div class="n-meta"><time datetime="${new Date(n.createdAt).toISOString()}">${board ? esc(fDay(n.createdAt)) + ', ' : ''}${esc(fTime(n.createdAt))}</time>${board ? '' : tagSelect(n)}${tagChips(n, board ? (n.tags || []).find(id => S.settings.boardTags.includes(id)) : mainTag(n))}${remPill(n)}</div>
+      <div class="n-meta"><time datetime="${new Date(n.createdAt).toISOString()}">${board ? esc(fDay(n.createdAt)) + ', ' : ''}${esc(fTime(n.createdAt))}</time>${board ? moves : tagSelect(n)}${tagChips(n, board ? (n.tags || []).find(id => S.settings.boardTags.includes(id)) : mainTag(n))}${remPill(n)}</div>
       <button type="button" class="act acts-toggle" data-act="openacts" data-id="${n.id}" aria-expanded="${S.ui.openNote === n.id}">${icon('sliders')}<span>Actions</span></button>
-      ${board && moves ? `<div class="n-moves">${moves}</div>` : ''}<div class="n-actions">${acts}</div>
+      <div class="n-actions">${acts}</div>
     </div>
   </article>`;
 }
