@@ -3,12 +3,12 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Barlow+Semi+Condensed:wght@500;600;700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: a linen desk ruled with the computation pad's grid; a sage header; notes are light sheets; every day, sheet and Board column opens with a ruled title block.
-   Ink is graphite. Red pencil is spent only on Save, Delete and what's due; non-photo blue marks pins, selection and focus. */
+/* Layout: a linen dot-grid notebook page; a sage header; notes are light sheets; every day, sheet and Board column opens with a ruled title block.
+   Ink is graphite. Clay (--red) is spent only on Save, Delete and what's due; teal (--blue) marks pins, selection and focus. */
 :root{
   --bg:#eceae2; --grid:#e0ddd2; --surface:#fbfaf6; --surface-2:#f1eee6; --fg:#2c312b; --muted:#5b6258; --line:#d8d4c8;
   --shell:#4b6152; --shell-2:#3f5346; --shell-fg:#f5f3ec; --shell-muted:#dbe5d9; --rule:#7d917f;
-  --red:#a85638; --red-fg:#ffffff; --blue:#3d6f7d; --blue-wash:#dbe9ed;
+  --red:#a85638; --red-fg:#ffffff; --blue:#376672; --blue-wash:#dbe9ed; --dot:#cdc7b6;
   --accent:var(--blue); --accent-fg:#ffffff; --hi:var(--blue-wash); --danger:var(--red); --ok:#4d7d52;
   --sh-rgb:36 60 40;
   --shell-ok:#7bd88f; --shell-err:#ff8a78; --shell-err-fg:#ffd0c8; --shell-line:rgb(255 255 255/.24);
@@ -24,12 +24,12 @@
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
   --bg:#171a17; --grid:#1f231f; --surface:#21251f; --surface-2:#2a2f28; --fg:#e8e9e1; --muted:#a8b1a5; --line:#363c34;
   --shell:#2f3c32; --shell-2:#26312a; --shell-fg:#e8e9e1; --shell-muted:#b3c2b4; --rule:#6f8572;
-  --red:#e19478; --red-fg:#1d0f09; --blue:#8cc1cf; --blue-wash:#1f3238;
+  --red:#e19478; --red-fg:#1d0f09; --blue:#8cc1cf; --blue-wash:#1f3238; --dot:#323830;
   --accent:var(--blue); --accent-fg:#0b1a21; --hi:var(--blue-wash); --danger:var(--red); --ok:#93c49a; --sh-rgb:0 0 0; --scrim:rgb(0 0 0/.62); color-scheme:dark; } }
 :root[data-theme="dark"]{
   --bg:#171a17; --grid:#1f231f; --surface:#21251f; --surface-2:#2a2f28; --fg:#e8e9e1; --muted:#a8b1a5; --line:#363c34;
   --shell:#2f3c32; --shell-2:#26312a; --shell-fg:#e8e9e1; --shell-muted:#b3c2b4; --rule:#6f8572;
-  --red:#e19478; --red-fg:#1d0f09; --blue:#8cc1cf; --blue-wash:#1f3238;
+  --red:#e19478; --red-fg:#1d0f09; --blue:#8cc1cf; --blue-wash:#1f3238; --dot:#323830;
   --accent:var(--blue); --accent-fg:#0b1a21; --hi:var(--blue-wash); --danger:var(--red); --ok:#93c49a; --sh-rgb:0 0 0; --scrim:rgb(0 0 0/.62); color-scheme:dark; }
 :root[data-font="grotesk"]{ --font-body:var(--font-hyper); }
 :root[data-font="mono"]{ --font-body:var(--font-type); }
@@ -653,6 +653,109 @@ body:has(.selbar) .toasts{bottom:calc(96px + env(safe-area-inset-bottom,0px))}
 .btn.mini .i{width:14px;height:14px}
 .btn.mini[aria-pressed="true"]{color:var(--blue);border-color:var(--blue);background:var(--blue-wash)}
 @media (max-width:640px){ .views button{font-size:13px;padding:8px 2px} .selbar .act span{font-size:13px} }
+
+/* ---------- linen notebook: a dotted page, earth-tone tags, Sort that keeps its word, phone fixes ---------- */
+/* The ground is a dot-grid notebook page: linen paper with a 20px dot every square. */
+body{background-image:radial-gradient(circle at 1px 1px,var(--dot) 1px,transparent 1.4px);background-size:20px 20px;background-position:9px 9px}
+html{scrollbar-gutter:stable}
+.additem input::placeholder{color:var(--muted)}
+/* One "where you are" mark everywhere: the chosen tag is teal on its wash, on the Mac rail and the phone alike */
+.chip[aria-pressed="true"]{background:var(--blue-wash);border-color:var(--blue);color:var(--fg)}
+.chip[aria-pressed="true"] .n{color:var(--fg);opacity:1}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .dot{background:color-mix(in oklab,var(--c) 72%,#ffffff)} }
+:root[data-theme="dark"] .dot{background:color-mix(in oklab,var(--c) 72%,#ffffff)}
+/* Colored sheets in dark mode mix by hue, so Butter stays warm instead of turning olive */
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .note.colored,:root:not([data-theme="light"]) .rrow.colored{background:color-mix(in oklch,var(--nc) 17%,var(--surface))} }
+:root[data-theme="dark"] .note.colored,:root[data-theme="dark"] .rrow.colored{background:color-mix(in oklch,var(--nc) 17%,var(--surface))}
+
+/* Sort */
+.sort-intro{margin:0;max-width:62ch;color:var(--muted)}
+.sortcard{position:relative;min-height:0;transition:transform .28s cubic-bezier(.2,.8,.2,1),box-shadow .15s}
+.sortcard[data-dir="keep"]{box-shadow:0 0 0 2px var(--blue),0 10px 24px -10px rgb(var(--sh-rgb)/.38)}
+.sortcard[data-dir="left"]{box-shadow:0 0 0 2px var(--fg),0 10px 24px -10px rgb(var(--sh-rgb)/.38)}
+.sortcard[data-dir="left"][data-left="delete"]{box-shadow:0 0 0 2px var(--red),0 10px 24px -10px rgb(var(--sh-rgb)/.38)}
+.swipe-word{position:absolute;top:12px;padding:4px 10px;border:1.5px solid currentColor;border-radius:4px;background:var(--surface);font:700 15px/1 var(--font-display);opacity:0;transition:opacity .12s;pointer-events:none}
+.swipe-word.keep{left:14px;color:var(--blue)}
+.swipe-word.left{right:14px;color:var(--fg)}
+.sortcard[data-left="delete"] .swipe-word.left{color:var(--red)}
+.sortcard[data-dir="keep"] .swipe-word.keep,.sortcard[data-dir="left"] .swipe-word.left{opacity:1}
+.sort-dock{display:flex;flex-direction:column;gap:12px}
+.sort-dock kbd{margin-left:6px;padding:2px 5px;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;background:var(--surface-2);color:var(--muted);font:600 11px/1 var(--font-display);font-variant-numeric:tabular-nums}
+.sort-end{background:var(--surface);border-radius:14px;box-shadow:0 1px 2px rgb(var(--sh-rgb)/.14),0 6px 16px -8px rgb(var(--sh-rgb)/.30);overflow:hidden;padding-bottom:18px}
+.sort-end .tblock{margin:0;border-width:0 0 1.5px;border-radius:0;background:none}
+.sort-end .tblock h2{font:700 26px/1 var(--font-display);letter-spacing:-.01em;padding:16px 18px;margin:0;flex:1 1 auto}
+.sort-end p{margin:16px 18px 14px;max-width:56ch}
+.sort-end .row{padding:0 18px;flex-wrap:wrap;gap:8px}
+
+/* Arrange: order, layout and (on phones) Select sit apart from the "Show only" filters */
+.arrange{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.sel-phone{display:none}
+@media (min-width:1024px){
+  .rail .arrange{flex-direction:column;align-items:stretch;gap:6px;margin-top:12px;padding:12px 16px 0;border-top:1px solid var(--line)}
+  .rail .arrange::before{content:"Arrange";font:700 16px/1 var(--font-display);padding:2px 0 4px;color:var(--fg)}
+}
+
+/* Mac grid: the hidden actions take no room until you point at or tab into a sheet */
+@media (hover:hover) and (pointer:fine) and (min-width:641px){
+  .desk-feed.grid .note .n-actions{max-height:0;overflow:hidden;transition:max-height .18s cubic-bezier(.2,.8,.2,1),opacity .15s}
+  .desk-feed.grid .note:hover .n-actions,.desk-feed.grid .note:focus-within .n-actions{max-height:120px}
+  .desk-feed.grid .note .n-band{row-gap:0}
+}
+.desk-feed.grid .day > .tblock + .note:last-child{grid-column:1/-1}
+.selbar .act[data-act="selall"]{border-right:1px solid var(--line);border-radius:0;margin-right:2px}
+.selbar .tagsel{min-height:36px;display:inline-flex;align-items:center}
+.selbar .tagsel select{min-height:34px}
+
+/* List mode stays on screen while it's on */
+.composer.listing{box-shadow:0 1px 2px rgb(var(--sh-rgb)/.14),0 10px 24px -10px rgb(var(--sh-rgb)/.38),0 0 0 2px var(--blue)}
+.pv.listmode{background:var(--blue-wash);color:var(--fg);font-weight:600}
+.composer.listing .preview{flex-wrap:wrap;align-items:center;gap:6px 10px}
+.composer.listing .preview .hint{display:inline!important;font-size:13px;color:var(--muted)}
+
+/* Narrow sheets (Board columns, grid cards) carry the Pinned mark above the text, not beside it */
+.bcol .note.pinned .n-body,.desk-feed.grid .note.pinned .n-body{padding-right:0}
+.bcol .pin-flag,.desk-feed.grid .pin-flag{position:static;align-self:flex-start;margin-bottom:-4px}
+/* Reminders: a time never breaks across lines */
+.rrow .when b,.rrow .when > span{white-space:nowrap}
+
+/* Phones */
+@media (max-width:640px){
+  .pagehead h1{flex:1 0 100%;border-bottom:1.5px solid var(--rule)}
+  .pagehead .tb-cell{flex:1 1 0;justify-content:center;padding:10px 8px}
+  .pagehead h1 + .tb-cell{border-left:0}
+  .pagehead .ph-ctl{flex:1 0 100%;border-left:0;border-top:1.5px solid var(--rule);padding:8px}
+  .pagehead .ph-ctl > *{flex:1 1 0;justify-content:center}
+  .pagehead .ph-ctl .seg{display:flex}
+  .pagehead .ph-ctl .seg button{flex:1}
+  .filters .search{flex:1 1 calc(100% - 130px);min-width:0}
+  .filters .ftoggle{flex:none}
+  .filters.open .ftog{flex:1 1 calc(50% - 4px)}
+  .filters.open .fsel{flex:1 1 100%}
+  .filters:not(.open) + .arrange{display:none}
+  .arrange .layout-seg{display:none}
+  .arrange .fsel{flex:1 1 auto}
+  .sel-phone{display:inline-flex;flex:1 1 auto;justify-content:center}
+  .desk-feed.grid .day{grid-template-columns:1fr}
+  /* Sort: choices sit in a dock at the bottom, in thumb reach */
+  .sortview{padding-bottom:210px}
+  .sort-dock{position:fixed;left:0;right:0;bottom:0;z-index:30;gap:10px;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));background:var(--surface);border-top:1.5px solid var(--rule);box-shadow:0 -8px 20px -12px rgb(var(--sh-rgb)/.35)}
+  .sort-file{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:0 16px}
+  .sort-acts{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+  .sort-acts .btn{flex-direction:column;justify-content:center;gap:3px;padding:6px 2px;min-height:56px;font-size:14px}
+  .sort-hint{text-align:center}
+  body:has(.sort-dock) .toasts{bottom:calc(200px + env(safe-area-inset-bottom,0px))}
+}
+/* Touch screens: every control is at least 44px to tap */
+@media (pointer:coarse){
+  .views button,.top .sync,.top .icon-btn{min-height:44px}
+  .btn,.act,.chip,.ftog,.fsel,.seg button,.mvbtn,.acts-toggle{min-height:44px}
+  .n-meta .tagsel,.tagsel select,.selbar .tagsel{min-height:44px}
+  .search input{min-height:42px}
+  .linkbtn{padding:12px 6px;margin:-10px 0}
+  .cbox,.item-x{position:relative}
+  .cbox::after,.item-x::after{content:"";position:absolute;inset:-12px}
+  .item-x{padding:4px}
+}
 </style>
 
 <header class="top">
@@ -720,12 +823,19 @@ const LS = {
   get(k, d){ try{ const v = localStorage.getItem('catchall.'+k); return v == null ? d : JSON.parse(v); }catch(e){ return d; } },
   set(k, v){ try{ localStorage.setItem('catchall.'+k, JSON.stringify(v)); return true; }catch(e){ return false; } }
 };
+/* Tag and note colors are muted earth tones picked to sit on linen. None is a red, so the clay
+   reserved for Save, Delete and what's due never doubles as a tag. A new tag starts at Sage. */
 const COLORS = [
-  ['Red','#e5484d'],['Orange','#f0731c'],['Amber','#d9a12c'],['Green','#30a46c'],['Teal','#12a594'],
-  ['Cyan','#0796bd'],['Blue','#3e63dd'],['Violet','#6e56cf'],['Pink','#d6409f'],['Brown','#a87a54'],['Gray','#868c99']
+  ['Sage','#5a8560'],['Slate','#4f6b9a'],['Ochre','#a87a1e'],['Plum','#85507a'],['Moss','#6f7f2e'],['Walnut','#8f6748'],
+  ['Heather','#7c6aa8'],['Pine','#2f6b5a'],['Rose','#b05a76'],['Fjord','#4a7f9e'],['Stone','#7a7468']
 ];
-const NOTE_COLORS = [['none','No color',''],['yellow','Yellow','#f2cf3a'],['orange','Orange','#f0731c'],['red','Red','#e5484d'],['pink','Pink','#d6409f'],
-  ['purple','Purple','#6e56cf'],['blue','Blue','#3e63dd'],['teal','Teal','#12a594'],['green','Green','#30a46c'],['gray','Gray','#868c99']];
+/* Tags made before the linen palette move to the nearest earth tone. Done on load and on every sync,
+   without a new timestamp, so it never fights another device; the next tag edit saves the new colors. */
+const OLD_TAG_COLORS = { '#e5484d':'#b05a76', '#f0731c':'#8f6748', '#d9a12c':'#a87a1e', '#30a46c':'#5a8560', '#12a594':'#2f6b5a', '#0796bd':'#4a7f9e',
+  '#3e63dd':'#4f6b9a', '#6e56cf':'#7c6aa8', '#d6409f':'#85507a', '#a87a54':'#8f6748', '#868c99':'#7a7468' };
+const fixTagColors = () => { for (const t of S.tags || []) if (t && OLD_TAG_COLORS[(t.color || '').toLowerCase()]) t.color = OLD_TAG_COLORS[t.color.toLowerCase()]; };
+const NOTE_COLORS = [['none','No color',''],['yellow','Butter','#e8c547'],['orange','Apricot','#e3955a'],['red','Rose','#c9667f'],['pink','Blush','#d48aa0'],
+  ['purple','Heather','#8f7bbd'],['blue','Slate','#6f8bb8'],['teal','Lake','#5e9aa0'],['green','Sage','#7ea576'],['gray','Stone','#a39d8f']];
 const noteHex = key => (NOTE_COLORS.find(c => c[0] === key) || [])[2] || '';
 const swatchRow = (cur, attrs) => NOTE_COLORS.map(([k, label, hex]) => `<button type="button" class="nswatch ${k === 'none' ? 'none' : ''}" style="--nc:${hex || 'transparent'}" ${attrs} data-c="${k}" aria-pressed="${(cur || 'none') === k}" aria-label="${label}" title="${label}"></button>`).join('');
 const DEFAULT_SETTINGS = { theme:'system', font:'legible', density:'comfy', boardTags:[], sound:true, view:'feed', layout:'list', order:'new', listClear:'keep', sentRem:'keep', swipeLeft:'archive' };
@@ -737,7 +847,7 @@ const S = {
         pending: [], drag: null }
 };
 for (const n of LS.get('notes', [])) if (n && n.id) S.notes.set(n.id, n);
-S.tags = LS.get('tags', []); S.tagsUpdatedAt = LS.get('tagsUpdatedAt', 0);
+S.tags = LS.get('tags', []); S.tagsUpdatedAt = LS.get('tagsUpdatedAt', 0); fixTagColors();
 // Board columns sync with the notes. Columns picked before syncing existed get the oldest
 // possible timestamp, so any device that changes its columns later wins.
 if (S.settings.boardTags.length && !S.settings.boardUpdatedAt) S.settings.boardUpdatedAt = 1;
@@ -783,7 +893,7 @@ function onRemote(snap){
     seen.add(d.id);
     if (d.id === 'tags'){
       const ru = v.updatedAt || 0;
-      if (ru > S.tagsUpdatedAt){ S.tags = clone(v.list || []); S.tagsUpdatedAt = ru; changed = true; }
+      if (ru > S.tagsUpdatedAt){ S.tags = clone(v.list || []); S.tagsUpdatedAt = ru; fixTagColors(); changed = true; }
       else if (sync.first && S.tagsUpdatedAt > ru) pushTags();
       continue;
     }
@@ -849,7 +959,7 @@ function mergeRemote(data){
   if (!data || !Array.isArray(data.notes)) return { changed, localNewer: true };
   if (data.imgGist && data.imgGist !== gist.imgId){ gist.imgId = data.imgGist; LS.set('imgGistId', gist.imgId); changed = true; }
   else if (gist.imgId && !data.imgGist) localNewer = true;
-  if ((data.tagsUpdatedAt || 0) > S.tagsUpdatedAt){ S.tags = data.tags || []; S.tagsUpdatedAt = data.tagsUpdatedAt; changed = true; }
+  if ((data.tagsUpdatedAt || 0) > S.tagsUpdatedAt){ S.tags = data.tags || []; S.tagsUpdatedAt = data.tagsUpdatedAt; fixTagColors(); changed = true; }
   else if (S.tagsUpdatedAt > (data.tagsUpdatedAt || 0)) localNewer = true;
   const ri = data.inbox || {};
   if ((ri.updatedAt || 0) > S.inbox.updatedAt){ S.inbox = Object.assign({}, S.inbox, ri); changed = true; }
@@ -1109,6 +1219,7 @@ function setPush(patch){ Object.assign(S.push, patch, { updatedAt: Date.now() })
    ntfy.sh keeps messages for 12 hours, which the background job covers. */
 const inboxReady = () => !IN_ARTIFACT && S.inbox.enabled && !!S.inbox.topic;
 const inboxAddress = () => NTFY + S.inbox.topic;
+const emailAddress = () => `ntfy-${S.inbox.topic}@ntfy.sh`;
 let inboxBusy = false, inboxLast = 0;
 async function pullInbox(force){
   if (!inboxReady() || inboxBusy || (!force && Date.now() - inboxLast < 30e3)) return 0;
@@ -1122,7 +1233,9 @@ async function pullInbox(force){
       if (m.event !== 'message') continue;
       const id = 'nx' + m.id;
       if (S.notes.has(id)) continue;
-      const raw = [m.title, m.message].filter(x => x && x !== 'triggered').join('\n').trim();
+      let longBody = null;
+      if (m.attachment && /^text\/plain/.test(m.attachment.type || '') && (m.attachment.size || 0) < 2e5){ try { longBody = await (await fetch(m.attachment.url)).text(); } catch(e){} }
+      const { raw, via } = inboxText(m, longBody);
       let images = [];
       if (m.attachment && /^image\//.test(m.attachment.type || '') && !IN_ARTIFACT){
         try { const blob = await (await fetch(m.attachment.url)).blob(); let d = await compress(blob, 2048, .85); if (d.length > 1.6e6) d = await compress(blob, 1600, .8); images = [await storePhoto(d)]; } catch(e){}
@@ -1132,20 +1245,24 @@ async function pullInbox(force){
       const tags = [...pc.tagIds];
       for (const name of pc.newTags){ const t = ensureTag(name); if (t && !tags.includes(t.id)) tags.push(t.id); }
       const at = (m.time || Date.now() / 1000) * 1000;
-      putNote({ id, kind: pc.kind, text: pc.text, items: pc.items, tags, pinned:false, archived:false, createdAt: at, updatedAt: at, remind: pc.remind, images, via:'iphone' });
+      putNote({ id, kind: pc.kind, text: pc.text, items: pc.items, tags, pinned:false, archived:false, createdAt: at, updatedAt: at, remind: pc.remind, images, via });
       added++;
     }
   } catch(e){ /* offline: try again later */ }
   finally { inboxBusy = false; }
-  if (added){ render(); toast(added === 1 ? 'Saved 1 note from your iPhone' : `Saved ${added} notes from your iPhone`); }
+  if (added){ render(); toast(added === 1 ? 'Saved 1 note from your inbox' : `Saved ${added} notes from your inbox`); }
   return added;
 }
 function inboxSectionHTML(){
   if (IN_ARTIFACT) return '';
-  if (!S.inbox.enabled) return `<div class="set-sec"><h3>Save from iPhone</h3>
-    <p class="small">Send anything to Catchall from your iPhone's Share sheet, or by saying “Hey Siri, Save to Catchall”, without opening the app. It works like texting MindChuk, and it's free.</p>
+  if (!S.inbox.enabled) return `<div class="set-sec"><h3>Save by email or from iPhone</h3>
+    <p class="small">Send anything to Catchall by email from any account, from your iPhone's Share sheet, or by saying “Hey Siri, Save to Catchall”, without opening the app. It works like texting MindChuk, and it's free.</p>
     <div class="row"><button type="button" class="btn shell" data-set="inboxon">${icon('send')}Turn on</button></div></div>`;
-  return `<div class="set-sec"><h3>Save from iPhone · on</h3>
+  return `<div class="set-sec"><h3>Save by email · on</h3>
+    <p class="small">Email this address from any account. The subject becomes the note's first line and the message the rest; signatures and quoted replies are left out. “remind me …”, #tags and “- ” lists work here too.</p>
+    <div class="row"><code id="emailAddr" style="font:13px var(--font-type);background:var(--surface-2);padding:4px 8px;border-radius:6px;user-select:all;overflow-wrap:anywhere">${esc(emailAddress())}</code><button type="button" class="btn" data-set="emailcopy">Copy</button><a class="btn" href="mailto:${esc(emailAddress())}?subject=${encodeURIComponent('Test from email')}">Write an email</a></div>
+    <p class="small">Tip: save it as a contact named “Catchall” so you can just type Catchall in the To field.</p></div>
+  <div class="set-sec"><h3>Save from iPhone · on</h3>
     <ol class="small" style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px">
       <li>On your iPhone, copy this inbox address:<br><span class="row" style="margin-top:4px"><code id="inboxAddr" style="font:13px var(--font-type);background:var(--surface-2);padding:4px 8px;border-radius:6px;user-select:all;overflow-wrap:anywhere">${esc(inboxAddress())}</code><button type="button" class="btn" data-set="inboxcopy">Copy</button></span></li>
       <li>Open the <b>Shortcuts</b> app, tap <b>+</b>, and name the new shortcut <b>Save to Catchall</b>.</li>
@@ -1186,6 +1303,26 @@ function ensureTag(name){
 }
 
 /* ---------- parsing ---------- */
+/* An inbox message becomes the text to parse. The iPhone shortcut sends plain text; an email arrives
+   with its subject as the title and its body as the message. Mail apps' extras are trimmed: quoted
+   replies, the "-- " signature, "Sent from my iPhone" and forwarded-message headers. */
+function inboxText(m, longBody){
+  const subject = String(m.title || '').trim(), title = subject.replace(/^((re|fwd?|aw|wg)\s*:\s*)+/i, '');
+  let body = longBody != null ? String(longBody) : String(m.message || '');
+  if (body === 'triggered' || (longBody == null && m.attachment && /^You received a file/i.test(body))) body = longBody || '';
+  const out = [];
+  for (const l of body.replace(/\r/g, '').split('\n')){
+    const t = l.trim();
+    if (/^-- ?$/.test(l) || /^On .{4,200} wrote:$/.test(t) || /^-{2,} ?(Original|Forwarded) Message/i.test(t) || /^Begin forwarded message:?$/i.test(t) || /^(Sent from my |Get Outlook for )/i.test(t)) break;
+    if (/^>/.test(t)) continue;
+    out.push(l.replace(/\s+$/, ''));
+  }
+  body = out.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+  const firstLine = body.split('\n')[0].trim();
+  const raw = (title && title.toLowerCase() !== firstLine.toLowerCase() ? title + (body ? '\n' + body : '') : body || title).trim();
+  return { raw, via: subject ? 'email' : 'iphone' };
+}
+
 const WDRE = '(sunday|sun|monday|mon|tuesday|tues|tue|wednesday|weds|wed|thursday|thurs|thur|thu|friday|fri|saturday|sat)';
 const MONTHS = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
 const wdIndex = w => ['sun','mon','tue','wed','thu','fri','sat'].indexOf(w.slice(0,3).toLowerCase());
@@ -1399,7 +1536,7 @@ function tagSelect(n){
     ${S.tags.map(t => `<option value="${t.id}" ${t.id === cur ? 'selected' : ''}>${esc(t.name)}</option>`).join('')}
     <option value="__new">+ New tag…</option></select></label>`;
 }
-function applyTag(id, tid){
+function applyTag(id, tid, quiet){
   const n = S.notes.get(id); if (!n) return;
   if (tid === '__new'){ render(); openNewTag(tag => applyTag(id, tag.id)); return; }
   const cur = mainTag(n);
@@ -1413,6 +1550,7 @@ function applyTag(id, tid){
     if (b.length < 5){ b.push(t.id); commitBoard(); msg += ', and added it as a column on the Board'; }
     else msg += '. The Board already has 5 columns, so pick it there to show it';
   }
+  if (quiet) return msg + '.';
   render(); toast(msg + '.');
 }
 function noteCard(n, board, moves = ''){
@@ -1461,7 +1599,7 @@ function filtersHTML(){
   const chip = (id, label, n, color) => `<button type="button" class="chip" data-tagf="${esc(id)}" aria-pressed="${u.tag === id}" ${color ? `style="--c:${esc(color)}"` : ''}>${color ? '<span class="dot"></span>' : ''}${esc(label)} <span class="n">${n}</span></button>`;
   const tog = (k, ic, label) => `<button type="button" class="ftog" data-tog="${k}" aria-pressed="${!!u[k]}">${icon(ic)}${label}</button>`;
   return `<div class="tagbar" role="toolbar" aria-label="Tags">
-      ${chip('all', 'All', all.length)}${chip('pinned', 'Pinned', count(n => n.pinned))}
+      ${chip('all', 'All', all.length)}${count(n => n.pinned) || u.tag === 'pinned' ? chip('pinned', 'Pinned', count(n => n.pinned)) : ''}
       ${S.tags.filter(t => !t.hidden || u.tag === t.id).map(t => chip(t.id, t.name, count(n => (n.tags || []).includes(t.id)), t.color)).join('')}
       ${S.tags.length && (count(n => !(n.tags || []).length) || u.tag === 'untagged') ? chip('untagged', 'No tag', count(n => !(n.tags || []).length)) : ''}
       <button type="button" class="chip add" data-act="newtag">${icon('plus')}New tag</button>
@@ -1472,9 +1610,12 @@ function filtersHTML(){
       ${tog('link','link','Links')}${tog('image','image','Images')}${tog('list','list','Lists')}${tog('archived','archive','Archived')}
       <label class="sr" for="range">Date range</label>
       <select id="range" class="fsel">${[['all','All time'],['7','Last 7 days'],['30','Last 30 days'],['90','Last 90 days']].map(([v, l]) => `<option value="${v}" ${u.range === v ? 'selected' : ''}>${l}</option>`).join('')}</select>
+    </div>
+    <div class="arrange">
       <label class="sr" for="order">Order</label>
       <select id="order" class="fsel"><option value="new" ${S.settings.order !== 'old' ? 'selected' : ''}>Newest first</option><option value="old" ${S.settings.order === 'old' ? 'selected' : ''}>Oldest first</option></select>
       <div class="seg layout-seg" role="group" aria-label="Layout"><button type="button" data-layout="list" aria-pressed="${S.settings.layout !== 'grid'}">${icon('feed')}List</button><button type="button" data-layout="grid" aria-pressed="${S.settings.layout === 'grid'}">${icon('grid')}Grid</button></div>
+      <button type="button" class="btn sel-phone" data-act="selmode" aria-pressed="${!!S.ui.selecting}">${icon('check')}${S.ui.selecting ? 'Done selecting' : 'Select several notes'}</button>
     </div>`;
 }
 const TRIES = [
@@ -1523,10 +1664,13 @@ function remCells(ns){
 }
 /* Select several notes: tap cards to pick them, then tag, pin, archive or delete them together. */
 function selectBarHTML(){
-  const k = S.ui.sel.size;
+  const k = S.ui.sel.size, picked = [...S.ui.sel].map(id => S.notes.get(id)).filter(Boolean);
+  const unpin = k && picked.every(n => n.pinned), shown = (S.ui.shownIds || []).length;
+  const allOn = shown && k >= shown;
   return `<div class="selbar" role="region" aria-label="Selected notes"><span class="sel-n"><b>${k}</b> selected</span>
+    <button type="button" class="act" data-act="selall">${icon('check')}<span>${allOn ? 'Select none' : 'Select all'}</span></button>
     <label class="act tagsel"><span class="sr">Tag the selected notes</span>${icon('tag')}<select data-bulktag="1" ${k ? '' : 'disabled'}><option value="">Tag…</option>${S.tags.map(t => `<option value="${t.id}">${esc(t.name)}</option>`).join('')}<option value="__none">No tag</option></select></label>
-    <button type="button" class="act" data-act="bulk" data-do="pin" ${k ? '' : 'disabled'}>${icon('pin')}<span>Pin</span></button>
+    <button type="button" class="act" data-act="bulk" data-do="${unpin ? 'unpin' : 'pin'}" ${k ? '' : 'disabled'}>${icon('pin')}<span>${unpin ? 'Unpin' : 'Pin'}</span></button>
     <button type="button" class="act" data-act="bulk" data-do="archive" ${k ? '' : 'disabled'}>${icon('archive')}<span>Archive</span></button>
     <button type="button" class="act del" data-act="bulk" data-do="delete" ${k ? '' : 'disabled'}>${icon('trash')}<span>Delete</span></button>
     <button type="button" class="btn" data-act="selmode">Done</button></div>`;
@@ -1537,54 +1681,84 @@ function bulkAction(what, tid){
   const undo = () => { before.forEach(n => putNote(clone(n))); render(); };
   for (const id of ids){
     const n = S.notes.get(id);
-    if (what === 'pin') putNote({ ...n, pinned: true });
+    if (what === 'pin' || what === 'unpin') putNote({ ...n, pinned: what === 'pin' });
     else if (what === 'archive') putNote({ ...n, archived: true });
     else if (what === 'delete') delNote(id);
     else if (what === 'tag'){ if (!tid) continue; const cur = mainTag(n); let tags = (n.tags || []).filter(x => x !== cur); if (tid === '__none') tags = []; else if (!tags.includes(tid)) tags.unshift(tid); putNote({ ...n, tags }); }
   }
-  const word = { pin:'Pinned', archive:'Archived', delete:'Deleted', tag: tid && tid !== '__none' ? `Tagged “${tagById(tid)?.name}”` : 'Removed tags from' }[what];
-  S.ui.sel = new Set(); if (what !== 'tag' && what !== 'pin') S.ui.selecting = false;
+  const word = { unpin:'Unpinned', pin:'Pinned', archive:'Archived', delete:'Deleted', tag: tid && tid !== '__none' ? `Tagged “${tagById(tid)?.name}”` : 'Removed tags from' }[what];
+  S.ui.sel = new Set(); if (what !== 'tag' && what !== 'pin' && what !== 'unpin') S.ui.selecting = false;
   render(); toast(`${word} ${ids.length} ${plural(ids.length, 'note', 'notes')}`, { undoFn: undo });
 }
-/* Sort: one note at a time, oldest first, to file under a tag, keep, pin, archive or delete. Swipe on a phone. */
+/* Sort: one note at a time, oldest first, to file under a tag, keep as it is, pin, archive or delete.
+   Every choice stamps the note with sortedAt (synced), so a sorted note stays out of the queue on every
+   device. "Start over" on this device only looks at notes sorted after it. Swipe on a phone; keys on a Mac. */
+const SORT_WORDS = { filed:['filed','filed'], keep:['kept as is','kept as is'], pin:['pinned','pinned'], archive:['archived','archived'], delete:['deleted','deleted'] };
 function sortQueue(){
-  const seen = S.ui.sortSeen || (S.ui.sortSeen = new Set());
-  const only = S.ui.sortOnly !== 'all';
-  return liveNotes().filter(n => !n.archived && !seen.has(n.id) && (!only || !(n.tags || []).length)).sort((a, b) => a.createdAt - b.createdAt);
+  const from = S.settings.sortFrom || 0, only = S.ui.sortOnly !== 'all';
+  return liveNotes().filter(n => !n.archived && !((n.sortedAt || 0) > from) && (!only || !(n.tags || []).length)).sort((a, b) => a.createdAt - b.createdAt);
 }
-function sortNext(id, what){
+function sortNext(id, what, tid){
   const n = S.notes.get(id); if (!n) return;
-  const before = clone(n);
-  (S.ui.sortSeen || (S.ui.sortSeen = new Set())).add(id); S.ui.sortDone = (S.ui.sortDone || 0) + 1;
-  if (what === 'pin') putNote({ ...n, pinned: true });
-  if (what === 'archive') putNote({ ...n, archived: true });
+  const before = clone(n), now = Date.now();
+  const stats = S.ui.sortStats || (S.ui.sortStats = {}), hist = S.ui.sortHist || (S.ui.sortHist = []);
   if (what === 'delete') delNote(id);
+  else {
+    const m = { ...n, sortedAt: now };
+    if (what === 'pin') m.pinned = true;
+    if (what === 'archive') m.archived = true;
+    putNote(m);
+    if (what === 'filed') var filedMsg = applyTag(id, tid, true);
+  }
+  stats[what] = (stats[what] || 0) + 1; hist.push({ before, what });
   render();
-  const msg = { keep:'Kept', pin:'Pinned', archive:'Archived', delete:'Deleted', filed:'Filed' }[what];
-  toast(msg, { undoFn: () => { S.ui.sortSeen.delete(id); S.ui.sortDone--; putNote(clone(before)); render(); } });
+  const msg = what === 'filed' ? (filedMsg || 'Filed.').replace(/^Tagged/, 'Filed under') : { keep:'Kept as is', pin:'Pinned', archive:'Archived', delete:'Deleted' }[what];
+  toast(msg, { undoFn: sortUndo, undoLabel: hist.length > 1 ? 'Undo last' : 'Undo' });
 }
+/* Undo walks back one choice at a time, so a second swipe never strands the first one's Undo. */
+function sortUndo(){
+  const h = (S.ui.sortHist || []).pop(); if (!h) return;
+  S.ui.sortStats[h.what]--; putNote(clone(h.before)); render();
+  if (S.ui.sortHist.length) toast(`Put back “${noteTitle(h.before)}”`, { undoFn: sortUndo, undoLabel: 'Undo the one before' });
+}
+const noteTitle = n => { const t = (n.text || (n.items || []).map(i => i.t).join(', ') || 'Photo').split('\n')[0]; return t.length > 40 ? t.slice(0, 39) + '…' : t; };
+function sortTally(){
+  const st = S.ui.sortStats || {};
+  return Object.keys(SORT_WORDS).filter(k => st[k] > 0).map(k => `<span class="tb-cell"><b>${st[k]}</b> ${SORT_WORDS[k][0]}</span>`).join('');
+}
+const sortTags = () => S.tags.filter(t => !t.hidden);
+const keyHint = k => coarse ? '' : `<kbd>${k}</kbd>`;
 function renderSort(main){
-  const q = sortQueue(), n = q[0];
+  const q = sortQueue(), n = q[0], st = S.ui.sortStats || {}, done = Object.values(st).reduce((a, b) => a + b, 0);
   const ctl = `<div class="seg" role="group" aria-label="Which notes"><button type="button" data-sortonly="untagged" aria-pressed="${S.ui.sortOnly !== 'all'}">No tag yet</button><button type="button" data-sortonly="all" aria-pressed="${S.ui.sortOnly === 'all'}">Everything</button></div>`;
-  const head = pageHead('Sort', [[q.length, 'to go'], S.ui.sortDone ? [S.ui.sortDone, 'sorted'] : null], ctl);
+  const head = pageHead('Sort', [[q.length, 'to go'], done ? [done, 'sorted'] : null], ctl);
+  const intro = `<p class="small sort-intro">One note at a time, oldest first. File it under a tag, or keep it as it is, pin, archive or delete it. Sorted notes leave this list on all your devices.</p>`;
   if (!n){
-    main.innerHTML = `<div class="col sortview">${head}<div class="empty sorted"><h3>All sorted.</h3><p>${S.ui.sortDone ? `You sorted ${S.ui.sortDone} ${plural(S.ui.sortDone, 'note', 'notes')}. ` : ''}Nothing ${S.ui.sortOnly === 'all' ? '' : 'untagged '}is waiting.</p><div class="row"><button type="button" class="btn" data-view="feed">${icon('feed')}Back to Feed</button>${S.ui.sortDone ? `<button type="button" class="btn" data-act="sortreset">Start over</button>` : ''}</div></div></div>`;
+    const scope = S.ui.sortOnly === 'all' ? '' : 'untagged ';
+    main.innerHTML = `<div class="col sortview">${head}<section class="sheet sort-end">
+      <header class="tblock"><h2>${done ? 'All sorted' : `No ${scope}notes to sort`}</h2>${sortTally()}</header>
+      <p>${done ? `That's every ${scope}note. Nothing ${scope}is waiting.` : `Every ${scope}note has been sorted. New notes will show up here.`}</p>
+      <div class="row"><button type="button" class="btn" data-view="feed">${icon('feed')}Back to Feed</button>${S.ui.sortOnly !== 'all' ? `<button type="button" class="btn" data-sortonly="all">Sort everything</button>` : ''}<button type="button" class="btn" data-act="sortreset">Sort them all again</button></div></section></div>`;
     return;
   }
   const leftWord = S.settings.swipeLeft === 'delete' ? 'delete' : 'archive';
-  main.innerHTML = `<div class="col sortview">${head}
-    <article class="note sortcard ${noteHex(n.color) ? 'colored' : ''}" data-sortcard="${n.id}" ${noteHex(n.color) ? `style="--nc:${noteHex(n.color)}"` : ''}>
+  const tags = sortTags();
+  main.innerHTML = `<div class="col sortview">${head}${done ? '' : intro}
+    <article class="note sortcard ${noteHex(n.color) ? 'colored' : ''}" data-sortcard="${n.id}" data-left="${leftWord}" ${noteHex(n.color) ? `style="--nc:${noteHex(n.color)}"` : ''}>
       ${noteBody(n)}
       <div class="n-band"><div class="n-meta"><time>${esc(fDay(n.createdAt))}, ${esc(fTime(n.createdAt))}</time>${tagChips(n)}${remPill(n)}</div></div>
+      <span class="swipe-word keep" aria-hidden="true">Keep</span><span class="swipe-word left" aria-hidden="true">${leftWord === 'delete' ? 'Delete' : 'Archive'}</span>
     </article>
-    <div class="sort-file"><span class="set-lbl" style="width:auto">File under</span>${S.tags.filter(t => !t.hidden).map(t => `<button type="button" class="chip" style="--c:${esc(t.color)}" data-sorttag="${t.id}" data-sortid="${n.id}"><span class="dot"></span>${esc(t.name)}</button>`).join('')}<button type="button" class="chip add" data-act="newtag">${icon('plus')}New tag</button></div>
-    <div class="sort-acts">
-      <button type="button" class="btn" data-act="sortkeep" data-id="${n.id}">${icon('right')}Keep</button>
-      <button type="button" class="btn" data-act="sortpin" data-id="${n.id}">${icon('pin')}Pin</button>
-      <button type="button" class="btn" data-act="sortarch" data-id="${n.id}">${icon('archive')}Archive</button>
-      <button type="button" class="btn quiet-del" data-act="sortdel" data-id="${n.id}">${icon('trash')}Delete</button>
-    </div>
-    <p class="small sort-hint">On a phone, swipe the card right to keep it or left to ${leftWord} it.</p></div>`;
+    <div class="sort-dock">
+      <div class="sort-file"><span class="set-lbl" style="width:auto">File under</span>${tags.map((t, i) => `<button type="button" class="chip" style="--c:${esc(t.color)}" data-sorttag="${t.id}" data-sortid="${n.id}"><span class="dot"></span>${esc(t.name)}${i < 9 ? keyHint(i + 1) : ''}</button>`).join('')}<button type="button" class="chip add" data-act="newtag">${icon('plus')}New tag</button></div>
+      <div class="sort-acts">
+        <button type="button" class="btn" data-act="sortkeep" data-id="${n.id}">${icon('right')}Keep${keyHint('K')}</button>
+        <button type="button" class="btn" data-act="sortpin" data-id="${n.id}">${icon('pin')}Pin${keyHint('P')}</button>
+        <button type="button" class="btn" data-act="sortarch" data-id="${n.id}">${icon('archive')}Archive${keyHint('A')}</button>
+        <button type="button" class="btn quiet-del" data-act="sortdel" data-id="${n.id}">${icon('trash')}Delete${keyHint('⌫')}</button>
+      </div>
+      <p class="small sort-hint">${coarse ? `Swipe the card right to keep it as it is, or left to ${leftWord} it.` : `Keep leaves the note as it is. Press Z to undo.`}</p>
+    </div></div>`;
 }
 function renderFeed(main){
   const list = liveNotes().filter(matches).sort(S.settings.order === 'old' ? (a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) || a.createdAt - b.createdAt : byNewest);
@@ -1592,7 +1766,7 @@ function renderFeed(main){
   if (!liveNotes().length) body = emptyHTML();
   else if (!list.length) body = `<p class="small" style="text-align:center;padding:24px 0">No notes match. <button type="button" class="btn" data-act="clearf">Clear filters</button></p>`;
   else {
-    const shown = list.slice(0, S.ui.limit);
+    const shown = list.slice(0, S.ui.limit); S.ui.shownIds = shown.map(n => n.id);
     const pinned = shown.filter(n => n.pinned), rest = shown.filter(n => !n.pinned);
     if (pinned.length) body += `<section class="day">${titleBlock('Pinned', pinned)}${pinned.map(n => noteCard(n)).join('')}</section>`;
     const days = [];
@@ -1604,7 +1778,7 @@ function renderFeed(main){
   const head = pageHead(S.ui.archived ? 'Archive' : 'Feed', [[list.length, plural(list.length, 'note', 'notes') + (list.length !== live.length && !S.ui.archived ? ' shown' : '')], ...remCells(live)],
     list.length ? `<button type="button" class="btn" data-act="selmode" aria-pressed="${!!S.ui.selecting}">${icon('check')}${S.ui.selecting ? 'Done selecting' : 'Select'}</button>` : '');
   // desk layout: tags and filters in a rail beside the feed on wide screens, stacked under capture on phones
-  main.innerHTML = `<div class="desk"><div class="desk-head">${head}</div><div class="desk-cap">${composerHTML()}</div><aside class="rail" aria-label="Tags and filters">${filtersHTML()}</aside><div class="col desk-feed ${S.settings.layout === 'grid' ? 'grid' : ''} ${S.ui.selecting ? 'selecting' : ''}" id="feed">${body}</div></div>${S.ui.selecting ? selectBarHTML() : ''}`;
+  main.innerHTML = `<div class="desk"><div class="desk-head">${head}</div><div class="desk-cap">${composerHTML()}</div>${liveNotes().length ? `<aside class="rail" aria-label="Tags and filters">${filtersHTML()}</aside>` : ''}<div class="col desk-feed ${S.settings.layout === 'grid' ? 'grid' : ''} ${S.ui.selecting ? 'selecting' : ''}" id="feed">${body}</div></div>${S.ui.selecting ? selectBarHTML() : ''}`;
 }
 function renderBoard(main){
   const cols = S.settings.boardTags.map(tagById).filter(Boolean);
@@ -1622,7 +1796,7 @@ function renderBoard(main){
     </section>`;
   };
   const onBoard = notes.filter(n => cols.some(t => (n.tags || []).includes(t.id))).length;
-  main.innerHTML = `${pageHead('Board', [[cols.length, plural(cols.length, 'column', 'columns')], [onBoard, plural(onBoard, 'note', 'notes')]])}<div class="board-head">${picker}</div>
+  main.innerHTML = `${pageHead('Board', [[cols.length, plural(cols.length, 'column', 'columns')], [onBoard, plural(onBoard, 'note', 'notes') + ' on the board']])}<div class="board-head">${picker}</div>
     <div class="board">${cols.map(colHTML).join('')}<section class="bcol archive" data-col="__archive">${icon('archive')}<span>Drop a card here to archive it</span></section></div>`;
 }
 function renderCal(main){
@@ -1715,6 +1889,13 @@ function autosize(){ const c = $('#cap'); if (!c) return; c.style.height = 'auto
 function updatePreview(){
   const c = $('#cap'), p = $('#preview'); if (!c || !p) return;
   const raw = c.value;
+  $('#composer')?.classList.toggle('listing', !!S.ui.listMode);
+  const sb = $('#saveBtn'); if (sb) sb.lastChild.textContent = S.ui.listMode ? 'Save list' : 'Save';
+  if (S.ui.listMode){
+    const k = parseCapture(raw).items.filter(i => i.t.trim()).length;
+    p.innerHTML = `<span class="pv listmode">${icon('list')}List · ${k} ${plural(k, 'item', 'items')}</span><span class="hint">The first line is the title. ${coarse ? 'Return' : 'Enter'} adds an item.</span><button type="button" class="linkbtn" data-act="exitlist">Stop the list</button>`;
+    return;
+  }
   if (!raw.trim()){
     p.innerHTML = `<span class="hint"><span class="kbd-hint"><kbd>Enter</kbd> saves · <kbd>Shift</kbd>+<kbd>Enter</kbd> new line · </span><button type="button" class="linkbtn" data-act="mklist">${icon('list')}Make a list</button> <button type="button" class="linkbtn" data-act="shortcuts">${icon('bolt')}Typing shortcuts</button></span>`;
     return;
@@ -2029,7 +2210,15 @@ async function importFile(file){
 document.addEventListener('click', e => {
   if (S.ui.selecting && S.settings.view === 'feed'){
     const card = e.target.closest('#feed .note[data-id]');
-    if (card){ e.preventDefault(); const id = card.dataset.id; S.ui.sel.has(id) ? S.ui.sel.delete(id) : S.ui.sel.add(id); render(); return; }
+    if (card){
+      e.preventDefault(); const id = card.dataset.id;
+      // Shift-click picks every note between the last one picked and this one.
+      if (e.shiftKey && S.ui.selLast && S.ui.selLast !== id){
+        const ids = [...document.querySelectorAll('#feed .note[data-id]')].map(x => x.dataset.id), a = ids.indexOf(S.ui.selLast), b = ids.indexOf(id);
+        if (a > -1 && b > -1) ids.slice(Math.min(a, b), Math.max(a, b) + 1).forEach(x => S.ui.sel.add(x));
+      } else S.ui.sel.has(id) ? S.ui.sel.delete(id) : S.ui.sel.add(id);
+      S.ui.selLast = id; render(); return;
+    }
   }
   // On phones a tap anywhere on a note sheet shows that note's actions (and hides the others').
   if (matchMedia('(max-width:640px)').matches && !e.target.closest('button, a, select, input, label, textarea')){
@@ -2042,7 +2231,7 @@ document.addEventListener('click', e => {
   if (d.view){ S.settings.view = d.view; S.ui.selecting = false; saveSettings(); render(); window.scrollTo(0, 0); return; }
   if (d.layout){ S.settings.layout = d.layout; saveSettings(); render(); return; }
   if (d.sortonly){ S.ui.sortOnly = d.sortonly; render(); return; }
-  if (d.sorttag){ applyTag(d.sortid, d.sorttag); sortNext(d.sortid, 'filed'); return; }
+  if (d.sorttag){ sortNext(d.sortid, 'filed', d.sorttag); return; }
   if (d.tagf){ S.ui.tag = d.tagf; S.ui.limit = 60; render(); return; }
   if (d.tog){ S.ui[d.tog] = !S.ui[d.tog]; render(); return; }
   if (d.try != null){ if ($('#setDlg').open) $('#setDlg').close(); const c = $('#cap'); if (!c) return; c.value = d.try; autosize(); updatePreview(); c.focus(); return; }
@@ -2067,14 +2256,16 @@ document.addEventListener('click', e => {
     case 'dicthintx': S.ui.dictHint = false; $('.dict-hint')?.remove(); break;
     case 'more': S.ui.limit += 60; render(); break;
     case 'shortcuts': openShortcuts(); break;
-    case 'mklist': { const c = $('#cap'); if (!c) break; S.ui.listMode = true; if (!c.value.trim()) c.value = 'List title\n- '; else if (!/\n- $/.test(c.value)) c.value = c.value.replace(/\s*$/, '') + '\n- '; c.focus(); if (c.value.startsWith('List title')) c.setSelectionRange(0, 10); else c.setSelectionRange(c.value.length, c.value.length); autosize(); updatePreview(); toast('Enter adds the next item. Tap Save when the list is done.'); break; }
-    case 'selmode': S.ui.selecting = !S.ui.selecting; S.ui.sel = new Set(); render(); break;
+    case 'mklist': { const c = $('#cap'); if (!c) break; S.ui.listMode = true; if (!c.value.trim()) c.value = 'List title\n- '; else if (!/\n- $/.test(c.value)) c.value = c.value.replace(/\s*$/, '') + '\n- '; c.focus(); if (c.value.startsWith('List title')) c.setSelectionRange(0, 10); else c.setSelectionRange(c.value.length, c.value.length); autosize(); updatePreview(); break; }
+    case 'exitlist': { const c = $('#cap'); S.ui.listMode = false; if (c){ c.value = c.value.replace(/\n- \s*$/, ''); c.focus(); autosize(); } updatePreview(); break; }
+    case 'selmode': S.ui.selecting = !S.ui.selecting; S.ui.sel = new Set(); S.ui.selLast = null; render(); break;
+    case 'selall': { const ids = S.ui.shownIds || []; const all = ids.every(x => S.ui.sel.has(x)); S.ui.sel = all ? new Set() : new Set(ids); render(); break; }
     case 'bulk': bulkAction(d.do); break;
     case 'sortkeep': sortNext(id, 'keep'); break;
     case 'sortpin': sortNext(id, 'pin'); break;
     case 'sortarch': sortNext(id, 'archive'); break;
     case 'sortdel': sortNext(id, 'delete'); break;
-    case 'sortreset': S.ui.sortSeen = new Set(); S.ui.sortDone = 0; render(); break;
+    case 'sortreset': S.settings.sortFrom = Date.now(); saveSettings(); S.ui.sortStats = {}; S.ui.sortHist = []; render(); break;
     case 'tagup': case 'tagdown': break;
     case 'openacts': S.ui.openNote = S.ui.openNote === id ? null : id; render(); break;
     case 'filters': S.ui.filtersOpen = !S.ui.filtersOpen; render(); break;
@@ -2186,6 +2377,10 @@ function setAction(a, t){
     navigator.clipboard?.writeText(inboxAddress()).then(() => toast('Inbox address copied'), () => { const r = document.createRange(); r.selectNodeContents($('#inboxAddr')); getSelection().removeAllRanges(); getSelection().addRange(r); });
     return;
   }
+  if (a === 'emailcopy'){
+    navigator.clipboard?.writeText(emailAddress()).then(() => toast('Email address copied'), () => { const r = document.createRange(); r.selectNodeContents($('#emailAddr')); getSelection().removeAllRanges(); getSelection().addRange(r); });
+    return;
+  }
   if (a === 'inboxqr'){ showQR(inboxAddress(), 'inboxQr', 'Scan this with the iPhone camera, copy the address, then paste it when the shortcut asks.'); return; }
   if (a === 'inboxtest'){
     t.disabled = true;
@@ -2282,6 +2477,17 @@ document.addEventListener('keydown', e => {
   if (t.id === 'cap' && e.key === 'Escape'){ t.blur(); return; }
   if (t.id === 'ntName' && e.key === 'Enter'){ e.preventDefault(); setAction('createtag'); return; }
   if (/INPUT|TEXTAREA|SELECT/.test(t.tagName) || document.querySelector('dialog[open]')) return;
+  if (e.key === 'Escape' && S.ui.selecting){ e.preventDefault(); S.ui.selecting = false; S.ui.sel = new Set(); render(); return; }
+  if ((e.metaKey || e.ctrlKey) && e.key === 'a' && S.ui.selecting){ e.preventDefault(); S.ui.sel = new Set(S.ui.shownIds || []); render(); return; }
+  if (S.settings.view === 'sort' && !e.metaKey && !e.ctrlKey && !e.altKey){
+    const card = $('[data-sortcard]'), id = card && card.dataset.sortcard, k = e.key.toLowerCase();
+    if (k === 'z' && (S.ui.sortHist || []).length){ e.preventDefault(); sortUndo(); return; }
+    if (id){
+      const tg = /^[1-9]$/.test(k) && sortTags()[+k - 1];
+      const what = tg ? 'filed' : { k:'keep', p:'pin', a:'archive', backspace:'delete', delete:'delete' }[k];
+      if (what){ e.preventDefault(); sortNext(id, what, tg && tg.id); return; }
+    }
+  }
   if (e.key === '/' && $('#q')){ e.preventDefault(); $('#q').focus(); }
   else if ((e.key === 'n' || e.key === 'c') && !e.metaKey && !e.ctrlKey && $('#cap')){ e.preventDefault(); $('#cap').focus(); }
 });
@@ -2386,7 +2592,7 @@ function dictate(){
 (() => {
   let sx = 0, sy = 0, card = null;
   document.addEventListener('touchstart', e => { card = e.target.closest('[data-sortcard]'); if (!card) return; sx = e.touches[0].clientX; sy = e.touches[0].clientY; card.style.transition = 'none'; }, { passive:true });
-  document.addEventListener('touchmove', e => { if (!card) return; const dx = e.touches[0].clientX - sx, dy = e.touches[0].clientY - sy; if (Math.abs(dy) > Math.abs(dx)) return; card.style.transform = `translateX(${dx}px) rotate(${dx / 40}deg)`; card.dataset.dir = dx > 40 ? 'keep' : dx < -40 ? 'left' : ''; }, { passive:true });
+  document.addEventListener('touchmove', e => { if (!card) return; const dx = e.touches[0].clientX - sx, dy = e.touches[0].clientY - sy; if (Math.abs(dy) > Math.abs(dx)) return; card.style.transform = `translateX(${dx}px)`; card.dataset.dir = dx > 40 ? 'keep' : dx < -40 ? 'left' : ''; }, { passive:true });
   document.addEventListener('touchend', e => {
     if (!card) return; const c = card; card = null; c.style.transition = '';
     const dx = (e.changedTouches[0]?.clientX || sx) - sx;

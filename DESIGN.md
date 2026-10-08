@@ -1,39 +1,39 @@
 ---
 name: Catchall
-description: A personal capture inbox drawn on an engineer's computation pad.
+description: A personal capture inbox kept in a linen dot-grid notebook.
 colors:
-  pad-green: "#eceae2"
-  pad-grid: "#e0ddd2"
+  linen: "#eceae2"
+  linen-dot: "#cdc7b6"
   sheet: "#fbfaf6"
   sheet-tint: "#f1eee6"
   graphite: "#2c312b"
   graphite-soft: "#5b6258"
   hairline: "#d8d4c8"
-  shell-green: "#4b6152"
-  shell-green-deep: "#3f5346"
+  sage-shell: "#4b6152"
+  sage-shell-deep: "#3f5346"
   shell-ink: "#f5f3ec"
   shell-ink-soft: "#dbe5d9"
-  rule-green: "#7d917f"
-  red-pencil: "#a85638"
-  red-pencil-ink: "#ffffff"
-  nonphoto-blue: "#3d6f7d"
-  nonphoto-wash: "#dbe9ed"
+  rule-sage: "#7d917f"
+  clay: "#a85638"
+  clay-ink: "#ffffff"
+  teal: "#376672"
+  teal-wash: "#dbe9ed"
   ok-green: "#4d7d52"
-  pad-green-dark: "#171a17"
-  pad-grid-dark: "#1f231f"
+  linen-dark: "#171a17"
+  linen-dot-dark: "#323830"
   sheet-dark: "#21251f"
   sheet-tint-dark: "#2a2f28"
   graphite-dark: "#e8e9e1"
   graphite-soft-dark: "#a8b1a5"
   hairline-dark: "#363c34"
-  shell-green-dark: "#2f3c32"
-  shell-green-deep-dark: "#26312a"
+  sage-shell-dark: "#2f3c32"
+  sage-shell-deep-dark: "#26312a"
   shell-ink-soft-dark: "#b3c2b4"
-  rule-green-dark: "#6f8572"
-  red-pencil-dark: "#e19478"
-  red-pencil-ink-dark: "#1d0f09"
-  nonphoto-blue-dark: "#8cc1cf"
-  nonphoto-wash-dark: "#1f3238"
+  rule-sage-dark: "#6f8572"
+  clay-dark: "#e19478"
+  clay-ink-dark: "#1d0f09"
+  teal-dark: "#8cc1cf"
+  teal-wash-dark: "#1f3238"
   ok-green-dark: "#93c49a"
   shell-ok: "#7bd88f"
   shell-alert: "#ff8a78"
@@ -125,8 +125,8 @@ spacing:
   grid: "20px"
 components:
   button-primary:
-    backgroundColor: "{colors.red-pencil}"
-    textColor: "{colors.red-pencil-ink}"
+    backgroundColor: "{colors.clay}"
+    textColor: "{colors.clay-ink}"
     typography: "{typography.action}"
     rounded: "{rounded.control}"
     padding: "7px 12px"
@@ -142,17 +142,17 @@ components:
     backgroundColor: "{colors.sheet-tint}"
     textColor: "{colors.graphite}"
   button-secondary-pressed:
-    backgroundColor: "{colors.nonphoto-wash}"
-    textColor: "{colors.nonphoto-blue}"
+    backgroundColor: "{colors.teal-wash}"
+    textColor: "{colors.teal}"
   button-danger:
     backgroundColor: "{colors.sheet}"
-    textColor: "{colors.red-pencil}"
+    textColor: "{colors.clay}"
     typography: "{typography.action}"
     rounded: "{rounded.control}"
     padding: "7px 10px"
   button-danger-hover:
-    backgroundColor: "{colors.red-pencil}"
-    textColor: "{colors.red-pencil-ink}"
+    backgroundColor: "{colors.clay}"
+    textColor: "{colors.clay-ink}"
   filter-chip:
     backgroundColor: "{colors.sheet}"
     textColor: "{colors.graphite}"
@@ -160,7 +160,7 @@ components:
     rounded: "{rounded.control}"
     padding: "7px 12px"
   filter-chip-active:
-    backgroundColor: "{colors.shell-green}"
+    backgroundColor: "{colors.sage-shell}"
     textColor: "{colors.shell-ink}"
   tag-chip:
     textColor: "{colors.graphite}"
@@ -173,8 +173,8 @@ components:
     rounded: "{rounded.block}"
     padding: "9px 14px"
   title-block-due:
-    backgroundColor: "{colors.red-pencil}"
-    textColor: "{colors.red-pencil-ink}"
+    backgroundColor: "{colors.clay}"
+    textColor: "{colors.clay-ink}"
   note-sheet:
     backgroundColor: "{colors.sheet}"
     textColor: "{colors.graphite}"
@@ -188,7 +188,7 @@ components:
     rounded: "{rounded.capture}"
     padding: "14px 14px 12px"
   shell-header:
-    backgroundColor: "{colors.shell-green}"
+    backgroundColor: "{colors.sage-shell}"
     textColor: "{colors.shell-ink}"
     padding: "10px 16px"
   view-tab:
@@ -200,75 +200,75 @@ components:
     backgroundColor: "{colors.sheet}"
     textColor: "{colors.graphite}"
   reminder-pill:
-    backgroundColor: "{colors.nonphoto-wash}"
+    backgroundColor: "{colors.teal-wash}"
     textColor: "{colors.graphite}"
     typography: "{typography.label}"
     rounded: "{rounded.tag}"
     padding: "4px 8px"
   reminder-pill-due:
-    backgroundColor: "{colors.red-pencil}"
-    textColor: "{colors.red-pencil-ink}"
+    backgroundColor: "{colors.clay}"
+    textColor: "{colors.clay-ink}"
 ---
 
 # Design System: Catchall
 
 ## Overview
 
-**Creative North Star: "The Engineer's Computation Pad"**
+**Creative North Star: "The Linen Notebook"**
 
-Catchall is drawn on the green-tinted, gridded pad a builder plans projects on. The desk is pad-green paper with a faint 20px grid ruled across the whole page. A deep pad-green band runs across the top as the shell. Notes are lighter loose sheets resting on the pad, and every group of them (a day in the Feed, the Pinned sheet, a calendar day, a Reminders section, a Board column) opens with a ruled title block, the way a computation sheet carries its heading boxes. Ink is graphite. Two pencils are kept on the pad: red pencil for the three things that must stand out (Save, Delete, anything due), and non-photo blue for pins, selection, focus and highlights.
+Catchall is kept in a builder's dot-grid notebook: warm linen paper with a soft dot every 20px, a sage cloth band across the top as the shell, and loose sheets of lighter paper resting on the page. Every group of notes (a day in the Feed, the Pinned sheet, a calendar day, a Reminders section, a Board column) opens with a ruled title block, the heading box carried over from the engineering pad this notebook grew out of. Ink is graphite. Two inks are kept beside it: clay for the three things that must stand out (Save, Delete, anything due), and teal for pins, selection, focus and highlights.
 
-The world is plain and workmanlike rather than cute. It turns away from both the sticky-note-on-cork convention and the grey notes app with a single accent. Density is moderate: sheets have 14px insets, a 12px gap between sheets, and comfortable 36px controls, with a compact setting that tightens to 8px and 10px. Labels are condensed engineering lettering (Barlow Semi Condensed), body text is Barlow, and every count and time is set in tabular figures so digits line up like a schedule.
+The world is calm, warm and workmanlike rather than cute. It turns away from both the sticky-note-on-cork convention and the cold grey notes app with a single accent. Density is moderate: sheets have 14px insets, a 12px gap between sheets, and comfortable 36px controls (44px on touch screens), with a compact setting that tightens to 8px and 10px. Labels are condensed engineering lettering (Barlow Semi Condensed), body text is Barlow, and every count and time is set in tabular figures so digits line up like a schedule.
 
-Light and dark both follow the device. Dark mode is the same pad at night: near-black green paper, a darker shell, and the pencils brightened to hold contrast (red #e19478, blue #8cc1cf).
+Light and dark both follow the device. Dark mode is the same notebook at night: near-black paper with a faint dot, a darker sage shell, and the two inks brightened to hold contrast (clay #e19478, teal #8cc1cf).
 
 **Key Characteristics:**
-- Pad-green ground with a 20px grid on the page background, never on the sheets.
-- Deep green shell header with labeled view tabs and a sync state.
-- Light sheets with one soft shadow and no outline; hairline green rules divide a sheet's body, meta and actions.
-- The ruled title block (1.5px rule-green border, 4px corners, count cells split by vertical rules) heads every group.
-- Red pencil only on Save, Delete and what's due; non-photo blue for pin, selection and focus.
+- Linen ground with a 20px dot grid on the page background, never on the sheets.
+- Sage shell header with labeled view tabs and a sync state.
+- Light sheets with one soft shadow and no outline; hairline rules divide a sheet's body, meta and actions.
+- The ruled title block (1.5px rule-sage border, 4px corners, count cells split by vertical rules) heads every group.
+- Clay only on Save, Delete and what's due; teal for pin, selection and focus.
 - Every action is a text-labeled button; icons only ever sit beside a word.
 - Tabular figures for every count, date and time.
 
 ## Colors
 
-Palette: **Linen & Sage** (chosen 2026-10-08 for a calmer, warmer feel): linen paper, a sage header, clay for Save, Delete and anything due, and dusty teal for pins, selection and focus. The token names below keep their original wording (pad green, red pencil, non-photo blue), but their values are the Linen & Sage colours.
-
-A two-pencil palette on green engineering paper: graphite ink, a sparing red, a sparing blue, and everything else in pad greens.
+Palette: **Linen & Sage** (chosen 2026-10-08 for a calmer, warmer feel). Graphite ink on linen paper, a sparing clay, a sparing teal, a sage shell, and warm neutrals for everything else. In the stylesheet the clay token is still named `--red` and the teal token `--blue`; the names are historical, the values are these.
 
 ### Primary
-- **Red Pencil** (#a85638 light, #e19478 dark): the Save button, Delete (outlined at rest, filled on hover), armed confirmations, the active Dictate mic, due reminder pills, the "due now" title-block cell, the overdue time in Reminders, the reminders badge on the view tab, alarm toasts, and the text caret. Ink on it is white (#ffffff) in light mode and near-black (#1d0f09) in dark.
+- **Clay** (#a85638 light, #e19478 dark): the Save button, Delete (outlined at rest, filled on hover), armed confirmations, the active Dictate mic, due reminder pills, the "due now" title-block cell, the overdue time in Reminders, the reminders badge on the view tab, alarm toasts, and the text caret. Ink on it is white (#ffffff) in light mode and near-black (#1d0f09) in dark.
 
 ### Secondary
-- **Non-Photo Blue** (#3d6f7d light, #8cc1cf dark): focus rings, pressed toggles (Pin, filter toggles), checked checkboxes, today's date in the calendar, the selected calendar cell, the pin flag, links, and the drop target outline on the Board.
-- **Non-Photo Wash** (#dbe9ed light, #1f3238 dark): the fill behind pressed toggles, pinned sheets (mixed 55% into the sheet), reminder pills that are not due, text selection, and the dictation hint.
+- **Teal** (#376672 light, #8cc1cf dark): focus rings, pressed toggles (Pin, filter toggles), checked checkboxes, today's date in the calendar, the selected calendar cell, the pin flag, links, and the drop target outline on the Board.
+- **Teal Wash** (#dbe9ed light, #1f3238 dark): the fill behind pressed toggles, pinned sheets (mixed 55% into the sheet), reminder pills that are not due, text selection, and the dictation hint.
 
 ### Tertiary
-- **Shell Green** (#4b6152): the header band and the active filter chip. **Shell Green Deep** (#3f5346) is the tab tray and the brand-mark tile inside the header. **Shell Ink** (#f5f3ec) and **Shell Ink Soft** (#dbe5d9) are the header's text and inactive tabs.
-- **Rule Green** (#7d917f light, #6f8572 dark): the ink of every title block and Board column rule, and the empty-state dashed border.
+- **Sage Shell** (#4b6152): the header band. **Sage Shell Deep** (#3f5346) is the tab tray and the brand-mark tile inside the header. **Shell Ink** (#f5f3ec) and **Shell Ink Soft** (#dbe5d9) are the header's text and inactive tabs.
+- **Rule Sage** (#7d917f light, #6f8572 dark): the ink of every title block and Board column rule, and the empty-state dashed border.
 - **OK Green** (#4d7d52): the synced state in Settings. In the header, the synced dot is a lighter green so it reads on the shell.
 
 ### Neutral
-- **Pad Green** (#eceae2): the page ground. **Pad Grid** (#e0ddd2): the 1px grid lines over it.
+- **Linen** (#eceae2): the page ground. **Linen Dot** (#cdc7b6 light, #323830 dark): the 1px dots of the 20px grid over it.
 - **Sheet** (#fbfaf6): notes, the capture box, reminder rows, calendar cells, dialogs, controls at rest. **Sheet Tint** (#f1eee6): hover fill, Board column paper, segmented-control tray, preview pills.
 - **Graphite** (#2c312b): all body ink. **Graphite Soft** (#5b6258): metadata, counts, placeholders, inactive labels.
 - **Hairline** (#d8d4c8): control borders and the rules inside a sheet.
 
-Note colors (nine, plus none) and tag colors come from a fixed user palette and tint a sheet by mixing 24% into Sheet. They are content color, not system color. The "no color" swatch is marked with a Graphite Soft slash, never red.
+Tag and note colors are content color, not system color, and both are muted earth tones chosen to sit on linen. None of them is a red, so clay never doubles as a category.
+- **Tag colors (11), in the order new tags take them:** Sage #5a8560, Slate #4f6b9a, Ochre #a87a1e, Plum #85507a, Moss #6f7f2e, Walnut #8f6748, Heather #7c6aa8, Pine #2f6b5a, Rose #b05a76, Fjord #4a7f9e, Stone #7a7468. Shown as a dot beside the tag's name; in dark mode the dot is lightened 28% toward white. Tags from the earlier saturated palette are mapped to the nearest earth tone on load.
+- **Note colors (nine, plus none):** Butter #e8c547, Apricot #e3955a, Rose #c9667f, Blush #d48aa0, Heather #8f7bbd, Slate #6f8bb8, Lake #5e9aa0, Sage #7ea576, Stone #a39d8f. They tint a sheet by mixing 24% into Sheet (17% in oklch in dark mode, so warm colors stay warm). The "no color" swatch is marked with a Graphite Soft slash, never clay.
 
 ### Utility
-- **Header signals:** **Shell OK** (#7bd88f) is the synced dot. **Shell Alert** (#ff8a78) and **Shell Alert Ink** (#ffd0c8) mark sync problems. **Shell Line** (white at 24%) outlines controls on the header band. These live only on the deep green shell.
-- **Scrim:** dark green at 55% (black at 62% in dark mode) behind dialogs.
+- **Header signals:** **Shell OK** (#7bd88f) is the synced dot. **Shell Alert** (#ff8a78) and **Shell Alert Ink** (#ffd0c8) mark sync problems. **Shell Line** (white at 24%) outlines controls on the header band. These live only on the sage shell.
+- **Scrim:** dark sage at 55% (black at 62% in dark mode) behind dialogs.
 - **Photo:** **Photo Ground** (#000) behind the image viewer. **Photo Scrim** (black at 65%) with **Photo Ink** (#fff) on the remove button over image thumbnails. Photos keep a neutral ground so their colors read true.
 - **Shadows:** every shadow is the shadow tint (`--sh-rgb`) at an opacity. No literal black or white shadows.
 
 Every color in the stylesheet is a token. Component rules reference tokens only.
 
 ### Named Rules
-**The Two Pencils Rule.** Red means act or attend: Save, Delete, due. Blue means where you are: pinned, selected, focused. Neither pencil is decoration, and neither stands in for the other.
+**The Two Inks Rule.** Clay means act or attend: Save, Delete, due. Teal means where you are: pinned, selected, focused, the chosen tag or filter. Neither ink is decoration, and neither stands in for the other.
 
-**The Paper Is Green Rule.** Grounds and structure are greens; the only near-white is the sheet. There is no grey in the system.
+**The Paper Is Linen Rule.** Grounds are warm linen and structure is sage; the only near-white is the sheet. Neutrals are warm (linen, stone, graphite), never a cool grey.
 
 ## Typography
 
@@ -324,16 +324,16 @@ Corners step up with the size of the object: 4px for the title block, 6px for ta
 ### Buttons
 Plain, labeled, one shape.
 - **Shape:** gently squared (8px), at least 36px tall, an icon beside the word.
-- **Primary:** Save only, red pencil fill with white bold text and a small shadow; darkens about 12% on hover.
+- **Primary:** Save only, clay fill with white bold text and a small shadow; darkens about 12% on hover.
 - **Secondary:** sheet fill, 1px hairline border, graphite text; hover deepens the border to graphite-soft and fills with sheet tint. No press motion.
 - **Toggle (pressed):** blue text and border on the blue wash (Pin, filter toggles).
 - **Danger:** red text with a red-tinted border at rest, fills solid red on hover. Delete has Undo, so it is not hidden behind a menu.
 - **Header buttons:** transparent, a 28% white outline, shell ink, condensed label; hover fills with deep shell green.
 
 ### Chips
-- **Filter chips:** condensed 600 14px, 8px corners, sheet fill with a hairline border and a tabular count. Active fills shell green with shell ink. The New tag chip is dashed.
+- **Filter chips:** condensed 600 14px, 8px corners, sheet fill with a hairline border and a tabular count. Active is teal wash with a teal border and graphite text, on the Mac rail and the phone alike. The New tag chip is dashed.
 - **Tag chips on a note:** condensed 600 13px lettering, 6px corners, no fill, a 1.5px outline of the tag color mixed 70% toward graphite. Each tag appears once per note.
-- **Reminder pills:** blue wash with graphite text; due turns red pencil; sent is sheet tint, struck through.
+- **Reminder pills:** blue wash with graphite text; due turns clay; sent is sheet tint, struck through.
 
 ### Cards / Containers
 - **Corner Style:** 12px for note sheets and reminder rows.
@@ -343,32 +343,35 @@ Plain, labeled, one shape.
 - **Internal Padding:** 14px sides and top, 12px bottom.
 
 ### Inputs / Fields
-- **Capture box:** the top of a fresh sheet, 14px corners, 19px text, red caret. A hairline rule divides the text from the Photo, Dictate and Save row. Focus adds a 2px blue ring to the sheet shadow; a dragged file turns the border dashed blue.
+- **Capture box:** the top of a fresh sheet, 14px corners, 19px text, clay caret. A hairline rule divides the text from the Photo, Dictate and Save row. Focus adds a 2px blue ring to the sheet shadow; a dragged file turns the border dashed blue.
 - **Search and selects:** sheet fill, hairline border, 8px corners; focus turns the border blue.
-- **Dialog fields:** pad-green fill inside the sheet-colored dialog, hairline border, 8px corners.
-- **Focus everywhere:** a 2px non-photo blue outline offset 2px.
+- **Dialog fields:** linen fill inside the sheet-colored dialog, hairline border, 8px corners.
+- **Focus everywhere:** a 2px teal outline offset 2px.
 
 ### Navigation
-The shell header is a deep pad-green band: the wordmark (condensed 700 24px) with the sticky-note brand mark on a deep-green tile, then the view tabs in a deep-green tray (10px corners). Inactive tabs are shell-ink-soft condensed 600 15px; hover brightens to shell ink; the active tab is a sheet-colored tab with graphite text, like a page pulled forward. A red badge on Reminders counts what's due. Sync state sits beside the tabs as a dot and words, and on phones only the dot shows while all is well.
+The shell header is a sage band: the wordmark (condensed 700 24px) with the sticky-note brand mark on a deep-sage tile, then the view tabs in a deep-sage tray (10px corners). Inactive tabs are shell-ink-soft condensed 600 15px; hover brightens to shell ink; the active tab is a sheet-colored tab with graphite text, like a page pulled forward. A clay badge on Reminders counts what's due. Sync state sits beside the tabs as a dot and words, and on phones only the dot shows while all is well.
 
 ### Title Block (signature)
-The ruled heading box from a computation sheet, built by `titleBlock()`. A 1.5px rule-green frame with 4px corners over a 70% sheet wash. The label (Title role) fills the left; to its right, cells split off by 1.5px vertical rules hold counts in condensed 500 14px with the number bold and tabular: "4 notes", "1 reminder". When anything in the group is due, that cell fills red pencil and reads "due now". It heads each Feed day, the Pinned sheet, the selected calendar day and each Reminders section. Board columns carry the same idea as their header: a sheet-colored strip with a 1.5px rule beneath the column name, inside a 1.5px rule-green column frame.
+The ruled heading box from a computation sheet, built by `titleBlock()`. A 1.5px rule-sage frame with 4px corners over a 70% sheet wash. The label (Title role) fills the left; to its right, cells split off by 1.5px vertical rules hold counts in condensed 500 14px with the number bold and tabular: "4 notes", "1 reminder". When anything in the group is due, that cell fills clay and reads "due now". It heads each Feed day, the Pinned sheet, the selected calendar day and each Reminders section. Board columns carry the same idea as their header: a sheet-colored strip with a 1.5px rule beneath the column name, inside a 1.5px rule-sage column frame.
+
+### Sort
+One note at a time on a single sheet, oldest first. Below it sit the choices: "File under" tag chips, then Keep, Pin, Archive and Delete. On a Mac each choice shows its key in a small keycap (1–9, K, P, A, ⌫; Z undoes). On a phone the choices sit in a docked sheet at the bottom of the screen, in thumb reach, with the four actions as equal stacked buttons. Swiping moves the card sideways without tilting it; a word in a ruled box ("Keep" in teal, "Archive" in graphite, "Delete" in clay) and a matching 2px ring say what letting go will do. Every choice stamps the note as sorted, so it leaves the queue on every device. The last screen is a sheet titled "All sorted" with a tally of what happened in ruled count cells.
 
 ## Do's and Don'ts
 
 ### Do:
 - **Do** open every group of notes with the ruled title block, with tabular counts in its cells.
-- **Do** keep the 20px grid on the page ground and keep sheets clean paper.
-- **Do** spend red pencil (#a85638) only on Save, Delete, and anything due or overdue.
-- **Do** use non-photo blue (#3d6f7d) for pinned, selected, pressed and focused states.
+- **Do** keep the 20px dot grid on the page ground and keep sheets clean paper.
+- **Do** spend clay (#a85638) only on Save, Delete, and anything due or overdue.
+- **Do** use teal (#376672) for pinned, selected, pressed and focused states.
 - **Do** give every action a visible word; an icon may sit beside the word, never replace it.
 - **Do** set counts, dates and times in Barlow Semi Condensed with tabular figures.
 - **Do** lift sheets with the one Sheet shadow and divide their insides with 1px hairline rules.
 
 ### Don't:
-- **Don't** use red for decoration, emphasis, or categories. If it is not Save, Delete or due, it is not red.
+- **Don't** use clay or any red for decoration, emphasis, or categories. If it is not Save, Delete or due, it is not clay.
 - **Don't** add icon-only controls. The owner could not recognize them.
-- **Don't** introduce grey neutrals; the paper and its rules are greens.
+- **Don't** introduce cool grey neutrals or saturated UI-kit colors; neutrals are warm and tags are earth tones.
 - **Don't** use uppercase letterspaced labels or small headings above sections. The title block is the heading.
 - **Don't** outline sheets or stack extra shadows on them.
-- **Don't** pin notes to cork, tilt them, or draw them as sticky notes. The sticky note lives only in the app icon.
+- **Don't** pin notes to cork, tilt them (not even while swiping in Sort), or draw them as sticky notes. The sticky note lives only in the app icon.

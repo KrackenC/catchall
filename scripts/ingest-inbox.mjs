@@ -1,4 +1,4 @@
-// Files messages sent to the "Save to Catchall" inbox (an ntfy.sh topic) into the synced gist as notes,
+// Files messages sent to the "Save to Catchall" inbox (an ntfy.sh topic, by the iPhone shortcut or by email) into the synced gist as notes,
 // so they're saved even when no copy of Catchall is open (ntfy.sh only keeps messages for 12 hours).
 // It uses the app's own parser, copied out of src/catchall.html at run time, so "remind me …",
 // #hashtags, tag keywords and "- " lists behave exactly as when typed in the app. Each note's id comes
@@ -40,11 +40,14 @@ const parsing = src.slice(src.indexOf('/* ---------- parsing ---------- */'), sr
 const colors = (src.match(/const COLORS = \[[\s\S]*?\];/) || ['const COLORS = [["Gray","#868c99"]];'])[0];
 const ctx = { S: { tags: data.tags || [] }, Date, Math, console };
 vm.createContext(ctx);
-vm.runInContext(`${colors}\n${parsing}\nthis.parseCapture = parseCapture; this.COLORS = COLORS;`, ctx);
+vm.runInContext(`${colors}\n${parsing}\nthis.parseCapture = parseCapture; this.inboxText = inboxText; this.COLORS = COLORS;`, ctx);
 
 const now = Date.now();
 for (const m of fresh){
-  const raw = [m.title, m.message].filter(x => x && x !== 'triggered').join('\n').trim();
+  // Long emails arrive as a text attachment; read it while ntfy still has it.
+  let longBody = null;
+  if (m.attachment && /^text\/plain/.test(m.attachment.type || '') && (m.attachment.size || 0) < 2e5){ try { longBody = await (await fetch(m.attachment.url)).text(); } catch {} }
+  const { raw, via } = ctx.inboxText(m, longBody);
   if (!raw) continue;
   const pc = ctx.parseCapture(raw);
   const tags = [...pc.tagIds];
@@ -54,7 +57,7 @@ for (const m of fresh){
     if (!tags.includes(t.id)) tags.push(t.id);
   }
   const at = (m.time || now / 1000) * 1000;
-  data.notes.push({ id: 'nx' + m.id, kind: pc.kind, text: pc.text, items: pc.items, tags, pinned:false, archived:false, createdAt: at, updatedAt: now, remind: pc.remind, images: [], via: 'iphone' });
+  data.notes.push({ id: 'nx' + m.id, kind: pc.kind, text: pc.text, items: pc.items, tags, pinned:false, archived:false, createdAt: at, updatedAt: now, remind: pc.remind, images: [], via });
   console.log('Filed:', JSON.stringify(pc.text).slice(0, 60), pc.remind ? '(reminder ' + new Date(pc.remind.at).toString() + ')' : '');
 }
 data.savedAt = now;

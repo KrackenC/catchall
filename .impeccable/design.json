@@ -1,12 +1,12 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-07T00:53:50+00:00",
+  "generatedAt": "2026-10-08T23:30:00+00:00",
   "title": "Design System: Catchall",
   "extensions": {
     "colorMeta": {
-      "pad-green": {
+      "linen": {
         "role": "neutral",
-        "displayName": "Pad Green",
+        "displayName": "Linen",
         "canonical": "#eceae2",
         "oklch": "oklch(91.8% 0.031 125)",
         "cssVar": "--bg",
@@ -22,13 +22,13 @@
           "#ebf1e2"
         ]
       },
-      "pad-grid": {
+      "linen-dot": {
         "role": "neutral",
-        "displayName": "Pad Grid",
-        "canonical": "#e0ddd2",
+        "displayName": "Linen Dot",
+        "canonical": "#cdc7b6",
         "oklch": "oklch(86.9% 0.045 128)",
-        "cssVar": "--grid",
-        "dark": "#1f231f",
+        "cssVar": "--dot",
+        "dark": "#323830",
         "tonalRamp": [
           "#080d03",
           "#202817",
@@ -130,9 +130,9 @@
           "#e7f3dd"
         ]
       },
-      "shell-green": {
+      "sage-shell": {
         "role": "tertiary",
-        "displayName": "Shell Green",
+        "displayName": "Sage Shell",
         "canonical": "#4b6152",
         "oklch": "oklch(42.7% 0.070 152)",
         "cssVar": "--shell",
@@ -148,9 +148,9 @@
           "#d7f9df"
         ]
       },
-      "shell-green-deep": {
+      "sage-shell-deep": {
         "role": "tertiary",
-        "displayName": "Shell Green Deep",
+        "displayName": "Sage Shell Deep",
         "canonical": "#3f5346",
         "oklch": "oklch(37.7% 0.062 152)",
         "cssVar": "--shell-2",
@@ -202,9 +202,9 @@
           "#e5f4e1"
         ]
       },
-      "rule-green": {
+      "rule-sage": {
         "role": "tertiary",
-        "displayName": "Rule Green",
+        "displayName": "Rule Sage",
         "canonical": "#7d917f",
         "oklch": "oklch(50.8% 0.081 154)",
         "cssVar": "--rule",
@@ -220,9 +220,9 @@
           "#d2fbdd"
         ]
       },
-      "red-pencil": {
+      "clay": {
         "role": "primary",
-        "displayName": "Red Pencil",
+        "displayName": "Clay",
         "canonical": "#a85638",
         "oklch": "oklch(54.7% 0.176 30)",
         "cssVar": "--red",
@@ -238,9 +238,9 @@
           "#ffcebc"
         ]
       },
-      "red-pencil-ink": {
+      "clay-ink": {
         "role": "primary",
-        "displayName": "Red Pencil Ink",
+        "displayName": "Clay Ink",
         "canonical": "#ffffff",
         "oklch": "oklch(100.0% 0.000 90)",
         "cssVar": "--red-fg",
@@ -256,10 +256,10 @@
           "#eeeeee"
         ]
       },
-      "nonphoto-blue": {
+      "teal": {
         "role": "secondary",
-        "displayName": "Non-Photo Blue",
-        "canonical": "#3d6f7d",
+        "displayName": "Teal",
+        "canonical": "#376672",
         "oklch": "oklch(53.2% 0.107 239)",
         "cssVar": "--blue",
         "dark": "#8cc1cf",
@@ -274,9 +274,9 @@
           "#bff7ff"
         ]
       },
-      "nonphoto-wash": {
+      "teal-wash": {
         "role": "secondary",
-        "displayName": "Non-Photo Wash",
+        "displayName": "Teal Wash",
         "canonical": "#dbe9ed",
         "oklch": "oklch(92.8% 0.030 226)",
         "cssVar": "--blue-wash",
@@ -369,9 +369,9 @@
       }
     },
     "background": {
-      "name": "pad-grid",
+      "name": "linen-dot",
       "value": "linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px); background-size:20px 20px",
-      "purpose": "The computation pad's grid on the page ground only."
+      "purpose": "The notebook's 20px dot grid on the page ground only."
     },
     "shadows": [
       {
@@ -381,7 +381,7 @@
       },
       {
         "name": "sheet-focus",
-        "value": "0 1px 2px rgb(36 60 40/.14), 0 10px 24px -10px rgb(36 60 40/.38), 0 0 0 2px #3d6f7d",
+        "value": "0 1px 2px rgb(36 60 40/.14), 0 10px 24px -10px rgb(36 60 40/.38), 0 0 0 2px #376672",
         "purpose": "Capture sheet while typing."
       },
       {
@@ -396,7 +396,7 @@
       },
       {
         "name": "focus-ring",
-        "value": "outline: 2px solid #3d6f7d; outline-offset: 2px",
+        "value": "outline: 2px solid #376672; outline-offset: 2px",
         "purpose": "Keyboard focus on every control."
       }
     ],
@@ -446,9 +446,9 @@
       "name": "Save Button",
       "kind": "button",
       "refersTo": "button-primary",
-      "description": "The one red-pencil button: Save on the capture sheet and in dialogs.",
+      "description": "The one clay button: Save on the capture sheet and in dialogs.",
       "html": "<button class=\"ds-btn-primary\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 19V5M5 12l7-7 7 7\"/></svg>Save</button>",
-      "css": ".ds-btn-primary{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:7px 12px;background:var(--red,#a85638);border:1px solid var(--red,#a85638);color:var(--red-fg,#fff);border-radius:8px;font-family:var(--font-body,'Barlow','Segoe UI',sans-serif);font-weight:700;font-size:14px;line-height:1;box-shadow:0 1px 2px rgb(36 60 40/.25);cursor:pointer} .ds-btn-primary:hover{background:color-mix(in srgb,var(--red,#a85638) 88%,#000);border-color:transparent} .ds-btn-primary:focus-visible{outline:2px solid var(--blue,#3d6f7d);outline-offset:2px}"
+      "css": ".ds-btn-primary{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:7px 12px;background:var(--red,#a85638);border:1px solid var(--red,#a85638);color:var(--red-fg,#fff);border-radius:8px;font-family:var(--font-body,'Barlow','Segoe UI',sans-serif);font-weight:700;font-size:14px;line-height:1;box-shadow:0 1px 2px rgb(36 60 40/.25);cursor:pointer} .ds-btn-primary:hover{background:color-mix(in srgb,var(--red,#a85638) 88%,#000);border-color:transparent} .ds-btn-primary:focus-visible{outline:2px solid var(--blue,#376672);outline-offset:2px}"
     },
     {
       "name": "Labeled Action",
@@ -456,7 +456,7 @@
       "refersTo": "button-secondary",
       "description": "Every note action: a word with an optional icon beside it. Pressed toggles turn blue.",
       "html": "<div style=\"display:flex;gap:6px;flex-wrap:wrap\"><button class=\"ds-act\"><svg width=\"15\" height=\"15\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M9 4h6l-1 6 3 3H7l3-3zM12 13v7\"/></svg>Pin</button><button class=\"ds-act\" aria-pressed=\"true\"><svg width=\"15\" height=\"15\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M9 4h6l-1 6 3 3H7l3-3zM12 13v7\"/></svg>Unpin</button><button class=\"ds-act ds-act-del\"><svg width=\"15\" height=\"15\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14\"/></svg>Delete</button></div>",
-      "css": ".ds-act{display:inline-flex;align-items:center;gap:5px;min-height:36px;padding:7px 10px;background:var(--surface,#fbfaf6);border:1px solid var(--line,#d8d4c8);color:var(--fg,#2c312b);border-radius:8px;font-family:var(--font-body,'Barlow','Segoe UI',sans-serif);font-weight:500;font-size:14px;line-height:1;cursor:pointer} .ds-act:hover{border-color:var(--muted,#5b6258);background:var(--surface-2,#f1eee6)} .ds-act:focus-visible{outline:2px solid var(--blue,#3d6f7d);outline-offset:2px} .ds-act[aria-pressed=\"true\"]{color:var(--blue,#3d6f7d);border-color:var(--blue,#3d6f7d);background:var(--blue-wash,#dbe9ed)} .ds-act-del{color:var(--red,#a85638);border-color:color-mix(in srgb,var(--red,#a85638) 45%,var(--line,#d8d4c8))} .ds-act-del:hover{background:var(--red,#a85638);border-color:var(--red,#a85638);color:var(--red-fg,#fff)}"
+      "css": ".ds-act{display:inline-flex;align-items:center;gap:5px;min-height:36px;padding:7px 10px;background:var(--surface,#fbfaf6);border:1px solid var(--line,#d8d4c8);color:var(--fg,#2c312b);border-radius:8px;font-family:var(--font-body,'Barlow','Segoe UI',sans-serif);font-weight:500;font-size:14px;line-height:1;cursor:pointer} .ds-act:hover{border-color:var(--muted,#5b6258);background:var(--surface-2,#f1eee6)} .ds-act:focus-visible{outline:2px solid var(--blue,#376672);outline-offset:2px} .ds-act[aria-pressed=\"true\"]{color:var(--blue,#376672);border-color:var(--blue,#376672);background:var(--blue-wash,#dbe9ed)} .ds-act-del{color:var(--red,#a85638);border-color:color-mix(in srgb,var(--red,#a85638) 45%,var(--line,#d8d4c8))} .ds-act-del:hover{background:var(--red,#a85638);border-color:var(--red,#a85638);color:var(--red-fg,#fff)}"
     },
     {
       "name": "Title Block",
@@ -470,7 +470,7 @@
       "name": "Note Sheet",
       "kind": "card",
       "refersTo": "note-sheet",
-      "description": "A loose sheet on the pad: one shadow, hairline rules inside, labeled actions below.",
+      "description": "A loose sheet on the linen page: one shadow, hairline rules inside, labeled actions below.",
       "html": "<article class=\"ds-note\"><div class=\"ds-note-body\">Build clone rocket</div><div class=\"ds-note-meta\"><time>8:47 PM</time><span class=\"ds-tag\" style=\"--c:#e5484d\">hobby</span></div></article>",
       "css": ".ds-note{background:var(--surface,#fbfaf6);color:var(--fg,#2c312b);border-radius:12px;padding:14px 14px 12px;display:flex;flex-direction:column;gap:10px;box-shadow:0 1px 2px rgb(36 60 40/.14),0 6px 16px -8px rgb(36 60 40/.30);max-width:420px} .ds-note-body{font-family:var(--font-body,'Barlow','Segoe UI',sans-serif);font-size:17px;line-height:1.45} .ds-note-meta{display:flex;gap:8px;align-items:center;border-top:1px solid var(--line,#d8d4c8);padding-top:9px} .ds-note-meta time{font:500 14px 'Barlow Semi Condensed',sans-serif;font-variant-numeric:tabular-nums;color:var(--muted,#5b6258)} .ds-tag{font:600 13px/1 'Barlow Semi Condensed',sans-serif;padding:4px 9px;border-radius:6px;border:1.5px solid color-mix(in srgb,var(--c) 70%,var(--fg,#2c312b));color:var(--fg,#2c312b)}"
     },
@@ -478,9 +478,9 @@
       "name": "Filter Chips",
       "kind": "chip",
       "refersTo": "filter-chip",
-      "description": "Tag filters under the capture box; active fills shell green; New tag is dashed.",
+      "description": "Tag filters under the capture box; active is teal wash with a teal border; New tag is dashed.",
       "html": "<div style=\"display:flex;gap:6px;flex-wrap:wrap\"><button class=\"ds-chip\" aria-pressed=\"true\">All <span class=\"ds-n\">5</span></button><button class=\"ds-chip\"><span class=\"ds-dot\" style=\"background:#30a46c\"></span>learning <span class=\"ds-n\">2</span></button><button class=\"ds-chip ds-chip-add\">New tag</button></div>",
-      "css": ".ds-chip{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:8px;background:var(--surface,#fbfaf6);border:1px solid var(--line,#d8d4c8);color:var(--fg,#2c312b);font:600 14px/1 'Barlow Semi Condensed',sans-serif;cursor:pointer} .ds-chip:hover{border-color:var(--muted,#5b6258)} .ds-chip:focus-visible{outline:2px solid var(--blue,#3d6f7d);outline-offset:2px} .ds-chip[aria-pressed=\"true\"]{background:var(--shell,#4b6152);border-color:var(--shell,#4b6152);color:var(--shell-fg,#f5f3ec)} .ds-n{font:500 12px 'Barlow Semi Condensed',sans-serif;font-variant-numeric:tabular-nums;color:var(--muted,#5b6258)} .ds-chip[aria-pressed=\"true\"] .ds-n{color:var(--shell-muted,#dbe5d9)} .ds-dot{width:8px;height:8px;border-radius:50%} .ds-chip-add{background:transparent;border-style:dashed;border-color:var(--muted,#5b6258)}"
+      "css": ".ds-chip{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:8px;background:var(--surface,#fbfaf6);border:1px solid var(--line,#d8d4c8);color:var(--fg,#2c312b);font:600 14px/1 'Barlow Semi Condensed',sans-serif;cursor:pointer} .ds-chip:hover{border-color:var(--muted,#5b6258)} .ds-chip:focus-visible{outline:2px solid var(--blue,#376672);outline-offset:2px} .ds-chip[aria-pressed=\"true\"]{background:var(--shell,#4b6152);border-color:var(--shell,#4b6152);color:var(--shell-fg,#f5f3ec)} .ds-n{font:500 12px 'Barlow Semi Condensed',sans-serif;font-variant-numeric:tabular-nums;color:var(--muted,#5b6258)} .ds-chip[aria-pressed=\"true\"] .ds-n{color:var(--shell-muted,#dbe5d9)} .ds-dot{width:8px;height:8px;border-radius:50%} .ds-chip-add{background:transparent;border-style:dashed;border-color:var(--muted,#5b6258)}"
     },
     {
       "name": "Capture Sheet",
@@ -488,15 +488,15 @@
       "refersTo": "capture-sheet",
       "description": "The capture box as the top of a fresh sheet, with a red caret and a blue focus ring.",
       "html": "<div class=\"ds-cap\"><textarea rows=\"1\" placeholder=\"What's on your mind? Saved the moment you hit Enter.\"></textarea><div class=\"ds-cap-row\"><span>Enter saves</span></div></div>",
-      "css": ".ds-cap{background:var(--surface,#fbfaf6);border-radius:14px;padding:14px 14px 12px;box-shadow:0 1px 2px rgb(36 60 40/.14),0 6px 16px -8px rgb(36 60 40/.30)} .ds-cap:focus-within{box-shadow:0 1px 2px rgb(36 60 40/.14),0 10px 24px -10px rgb(36 60 40/.38),0 0 0 2px var(--blue,#3d6f7d)} .ds-cap textarea{width:100%;border:0;background:none;resize:none;outline:none;font-family:var(--font-body,'Barlow','Segoe UI',sans-serif);font-size:19px;line-height:1.45;color:var(--fg,#2c312b);caret-color:var(--red,#a85638)} .ds-cap textarea::placeholder{color:var(--muted,#5b6258)} .ds-cap-row{border-top:1px solid var(--line,#d8d4c8);padding-top:10px;margin-top:8px;font-size:13px;color:var(--muted,#5b6258)}"
+      "css": ".ds-cap{background:var(--surface,#fbfaf6);border-radius:14px;padding:14px 14px 12px;box-shadow:0 1px 2px rgb(36 60 40/.14),0 6px 16px -8px rgb(36 60 40/.30)} .ds-cap:focus-within{box-shadow:0 1px 2px rgb(36 60 40/.14),0 10px 24px -10px rgb(36 60 40/.38),0 0 0 2px var(--blue,#376672)} .ds-cap textarea{width:100%;border:0;background:none;resize:none;outline:none;font-family:var(--font-body,'Barlow','Segoe UI',sans-serif);font-size:19px;line-height:1.45;color:var(--fg,#2c312b);caret-color:var(--red,#a85638)} .ds-cap textarea::placeholder{color:var(--muted,#5b6258)} .ds-cap-row{border-top:1px solid var(--line,#d8d4c8);padding-top:10px;margin-top:8px;font-size:13px;color:var(--muted,#5b6258)}"
     },
     {
       "name": "Shell Header",
       "kind": "nav",
       "refersTo": "shell-header",
-      "description": "Deep pad-green band with wordmark, labeled view tabs in a tray, and a red due badge.",
+      "description": "Sage band with wordmark, labeled view tabs in a tray, and a clay due badge.",
       "html": "<nav class=\"ds-top\"><span class=\"ds-brand\">Catchall</span><div class=\"ds-views\"><button aria-pressed=\"true\">Feed</button><button>Board</button><button>Calendar</button><button>Reminders <span class=\"ds-badge\">1</span></button></div></nav>",
-      "css": ".ds-top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 16px;background:var(--shell,#4b6152);color:var(--shell-fg,#f5f3ec);box-shadow:0 2px 8px -2px rgb(36 60 40/.35)} .ds-brand{font:700 24px/1 'Barlow Semi Condensed',sans-serif;letter-spacing:-.01em;margin-right:auto} .ds-views{display:flex;gap:2px;background:var(--shell-2,#3f5346);padding:3px;border-radius:10px} .ds-views button{border:0;background:none;color:var(--shell-muted,#dbe5d9);font:600 15px/1 'Barlow Semi Condensed',sans-serif;padding:8px 12px;border-radius:8px;display:flex;gap:6px;align-items:center;cursor:pointer} .ds-views button:hover{color:var(--shell-fg,#f5f3ec)} .ds-views button:focus-visible{outline:2px solid var(--blue,#3d6f7d);outline-offset:2px} .ds-views button[aria-pressed=\"true\"]{background:var(--surface,#fbfaf6);color:var(--fg,#2c312b);box-shadow:0 1px 2px rgb(0 0 0/.2)} .ds-badge{background:var(--red,#a85638);color:var(--red-fg,#fff);font:700 11px/1 'Barlow Semi Condensed',sans-serif;padding:3px 6px;border-radius:99px;font-variant-numeric:tabular-nums}"
+      "css": ".ds-top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 16px;background:var(--shell,#4b6152);color:var(--shell-fg,#f5f3ec);box-shadow:0 2px 8px -2px rgb(36 60 40/.35)} .ds-brand{font:700 24px/1 'Barlow Semi Condensed',sans-serif;letter-spacing:-.01em;margin-right:auto} .ds-views{display:flex;gap:2px;background:var(--shell-2,#3f5346);padding:3px;border-radius:10px} .ds-views button{border:0;background:none;color:var(--shell-muted,#dbe5d9);font:600 15px/1 'Barlow Semi Condensed',sans-serif;padding:8px 12px;border-radius:8px;display:flex;gap:6px;align-items:center;cursor:pointer} .ds-views button:hover{color:var(--shell-fg,#f5f3ec)} .ds-views button:focus-visible{outline:2px solid var(--blue,#376672);outline-offset:2px} .ds-views button[aria-pressed=\"true\"]{background:var(--surface,#fbfaf6);color:var(--fg,#2c312b);box-shadow:0 1px 2px rgb(0 0 0/.2)} .ds-badge{background:var(--red,#a85638);color:var(--red-fg,#fff);font:700 11px/1 'Barlow Semi Condensed',sans-serif;padding:3px 6px;border-radius:99px;font-variant-numeric:tabular-nums}"
     },
     {
       "name": "Reminder Row",
@@ -509,25 +509,25 @@
   ],
   "narrative": {
     "northStar": "The Engineer's Computation Pad",
-    "overview": "**Creative North Star: \"The Engineer's Computation Pad\"**\n\nCatchall is drawn on the green-tinted, gridded pad a builder plans projects on. The desk is pad-green paper with a faint 20px grid ruled across the whole page. A deep pad-green band runs across the top as the shell. Notes are lighter loose sheets resting on the pad, and every group of them (a day in the Feed, the Pinned sheet, a calendar day, a Reminders section, a Board column) opens with a ruled title block, the way a computation sheet carries its heading boxes. Ink is graphite. Two pencils are kept on the pad: red pencil for the three things that must stand out (Save, Delete, anything due), and non-photo blue for pins, selection, focus and highlights.\n\nThe world is plain and workmanlike rather than cute. It turns away from both the sticky-note-on-cork convention and the grey notes app with a single accent. Density is moderate: sheets have 14px insets, a 12px gap between sheets, and comfortable 36px controls, with a compact setting that tightens to 8px and 10px. Labels are condensed engineering lettering (Barlow Semi Condensed), body text is Barlow, and every count and time is set in tabular figures so digits line up like a schedule.\n\nLight and dark both follow the device. Dark mode is the same pad at night: near-black green paper, a darker shell, and the pencils brightened to hold contrast (red #e19478, blue #8cc1cf).",
+    "overview": "**Creative North Star: \"The Linen Notebook\"**\n\nCatchall is kept in a builder's dot-grid notebook: warm linen paper with a soft dot every 20px, a sage cloth band across the top as the shell, and loose sheets of lighter paper resting on the page. Every group of notes (a day in the Feed, the Pinned sheet, a calendar day, a Reminders section, a Board column) opens with a ruled title block, the heading box carried over from the engineering pad this notebook grew out of. Ink is graphite. Two inks are kept beside it: clay for the three things that must stand out (Save, Delete, anything due), and teal for pins, selection, focus and highlights.\n\nThe world is calm, warm and workmanlike rather than cute. It turns away from both the sticky-note-on-cork convention and the cold grey notes app with a single accent. Density is moderate: sheets have 14px insets, a 12px gap between sheets, and comfortable 36px controls (44px on touch screens), with a compact setting that tightens to 8px and 10px. Labels are condensed engineering lettering (Barlow Semi Condensed), body text is Barlow, and every count and time is set in tabular figures so digits line up like a schedule.\n\nLight and dark both follow the device. Dark mode is the same notebook at night: near-black paper with a faint dot, a darker sage shell, and the two inks brightened to hold contrast (clay #e19478, teal #8cc1cf).",
     "keyCharacteristics": [
-      "Pad-green ground with a 20px grid on the page background, never on the sheets.",
-      "Deep green shell header with labeled view tabs and a sync state.",
-      "Light sheets with one soft shadow and no outline; hairline green rules divide a sheet's body, meta and actions.",
-      "The ruled title block (1.5px rule-green border, 4px corners, count cells split by vertical rules) heads every group.",
-      "Red pencil only on Save, Delete and what's due; non-photo blue for pin, selection and focus.",
+      "Linen ground with a 20px dot grid on the page background, never on the sheets.",
+      "Sage shell header with labeled view tabs and a sync state.",
+      "Light sheets with one soft shadow and no outline; hairline rules divide a sheet's body, meta and actions.",
+      "The ruled title block (1.5px rule-sage border, 4px corners, count cells split by vertical rules) heads every group.",
+      "Clay only on Save, Delete and what's due; teal for pin, selection and focus.",
       "Every action is a text-labeled button; icons only ever sit beside a word.",
       "Tabular figures for every count, date and time."
     ],
     "rules": [
       {
-        "name": "The Two Pencils Rule",
-        "body": "Red means act or attend: Save, Delete, due. Blue means where you are: pinned, selected, focused. Neither pencil is decoration, and neither stands in for the other.",
+        "name": "The Two Inks Rule",
+        "body": "Clay means act or attend: Save, Delete, due. Teal means where you are: pinned, selected, focused, the chosen tag or filter. Neither ink is decoration, and neither stands in for the other.",
         "section": "colors"
       },
       {
-        "name": "The Paper Is Green Rule",
-        "body": "Grounds and structure are greens; the only near-white is the sheet. There is no grey in the system.",
+        "name": "The Paper Is Linen Rule",
+        "body": "Grounds are warm linen and structure is sage; the only near-white is the sheet. Neutrals are warm (linen, stone, graphite), never a cool grey.",
         "section": "colors"
       },
       {
@@ -548,20 +548,20 @@
     ],
     "dos": [
       "**Do** open every group of notes with the ruled title block, with tabular counts in its cells.",
-      "**Do** keep the 20px grid on the page ground and keep sheets clean paper.",
-      "**Do** spend red pencil (#a85638) only on Save, Delete, and anything due or overdue.",
-      "**Do** use non-photo blue (#3d6f7d) for pinned, selected, pressed and focused states.",
+      "**Do** keep the 20px dot grid on the page ground and keep sheets clean paper.",
+      "**Do** spend clay (#a85638) only on Save, Delete, and anything due or overdue.",
+      "**Do** use teal (#376672) for pinned, selected, pressed and focused states.",
       "**Do** give every action a visible word; an icon may sit beside the word, never replace it.",
       "**Do** set counts, dates and times in Barlow Semi Condensed with tabular figures.",
       "**Do** lift sheets with the one Sheet shadow and divide their insides with 1px hairline rules."
     ],
     "donts": [
-      "**Don't** use red for decoration, emphasis, or categories. If it is not Save, Delete or due, it is not red.",
+      "**Don't** use clay or any red for decoration, emphasis, or categories. If it is not Save, Delete or due, it is not clay.",
       "**Don't** add icon-only controls. The owner could not recognize them.",
-      "**Don't** introduce grey neutrals; the paper and its rules are greens.",
+      "**Don't** introduce cool grey neutrals or saturated UI-kit colors; neutrals are warm and tags are earth tones.",
       "**Don't** use uppercase letterspaced labels or small headings above sections. The title block is the heading.",
       "**Don't** outline sheets or stack extra shadows on them.",
-      "**Don't** pin notes to cork, tilt them, or draw them as sticky notes. The sticky note lives only in the app icon."
+      "**Don't** pin notes to cork, tilt them (not even while swiping in Sort), or draw them as sticky notes. The sticky note lives only in the app icon."
     ]
   }
 }
