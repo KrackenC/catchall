@@ -5,6 +5,7 @@
 // of Catchall already queued (remind.queued), and remembers its own sends in a cache.
 // Env: GIST_ID, GIST_OWNER, STATE_FILE, DATA_FILE (local test input), DRY_RUN=1.
 import fs from 'node:fs';
+import vm from 'node:vm';
 
 const { GIST_ID, GIST_OWNER = 'KrackenC', STATE_FILE = '.push-state/state.json', DRY_RUN } = process.env;
 const NTFY = 'https://ntfy.sh/', APP_URL = 'https://krackenc.github.io/catchall/';
@@ -65,5 +66,29 @@ for (const n of data.notes || []) {
 }
 for (const k of Object.keys(state)) if (state[k] < keep) delete state[k];
 fs.mkdirSync(STATE_FILE.replace(/\/[^/]+$/, ''), { recursive: true });
+fs.writeFileSync(STATE_FILE, JSON.stringify(state));
+// The weekly review: one summary a week at the owner's chosen time, in their time zone. It is queued
+// with ntfy's At header when this job runs in the 45 minutes before, or sent straight away if the job
+// runs up to 4 hours late. The week's key is remembered in the same state, so it goes out once.
+const reviewPick = push.review || 'sun18';
+if (reviewPick !== 'off'){
+  const src = fs.readFileSync(process.env.SRC || 'src/catchall.html', 'utf8');
+  const parsing = src.slice(src.indexOf('/* ---------- parsing ---------- */'), src.indexOf('/* ---------- formatting ---------- */'));
+  const ctx = { S: { tags: data.tags || [] }, Date, Math, console }; vm.createContext(ctx);
+  vm.runInContext(`${parsing}\nthis.reviewSummary = reviewSummary; this.REVIEW_TIMES = REVIEW_TIMES;`, ctx);
+  const [day, hour] = ctx.REVIEW_TIMES[reviewPick] || ctx.REVIEW_TIMES.sun18;
+  if (data.tz) process.env.TZ = data.tz;
+  // the next (or current) target time in local time
+  const target = new Date(now); target.setHours(hour, 0, 0, 0);
+  target.setDate(target.getDate() + ((day - target.getDay() + 7) % 7));
+  if (target.getTime() > now + AHEAD) target.setDate(target.getDate() - 7); // last week's slot, for a late send
+  const t = target.getTime(), key = 'review@' + target.toDateString();
+  if (!state[key] && t > now - 4 * 36e5 && t <= now + AHEAD){
+    const headers = { Title: 'Catchall weekly review', Tags: 'notebook', Click: APP_URL };
+    if (t > now + 15e3) headers.At = String(Math.floor(t / 1000));
+    const body = ctx.reviewSummary(data.notes, t);
+    if (await call('POST', 'review' + target.toISOString().slice(0, 10).replace(/-/g, ''), body.text, headers)){ state[key] = t; console.log('Weekly review', headers.At ? 'queued for' : 'sent for', target.toString(), '-', body.text); }
+  }
+}
 fs.writeFileSync(STATE_FILE, JSON.stringify(state));
 console.log(`Queued ${queued}, sent ${late} late, remembering ${Object.keys(state).length}.`);

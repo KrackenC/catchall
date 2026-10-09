@@ -1486,6 +1486,8 @@ function pushSectionHTML(){
     <div class="row"><button type="button" class="btn" data-set="pushtest">Send test</button>
       <button type="button" class="btn" data-set="pushtext">Reminder text in notification: ${S.push.showText ? 'shown' : 'hidden'}</button>
       <button type="button" class="btn danger" data-set="pushoff">Turn off</button></div>
+    <div class="row set-row"><span class="set-lbl" style="width:auto">Weekly review</span><div class="seg" role="group">${[['sun18','Sunday 6 PM'],['sun20','Sunday 8 PM'],['mon8','Monday 8 AM'],['off','Off']].map(([v, l]) => `<button type="button" data-set="review" data-v="${v}" aria-pressed="${(S.push.review || 'sun18') === v}">${l}</button>`).join('')}</div></div>
+    <p class="small">${(S.push.review || 'sun18') === 'off' ? 'No weekly summary.' : `Every ${REVIEW_TIMES[S.push.review || 'sun18'][2]} your phone gets a short summary, like “${esc(reviewSummary(liveNotes(), Date.now()).text)}”`} <button type="button" class="linkbtn" data-set="reviewnow">Send a sample now</button></p>
     <p class="small">Each reminder is handed to ntfy in the 45 minutes before it's due, by a background job that runs every 15 minutes even when no device has Catchall open (or sooner, by any open copy of Catchall). If you change or delete a reminder in those last 45 minutes, the original may still arrive. Treat the topic name like a password: anyone who has it can see these notifications.</p>
     ${gist.id ? '' : '<p class="small"><b>Turn on Sync across devices too.</b> The background job reads your reminders from the synced copy.</p>'}</div>`;
 }
@@ -1498,6 +1500,22 @@ function ensureTag(name){
 }
 
 /* ---------- parsing ---------- */
+/* The weekly review: what's waiting. Shared with the background job that sends it.
+   push.review is "sun18" (Sunday 6 PM, the default), "sun20", "mon8" or "off". */
+const REVIEW_TIMES = { sun18: [0, 18, 'Sunday at 6 PM'], sun20: [0, 20, 'Sunday at 8 PM'], mon8: [1, 8, 'Monday at 8 AM'] };
+function reviewSummary(notes, now){
+  const live = (notes || []).filter(n => n && !n.deleted && !n.archived);
+  const sort = live.filter(n => !(n.tags || []).length && !n.sortedAt).length;
+  const week = live.filter(n => n.remind && !n.remind.sent && n.remind.at >= now - 864e5 && n.remind.at < now + 7 * 864e5).length;
+  const pinned = live.filter(n => n.pinned).length;
+  const bits = [];
+  if (sort) bits.push(sort + (sort === 1 ? ' note' : ' notes') + ' to sort');
+  if (week) bits.push(week + (week === 1 ? ' reminder' : ' reminders') + ' this week');
+  if (pinned) bits.push(pinned + ' pinned');
+  const text = bits.length ? bits.join(' · ') + '. ' + (sort ? 'Open Catchall and tap Sort to clear them.' : 'Open Catchall to look ahead.') : 'All caught up: nothing to sort and no reminders this week.';
+  return { sort, week, pinned, text };
+}
+
 /* An inbox message becomes the text to parse. The iPhone shortcut sends plain text; an email arrives
    with its subject as the title and its body as the message. Mail apps' extras are trimmed: quoted
    replies, the "-- " signature, "Sent from my iPhone" and forwarded-message headers. */
@@ -2815,6 +2833,13 @@ function setAction(a, t){
     if (!t.classList.contains('armed')){ t.classList.add('armed'); t.textContent = 'Stop phone notifications? Click again'; return; }
     setPush({ enabled:false }); openSettings(); toast('Phone notifications are off'); return;
   }
+  if (a === 'review'){ setPush({ review: t.dataset.v }); openSettings(); return; }
+  if (a === 'reviewnow'){
+    ntfy('', { method:'POST', body: reviewSummary(liveNotes(), Date.now()).text, headers:{ Title:'Catchall weekly review', Tags:'notebook', Click: APP_URL } })
+      .then(r => toast(r.ok ? 'Sample sent. It should appear on your phone in a few seconds.' : 'ntfy refused it (' + r.status + '). Try again in a minute.'))
+      .catch(() => toast('Could not reach ntfy.sh. Check your connection.'));
+    return;
+  }
   if (a === 'pushtext'){ setPush({ showText: !S.push.showText }); notifyAll(); openSettings(); return; }
   if (a === 'pushcopy'){
     navigator.clipboard?.writeText(S.push.topic).then(() => toast('Topic copied'), () => { const r = document.createRange(); r.selectNodeContents($('#pushTopic')); getSelection().removeAllRanges(); getSelection().addRange(r); });
@@ -3069,7 +3094,7 @@ window.__catchallTest = { parseReminder, parseCapture, parseStructure, nextOccur
 </div>
 <script>
 (function () {
-  var CURRENT_VERSION = "30";
+  var CURRENT_VERSION = "31";
   var banner = document.getElementById('__update-banner');
   var updateBtn = document.getElementById('__update-btn');
   var dismissBtn = document.getElementById('__dismiss-btn');
