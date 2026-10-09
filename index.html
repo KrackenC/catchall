@@ -13,6 +13,11 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" href="favicon-32.png">
 <link rel="apple-touch-icon" href="icon-180.png">
+<script>
+// Keeps a copy of the app on the device so it opens with no signal. Pages still load from the
+// network first, so updates arrive exactly as before; the copy is only used when offline.
+if ('serviceWorker' in navigator) window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
+</script>
 <style>
 :root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 body{margin:0}
@@ -800,6 +805,21 @@ html{scrollbar-gutter:stable}
   .comp-row .act{justify-content:center;padding-inline:4px}
   .comp-row #saveBtn{grid-column:1/-1;justify-content:center;min-height:48px;font-size:16px}
 }
+
+/* the note chosen from the keyboard */
+.note:focus{outline:none}
+.note:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+
+/* search: how it was read, and saved searches */
+.qread{flex-basis:100%;margin:2px 2px 0;line-height:1.5}
+.qread b{color:var(--fg);font-weight:600}
+.qread .linkbtn{margin-left:4px}
+.saved{flex-basis:100%;display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.saved-lbl{font:600 13px var(--font-display);color:var(--muted)}
+.saved .chip .i{width:13px;height:13px}
+@media (min-width:1024px){ .rail .qread{order:-1;margin:-2px 0 6px} .rail .saved{order:-1;margin:0 0 8px} .rail .saved .chip{width:auto;padding:6px 9px;font-size:14px;border:1px solid var(--line)} }
+/* the rail's stacked groups never wrap, so nothing spills past its padding */
+@media (min-width:1024px){ .rail .filters,.rail .arrange{flex-wrap:nowrap} .rail .filters > *,.rail .arrange > *{flex-basis:auto} }
 </style>
 
 <header class="top">
@@ -901,9 +921,10 @@ S.tags = LS.get('tags', []); S.tagsUpdatedAt = LS.get('tagsUpdatedAt', 0); fixTa
 if (S.settings.boardTags.length && !S.settings.boardUpdatedAt) S.settings.boardUpdatedAt = 1;
 S.push = Object.assign({ topic:'', enabled:false, showText:true, updatedAt:0 }, LS.get('push', {}));
 S.inbox = Object.assign({ topic:'', enabled:false, updatedAt:0 }, LS.get('inbox', {}));
+S.searches = Object.assign({ list:[], updatedAt:0 }, LS.get('searches', {}));
 let localWarned = false;
 function saveLocal(){
-  const ok = LS.set('notes', [...S.notes.values()]) && LS.set('tags', S.tags) && LS.set('tagsUpdatedAt', S.tagsUpdatedAt) && LS.set('push', S.push) && LS.set('inbox', S.inbox);
+  const ok = LS.set('notes', [...S.notes.values()]) && LS.set('tags', S.tags) && LS.set('tagsUpdatedAt', S.tagsUpdatedAt) && LS.set('push', S.push) && LS.set('inbox', S.inbox) && LS.set('searches', S.searches);
   if (!ok && !localWarned && sync.state !== 'synced'){ localWarned = true; toast('This browser is out of room for notes. Export a backup from Settings, or remove some images.'); }
 }
 const saveSettings = () => LS.set('settings', S.settings);
@@ -913,12 +934,14 @@ const tagById = id => S.tags.find(t => t.id === id);
 /* ---------- sync (Claude account, private per person) ---------- */
 const sync = { col:null, state:'local', first:true, chains:new Map(), readonly:false };
 function setSync(s){
+  if (s === 'error' && navigator.onLine === false) s = 'offline';
   sync.state = s;
   const el = $('#sync'); el.dataset.s = s;
-  const label = { local: IN_ARTIFACT ? 'This device only' : 'Set up sync', connecting:'Syncing…', synced:'Synced', error:'Sync paused', readonly:'Read-only', autherr:'Reconnect sync', noscope:"Can't save" }[s];
+  const label = { local: IN_ARTIFACT ? 'This device only' : 'Set up sync', connecting:'Syncing…', synced:'Synced', error:'Sync paused', readonly:'Read-only', autherr:'Reconnect sync', noscope:"Can't save", offline:'Offline' }[s];
   el.innerHTML = `<span>${label}</span>`;
   el.title = s === 'synced' ? (IN_ARTIFACT ? 'Notes sync to your Claude account.' : 'Notes sync through your private GitHub gist to every connected device.')
            : s === 'local' ? 'Notes are saved on this device only. Open Settings to sync across devices.'
+           : s === 'offline' ? "No connection. Notes are saved on this device and sync when you're back online."
            : s === 'error' ? 'Could not reach GitHub. Changes are saved here and will sync when the connection is back.'
            : s === 'autherr' ? 'GitHub rejected the access token. Open Settings and connect again.'
            : s === 'noscope' ? "This device can read your notes but GitHub won't let it save them. Open Settings to fix." : label;
@@ -945,6 +968,11 @@ function onRemote(snap){
       else if (sync.first && S.tagsUpdatedAt > ru) pushTags();
       continue;
     }
+    if (d.id === 'searches'){
+      if ((v.updatedAt || 0) > S.searches.updatedAt){ S.searches = { list: clone(v.list || []), updatedAt: v.updatedAt }; changed = true; }
+      else if (sync.first && S.searches.updatedAt > (v.updatedAt || 0)) pushSearches();
+      continue;
+    }
     if (d.id === 'board'){
       const ru = v.updatedAt || 0, lu = S.settings.boardUpdatedAt || 0;
       if (ru > lu){ takeBoard(v.list, ru); changed = true; }
@@ -960,6 +988,7 @@ function onRemote(snap){
     for (const n of S.notes.values()) if (!seen.has(n.id)) push(n.id);
     if (!seen.has('tags') && S.tags.length) pushTags();
     if (!seen.has('board') && S.settings.boardUpdatedAt) pushBoard();
+    if (!seen.has('searches') && S.searches.updatedAt) pushSearches();
     sync.first = false;
   }
   if (!sync.readonly) setSync('synced');
@@ -977,6 +1006,8 @@ function chain(key, fn){
 }
 function push(id){ if (!IN_ARTIFACT) return schedulePush(); if (sync.col && !sync.readonly) chain(id, () => { const n = S.notes.get(id); return n ? sync.col.doc(id).set(clone(n)) : null; }); }
 function pushBoard(){ if (!IN_ARTIFACT) return schedulePush(); if (sync.col && !sync.readonly) chain('board', () => sync.col.doc('board').set({ list: clone(S.settings.boardTags), updatedAt: S.settings.boardUpdatedAt || 0 })); }
+function pushSearches(){ if (!IN_ARTIFACT) return schedulePush(); if (sync.col && !sync.readonly) chain('searches', () => sync.col.doc('searches').set(clone(S.searches))); }
+function commitSearches(){ S.searches.updatedAt = Date.now(); saveLocal(); pushSearches(); }
 function commitBoard(){ S.settings.boardUpdatedAt = Date.now(); saveSettings(); pushBoard(); }
 function takeBoard(list, at){ S.settings.boardTags = clone(list || []); S.settings.boardUpdatedAt = at; saveSettings(); }
 function pushTags(){ if (!IN_ARTIFACT) return schedulePush(); if (sync.col && !sync.readonly) chain('tags', () => sync.col.doc('tags').set({ list: clone(S.tags), updatedAt: S.tagsUpdatedAt })); }
@@ -1000,7 +1031,7 @@ function snapshotData(){
   const gone = [];
   for (const [id, n] of S.notes) if (n.deleted && n.updatedAt < cutoff){ gone.push(...(n.images || [])); S.notes.delete(id); }
   if (gone.length) trashImages(gone);
-  return { app:'Catchall', v:1, savedAt: Date.now(), imgGist: gist.imgId || undefined, tags: S.tags, tagsUpdatedAt: S.tagsUpdatedAt, push: S.push, inbox: S.inbox, tz: Intl.DateTimeFormat().resolvedOptions().timeZone, board: { tags: S.settings.boardTags, updatedAt: S.settings.boardUpdatedAt || 0 }, notes: [...S.notes.values()] };
+  return { app:'Catchall', v:1, savedAt: Date.now(), imgGist: gist.imgId || undefined, tags: S.tags, tagsUpdatedAt: S.tagsUpdatedAt, push: S.push, inbox: S.inbox, searches: S.searches, tz: Intl.DateTimeFormat().resolvedOptions().timeZone, board: { tags: S.settings.boardTags, updatedAt: S.settings.boardUpdatedAt || 0 }, notes: [...S.notes.values()] };
 }
 function mergeRemote(data){
   let changed = false, localNewer = false;
@@ -1009,6 +1040,9 @@ function mergeRemote(data){
   else if (gist.imgId && !data.imgGist) localNewer = true;
   if ((data.tagsUpdatedAt || 0) > S.tagsUpdatedAt){ S.tags = data.tags || []; S.tagsUpdatedAt = data.tagsUpdatedAt; fixTagColors(); changed = true; }
   else if (S.tagsUpdatedAt > (data.tagsUpdatedAt || 0)) localNewer = true;
+  const rs = data.searches || {};
+  if ((rs.updatedAt || 0) > S.searches.updatedAt){ S.searches = { list: rs.list || [], updatedAt: rs.updatedAt }; changed = true; }
+  else if (S.searches.updatedAt > (rs.updatedAt || 0)) localNewer = true;
   const ri = data.inbox || {};
   if ((ri.updatedAt || 0) > S.inbox.updatedAt){ S.inbox = Object.assign({}, S.inbox, ri); changed = true; }
   else if (S.inbox.updatedAt > (ri.updatedAt || 0)) localNewer = true;
@@ -1092,6 +1126,8 @@ function initGist(){
   window.__catchallPull = setInterval(() => { if (!document.hidden) syncNow(); }, 45000);
 }
 document.addEventListener('visibilitychange', () => { if (!IN_ARTIFACT && !document.hidden && gist.id) syncNow(); });
+window.addEventListener('online', () => { if (IN_ARTIFACT) return; if (gist.id) syncNow(); pullInbox(true); });
+window.addEventListener('offline', () => { if (!IN_ARTIFACT && gist.id) setSync('offline'); });
 window.addEventListener('focus', () => { if (!IN_ARTIFACT && gist.id && Date.now() - gist.last > 10000) syncNow(); });
 window.addEventListener('pagehide', () => { if (!IN_ARTIFACT && gist.dirty) { clearTimeout(gist.timer); syncNow(); } });
 async function showQR(text = gist.token, boxId = 'qrBox', caption){
@@ -1551,10 +1587,54 @@ function matches(n){
   if (u.list && n.kind !== 'list') return false;
   if (u.range !== 'all' && n.createdAt < Date.now() - +u.range * 864e5) return false;
   if (u.q){
-    const hay = [n.text, ...(n.items || []).map(i => i.t), ...(n.tags || []).map(id => tagById(id)?.name || '')].join(' ').toLowerCase();
-    if (!u.q.toLowerCase().split(/\s+/).every(w => hay.includes(w))) return false;
+    const q = searchOf(u.q);
+    if (q.from != null && (n.createdAt < q.from || n.createdAt >= q.to)) return false;
+    if (q.tags.some(id => !(n.tags || []).includes(id))) return false;
+    for (const h of q.has){
+      const ok = { photo: (n.images || []).length, file: (n.files || []).some(f => !isAudio(f)), memo: (n.files || []).some(isAudio), link: hasLink(n), list: n.kind === 'list', reminder: !!n.remind, pinned: n.pinned }[h];
+      if (!ok) return false;
+    }
+    const hay = [n.text, ...(n.items || []).map(i => i.t), ...(n.tags || []).map(id => tagById(id)?.name || ''), ...(n.files || []).map(f => f.name || '')].join(' ').toLowerCase();
+    if (!q.words.every(w => hay.includes(w))) return false;
   }
   return true;
+}
+/* Search understands more than words: dates ("today", "yesterday", "this week", "last week",
+   "this month", "last month", "last 10 days", "october", "march 2025", "2025"), #tags, and
+   "has:photo", "has:file", "has:memo", "has:link", "has:list", "has:reminder", "is:pinned".
+   Whatever is left is matched as words in the note, its list items, tags and file names. */
+const MONTHS_FULL = ['january','february','march','april','may','june','july','august','september','october','november','december'];
+let searchMemo = { q: null, at: 0, r: null };
+function searchOf(raw){
+  const today0 = new Date(); today0.setHours(0, 0, 0, 0);
+  if (searchMemo.q === raw && searchMemo.at === today0.getTime()) return searchMemo.r;
+  let s = ' ' + raw.toLowerCase() + ' ';
+  const r = { words: [], tags: [], has: [], from: null, to: null, label: '', unknownTags: [] };
+  const D = (y, m, d) => new Date(y, m, d).getTime();
+  const fmt = t => new Date(t).toLocaleDateString([], { weekday:'short', month:'short', day:'numeric', year: new Date(t).getFullYear() === today0.getFullYear() ? undefined : 'numeric' });
+  const span = (a, b, label) => { r.from = a; r.to = b; r.label = label || (fmt(a) + ' to ' + fmt(b - 864e5)); };
+  const take = (re, fn) => { const m = s.match(re); if (!m) return false; fn(m); s = s.slice(0, m.index) + ' ' + s.slice(m.index + m[0].length); return true; };
+  const y = today0.getFullYear(), mo = today0.getMonth(), d = today0.getDate(), dow = (today0.getDay() + 6) % 7;
+  take(/\btoday\b/, () => span(D(y, mo, d), D(y, mo, d + 1), 'Today'))
+  || take(/\byesterday\b/, () => span(D(y, mo, d - 1), D(y, mo, d), 'Yesterday'))
+  || take(/\bthis week\b/, () => span(D(y, mo, d - dow), D(y, mo, d - dow + 7), 'This week'))
+  || take(/\blast week\b/, () => span(D(y, mo, d - dow - 7), D(y, mo, d - dow), 'Last week'))
+  || take(/\bthis month\b/, () => span(D(y, mo, 1), D(y, mo + 1, 1), 'This month'))
+  || take(/\blast month\b/, () => span(D(y, mo - 1, 1), D(y, mo, 1), 'Last month'))
+  || take(/\b(?:last|past) (\d{1,3}) days?\b/, m => span(D(y, mo, d - +m[1] + 1), D(y, mo, d + 1), 'The last ' + m[1] + ' days'))
+  || take(/\b(?:in |during )?(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|june?|july?|aug(?:ust)?|sept?(?:ember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)(?: (20\d\d))?(?= )/, m => {
+       // a bare "may" or "march" is more likely a word than a month
+       if (/^(may|mar|march)$/.test(m[1]) && !m[2] && !/^ ?(in|during) /.test(m[0])){ r.words.push(m[1]); return; }
+       const mi = MONTHS_FULL.findIndex(x => x.startsWith(m[1].slice(0, 3)));
+       const yy = m[2] ? +m[2] : mi > mo ? y - 1 : y;
+       span(D(yy, mi, 1), D(yy, mi + 1, 1), MONTHS_FULL[mi][0].toUpperCase() + MONTHS_FULL[mi].slice(1) + ' ' + yy); })
+  || take(/\b(20\d\d)\b/, m => span(D(+m[1], 0, 1), D(+m[1] + 1, 0, 1), 'All of ' + m[1]));
+  s = s.replace(/(?:^|\s)#([a-z][\w-]*)/g, (x, name) => { const t = S.tags.find(t => t.name.toLowerCase() === name); if (t) r.tags.push(t.id); else r.unknownTags.push(name); return ' '; });
+  const HAS = { photo:'photo', photos:'photo', image:'photo', images:'photo', picture:'photo', file:'file', files:'file', pdf:'file', memo:'memo', memos:'memo', voice:'memo', audio:'memo', link:'link', links:'link', list:'list', lists:'list', reminder:'reminder', reminders:'reminder' };
+  s = s.replace(/\b(?:has|with):(\w+)/g, (x, w) => { if (HAS[w]) r.has.push(HAS[w]); return ' '; }).replace(/\bis:pinned\b/g, () => { r.has.push('pinned'); return ' '; });
+  r.words = r.words.concat(s.split(/\s+/).filter(Boolean));
+  searchMemo = { q: raw, at: today0.getTime(), r };
+  return r;
 }
 const byNewest = (a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) || b.createdAt - a.createdAt;
 
@@ -1627,7 +1707,7 @@ function noteCard(n, board, moves = ''){
   const acts = btn('pin', 'pin', n.pinned ? 'Unpin' : 'Pin', n.pinned ? 'aria-pressed="true"' : '') + btn('edit', 'edit', 'Edit')
     + btn('archive', 'archive', n.archived ? 'Unarchive' : 'Archive') + delBtn;
   const hex = noteHex(n.color);
-  return `<article class="note ${S.ui.selecting && S.ui.sel && S.ui.sel.has(n.id) ? 'picked' : ''} ${S.ui.openNote === n.id ? 'open' : ''} ${n.pinned ? 'pinned' : ''} ${n.archived ? 'arch' : ''} ${hex ? 'colored' : ''}" data-id="${n.id}" ${hex ? `style="--nc:${hex}"` : ''} ${board ? 'draggable="true"' : ''}>
+  return `<article class="note ${S.ui.selecting && S.ui.sel && S.ui.sel.has(n.id) ? 'picked' : ''} ${S.ui.openNote === n.id ? 'open' : ''} ${n.pinned ? 'pinned' : ''} ${n.archived ? 'arch' : ''} ${hex ? 'colored' : ''}" data-id="${n.id}" tabindex="-1" ${hex ? `style="--nc:${hex}"` : ''} ${board ? 'draggable="true"' : ''}>
     ${S.ui.selecting && !board ? `<span class="selmark">${icon('check')}${S.ui.sel && S.ui.sel.has(n.id) ? 'Selected' : 'Select'}</span>` : ''}
     ${n.pinned ? `<span class="pin-flag">${icon('pin')}Pinned</span>` : ''}
     ${noteBody(n)}
@@ -1661,6 +1741,23 @@ function composerHTML(){
     </div>
   </section>`;
 }
+/* Under the search box: how the search was read, a way to save it, and the saved searches. */
+function searchHelpHTML(){
+  const u = S.ui, q = u.q.trim(), list = S.searches.list;
+  const active = list.find(x => x.q.toLowerCase() === q.toLowerCase());
+  let read = '';
+  if (q){
+    const r = searchOf(q), bits = [];
+    if (r.label) bits.push(`<b>${esc(r.label)}</b>`);
+    for (const id of r.tags) bits.push(`tagged <b>${esc(tagById(id)?.name || '')}</b>`);
+    for (const h of r.has) bits.push(`with <b>${{ photo:'a photo', file:'a file', memo:'a voice memo', link:'a link', list:'a list', reminder:'a reminder', pinned:'a pin' }[h]}</b>`);
+    if (r.words.length) bits.push(`containing <b>${esc(r.words.join(' '))}</b>`);
+    if (r.unknownTags.length) bits.push(`no tag called <b>#${esc(r.unknownTags[0])}</b>`);
+    read = `<p class="qread small">Showing notes: ${bits.join(', ')}.${active ? '' : ` <button type="button" class="linkbtn" data-act="savesearch">${icon('plus')}Save this search</button>`}${active ? ` <button type="button" class="linkbtn" data-act="forgetsearch" data-sid="${active.id}">Forget this saved search</button>` : ''}</p>`;
+  }
+  const chips = list.length ? `<div class="saved" role="group" aria-label="Saved searches"><span class="saved-lbl">Saved</span>${list.map(x => `<button type="button" class="chip" data-saved="${x.id}" aria-pressed="${!!active && active.id === x.id}">${icon('search')}${esc(x.q)}</button>`).join('')}</div>` : '';
+  return read + chips;
+}
 function filtersHTML(){
   const u = S.ui, all = liveNotes().filter(n => !n.archived);
   const count = f => all.filter(f).length;
@@ -1673,7 +1770,8 @@ function filtersHTML(){
       <button type="button" class="chip add" data-act="newtag">${icon('plus')}New tag</button>
     </div>
     <div class="filters ${u.filtersOpen ? 'open' : ''}">
-      <label class="search">${icon('search')}<span class="sr">Search notes</span><input id="q" type="search" placeholder="Search notes" title="Search notes (press / to jump here)" value="${esc(u.q)}" autocomplete="off"></label>
+      <label class="search">${icon('search')}<span class="sr">Search notes</span><input id="q" type="search" placeholder="Search notes" title="Search words, #tags, or dates like “last week” (press / to jump here)" value="${esc(u.q)}" autocomplete="off" enterkeyhint="search"></label>
+      ${searchHelpHTML()}
       <button type="button" class="btn ftoggle" data-act="filters" aria-expanded="${!!u.filtersOpen}">${icon('sliders')}Filters${(() => { const k = ['link','image','file','list','archived'].filter(x => u[x]).length + (u.range !== 'all' ? 1 : 0); return k ? ` (${k})` : ''; })()}</button>
       ${tog('link','link','Links')}${tog('image','image','Images')}${IN_ARTIFACT ? '' : tog('file','clip','Files')}${tog('list','list','Lists')}${tog('archived','archive','Archived')}
       <label class="sr" for="range">Date range</label>
@@ -1700,7 +1798,9 @@ function openShortcuts(){
     <p class="small">Type these straight into the capture box. Tap one to try it.</p>
     <div class="tries">${TRIES.map(([c, s]) => `<button type="button" class="try" data-try="${esc(c)}"><code>${esc(c.split('\n')[0])}${c.includes('\n') ? ' …' : ''}</code><small>${esc(s)}</small></button>`).join('')}</div>
     <div class="set-sec"><h3>Tag keywords</h3><p class="small">Give a tag a keyword in Settings, then start a note with it: “GROCERY oat milk” files “oat milk” under that tag. Typing #anything also tags a note.</p></div>
-    ${touch ? '' : `<div class="set-sec"><h3>Keys</h3><p class="small"><kbd>Enter</kbd> saves · <kbd>Shift</kbd>+<kbd>Enter</kbd> starts a new line · <kbd>/</kbd> jumps to search · <kbd>N</kbd> jumps to the capture box · <kbd>Esc</kbd> leaves it</p></div>`}`;
+    ${touch ? '' : `<div class="set-sec"><h3>Keys</h3><p class="small"><kbd>Enter</kbd> saves · <kbd>Shift</kbd>+<kbd>Enter</kbd> starts a new line · <kbd>/</kbd> jumps to search · <kbd>N</kbd> jumps to the capture box · <kbd>Esc</kbd> leaves it</p></div>
+    <div class="set-sec"><h3>Moving through the Feed</h3><p class="small"><kbd>J</kbd> / <kbd>K</kbd> go to the next or previous note (then <kbd>↓</kbd> / <kbd>↑</kbd> work too) · <kbd>P</kbd> pins · <kbd>E</kbd> or <kbd>Enter</kbd> edits · <kbd>A</kbd> archives · <kbd>Delete</kbd> deletes (with Undo) · <kbd>X</kbd> picks the note in Select mode · <kbd>Esc</kbd> steps out</p></div>
+    <div class="set-sec"><h3>In Sort</h3><p class="small"><kbd>1</kbd>–<kbd>9</kbd> file under a tag · <kbd>K</kbd> keeps · <kbd>P</kbd> pins · <kbd>A</kbd> archives · <kbd>Delete</kbd> deletes · <kbd>Z</kbd> undoes</p></div>`}`;
   if (!$('#setDlg').open) $('#setDlg').showModal();
 }
 function emptyHTML(){
@@ -1947,6 +2047,10 @@ function render(){
   } else stopDictation();
   micUI(); recUI();
   if (qf != null && $('#q')){ $('#q').focus(); $('#q').setSelectionRange(qf, qf); }
+  // keep the note chosen from the keyboard after the feed is redrawn
+  if (S.ui.kbId && v === 'feed' && !document.querySelector('dialog[open]') && (!document.activeElement || document.activeElement === document.body)){
+    const el = document.querySelector(`#feed .note[data-id="${CSS.escape(S.ui.kbId)}"]`); if (el) el.focus({ preventScroll: true });
+  }
   hydrateImgs();
   const due = liveNotes().filter(n => n.remind && !n.remind.sent && n.remind.at <= Date.now()).length;
   document.title = due ? `(${due}) Catchall` : 'Catchall';
@@ -2363,6 +2467,7 @@ document.addEventListener('click', e => {
   if (d.layout){ S.settings.layout = d.layout; saveSettings(); render(); return; }
   if (d.sortonly){ S.ui.sortOnly = d.sortonly; render(); return; }
   if (d.sorttag){ sortNext(d.sortid, 'filed', d.sorttag); return; }
+  if (d.saved){ const x = S.searches.list.find(x => x.id === d.saved); if (x){ S.ui.q = S.ui.q.trim().toLowerCase() === x.q.toLowerCase() ? '' : x.q; S.ui.limit = 60; render(); } return; }
   if (d.tagf){ S.ui.tag = d.tagf; S.ui.limit = 60; render(); return; }
   if (d.tog){ S.ui[d.tog] = !S.ui[d.tog]; render(); return; }
   if (d.try != null){ if ($('#setDlg').open) $('#setDlg').close(); const c = $('#cap'); if (!c) return; c.value = d.try; autosize(); updatePreview(); c.focus(); return; }
@@ -2402,6 +2507,8 @@ document.addEventListener('click', e => {
     case 'tagup': case 'tagdown': break;
     case 'openacts': S.ui.openNote = S.ui.openNote === id ? null : id; render(); break;
     case 'filters': S.ui.filtersOpen = !S.ui.filtersOpen; render(); break;
+    case 'savesearch': { const q = S.ui.q.trim(); if (!q || S.searches.list.some(x => x.q.toLowerCase() === q.toLowerCase())) break; S.searches.list.push({ id: uid('s'), q }); commitSearches(); render(); toast(`Saved “${q}”. It's one tap away under the search box on all your devices.`); break; }
+    case 'forgetsearch': { const x = S.searches.list.find(x => x.id === d.sid); if (!x) break; S.searches.list = S.searches.list.filter(y => y !== x); commitSearches(); render(); toast(`Forgot “${x.q}”`, { undoFn: () => { S.searches.list.push(x); commitSearches(); render(); } }); break; }
     case 'clearf': Object.assign(S.ui, { tag:'all', q:'', link:false, image:false, file:false, list:false, archived:false, range:'all' }); render(); break;
     case 'newtag': openNewTag(); break;
     case 'pin': putNote({ ...n, pinned: !n.pinned }); render(); break;
@@ -2598,6 +2705,8 @@ document.addEventListener('input', e => {
   else if (t.id === 'q'){ S.ui.q = t.value; S.ui.limit = 60; clearTimeout(t._d); t._d = setTimeout(render, 150); }
 });
 const coarse = matchMedia('(hover: none)').matches;
+function kbFocus(el){ S.ui.kbId = el.dataset.id; el.focus({ preventScroll: true }); el.scrollIntoView({ block: 'nearest' }); }
+document.addEventListener('pointerdown', e => { if (!e.target.closest('#feed .note')) S.ui.kbId = null; });
 document.addEventListener('keydown', e => {
   const t = e.target;
   // In list mode Enter starts the next "- " item; Save (or Ctrl/Cmd+Enter) saves the list.
@@ -2620,6 +2729,29 @@ document.addEventListener('keydown', e => {
       const tg = /^[1-9]$/.test(k) && sortTags()[+k - 1];
       const what = tg ? 'filed' : { k:'keep', p:'pin', a:'archive', backspace:'delete', delete:'delete' }[k];
       if (what){ e.preventDefault(); sortNext(id, what, tg && tg.id); return; }
+    }
+  }
+  // Feed on a computer: J/K (or the arrow keys once a note is chosen) move between notes;
+  // P pins, E or Enter edits, A archives, Delete deletes, X picks it in Select mode, Esc steps out.
+  if (S.settings.view === 'feed' && !e.metaKey && !e.ctrlKey && !e.altKey){
+    const cards = [...document.querySelectorAll('#feed .note[data-id]')];
+    const inNote = t.closest && t.closest('#feed .note[data-id]'), cur = inNote === t ? t : null, k = e.key.toLowerCase();
+    const step = { j:1, k:-1, ...(cur ? { arrowdown:1, arrowup:-1 } : {}) }[k];
+    if (step && cards.length){
+      e.preventDefault();
+      const i = inNote ? cards.indexOf(inNote) + step : step > 0 ? 0 : cards.length - 1;
+      kbFocus(cards[Math.max(0, Math.min(cards.length - 1, i))]); return;
+    }
+    if (cur){
+      if (k === 'escape'){ S.ui.kbId = null; cur.blur(); return; }
+      if (k === 'x' && S.ui.selecting){ e.preventDefault(); cur.click(); return; }
+      const act = { p:'pin', e:'edit', enter:'edit', a:'archive', delete:'del', backspace:'del' }[k];
+      if (act && !S.ui.selecting){
+        e.preventDefault();
+        const at = cards.indexOf(cur), next = act === 'del' || act === 'archive' ? (cards[at + 1] || cards[at - 1]) : cur;
+        S.ui.kbId = next ? next.dataset.id : null;
+        cur.querySelector(`[data-act="${act}"]`)?.click(); return;
+      }
     }
   }
   if (e.key === '/' && $('#q')){ e.preventDefault(); $('#q').focus(); }
@@ -2761,7 +2893,7 @@ window.__catchallTest = { parseReminder, parseCapture, parseStructure, nextOccur
 </div>
 <script>
 (function () {
-  var CURRENT_VERSION = "28";
+  var CURRENT_VERSION = "29";
   var banner = document.getElementById('__update-banner');
   var updateBtn = document.getElementById('__update-btn');
   var dismissBtn = document.getElementById('__dismiss-btn');
