@@ -358,6 +358,9 @@ The ruled heading box from a computation sheet, built by `titleBlock()`. A 1.5px
 ### Sort
 One note at a time on a single sheet, oldest first. Below it sit the choices: "File under" tag chips, then Keep, Pin, Archive and Delete. On a Mac each choice shows its key in a small keycap (1–9, K, P, A, ⌫; Z undoes). On a phone the choices sit in a docked sheet at the bottom of the screen, in thumb reach, with the four actions as equal stacked buttons. Swiping moves the card sideways without tilting it; a word in a ruled box ("Keep" in teal, "Archive" in graphite, "Delete" in clay) and a matching 2px ring say what letting go will do. Every choice stamps the note as sorted, so it leaves the queue on every device. The last screen is a sheet titled "All sorted"; its title block ends in a teal-inked "Done" cell (a ruled cell with a check, never a boxed button shape), followed by a ruled tally of the round that lasts until "Start over from the oldest note". On phones only the counts above zero show.
 
+### Settings
+Six collapsible groups, each a ruled box whose header reads like a title block: the group's name in condensed 700 17px, then a one-line summary of its state in condensed 500 14px ("Phone notifications on · weekly review Sunday at 6 PM"), and a chevron. All start closed, so Settings opens as a short index; the header's sync button opens straight to "Phone, computer and sync". Groups remember being open, and a change keeps the focused control and scroll position. The weekly review has its own block with a quoted preview card of this week's summary.
+
 ## Do's and Don'ts
 
 ### Do:

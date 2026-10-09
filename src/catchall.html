@@ -807,6 +807,22 @@ html{scrollbar-color:color-mix(in srgb,var(--muted) 55%,transparent) transparent
   .qtips{gap:0 4px}
   .done-head{min-height:44px}
 }
+
+/* ---------- 12. Settings in groups ---------- */
+.sgroup{border:1.5px solid var(--rule);border-radius:4px;background:var(--surface)}
+.sgroup + .sgroup{margin-top:-6px}
+.sgroup > summary{list-style:none;display:flex;flex-wrap:wrap;align-items:center;gap:2px 12px;padding:12px 14px;cursor:pointer;min-height:48px}
+.sgroup > summary::-webkit-details-marker{display:none}
+.sgroup > summary .sg-t{font:700 17px/1.1 var(--font-display);color:var(--fg)}
+.sgroup > summary .sg-s{flex:1 1 12rem;font:500 14px/1.3 var(--font-display);color:var(--muted);font-variant-numeric:tabular-nums}
+.sgroup > summary .i{margin-left:auto;color:var(--muted);transition:transform .15s}
+.sgroup[open] > summary{border-bottom:1.5px solid var(--rule)}
+.sgroup[open] > summary .i{transform:rotate(180deg)}
+.sgroup > summary:hover .sg-t{text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--line)}
+.sg-body{display:flex;flex-direction:column;gap:16px;padding:14px}
+.wk-card{margin:0;padding:10px 12px;border-left:0;border:1px solid var(--line);border-radius:8px;background:var(--surface-2);display:flex;flex-direction:column;gap:2px;font-size:16px}
+.wk-card b{font:700 14px var(--font-display);color:var(--muted)}
+.set-help{margin:0}
 </style>
 
 <header class="top">
@@ -1339,7 +1355,7 @@ async function pullInbox(force){
 function inboxSectionHTML(){
   if (IN_ARTIFACT) return '';
   if (!S.inbox.enabled) return `<div class="set-sec"><h3>Save by email or from iPhone</h3>
-    <p class="small">Send anything to Catchall by email from any account, from your iPhone's Share sheet, or by saying “Hey Siri, Save to Catchall”, without opening the app. It works like texting MindChuk, and it's free.</p>
+    <p class="small">Send anything to Catchall by email from any account, from your iPhone's Share sheet, or by saying “Hey Siri, Save to Catchall”, without opening the app. It's free, and needs nothing but a shortcut on the phone.</p>
     <div class="row"><button type="button" class="btn shell" data-set="inboxon">${icon('send')}Turn on</button></div></div>`;
   return `<div class="set-sec"><h3>Save by email · on</h3>
     <p class="small">Email this address from any account. The subject becomes the note's first line and the message the rest; signatures and quoted replies are left out. “remind me …”, #tags and “- ” lists work here too.</p>
@@ -1359,6 +1375,17 @@ function inboxSectionHTML(){
     <div id="inboxQr"></div>
     <p class="small">New items show up the next time Catchall is open, or within about 15 minutes through the background job. Keep the address private: anyone who has it can add notes.</p></div>`;
 }
+/* The weekly review has its own block, with a preview of what this week's would say. */
+function weeklyHTML(){
+  if (IN_ARTIFACT) return '';
+  const pick = S.push.review || 'sun18';
+  return `<div class="set-sec"><h3>Weekly review</h3>
+    ${S.push.enabled ? `<div class="seg" role="group" aria-label="When">${[['sun18','Sunday 6 PM'],['sun20','Sunday 8 PM'],['mon8','Monday 8 AM'],['off','Off']].map(([v, l]) => `<button type="button" data-set="review" data-v="${v}" aria-pressed="${pick === v}">${l}</button>`).join('')}</div>
+    ${pick === 'off' ? '<p class="small">No weekly summary.</p>' : `<p class="small">Every ${REVIEW_TIMES[pick][2]} your phone gets a short summary. This week's would say:</p>
+    <blockquote class="wk-card"><b>Catchall weekly review</b><span>${esc(reviewSummary(liveNotes(), Date.now()).text)}</span></blockquote>
+    <div class="row"><button type="button" class="btn" data-set="reviewnow">Send a sample now</button></div>`}`
+    : '<p class="small">Turn on phone notifications above to get a short summary of what needs sorting, once a week.</p>'}</div>`;
+}
 function pushSectionHTML(){
   if (IN_ARTIFACT) return '';
   if (!S.push.enabled) return `<div class="set-sec"><h3>Phone notifications</h3>
@@ -1371,11 +1398,10 @@ function pushSectionHTML(){
         <span class="row" style="margin-top:4px"><code id="pushTopic" style="font:13px var(--font-type);background:var(--surface-2);padding:4px 8px;border-radius:6px;user-select:all;overflow-wrap:anywhere">${esc(S.push.topic)}</code><button type="button" class="btn" data-set="pushcopy">Copy</button></span></li>
       <li>Allow notifications when ntfy asks, then tap <b>Send test</b> below.</li>
     </ol>
+    <div class="row set-row"><span class="set-lbl" style="width:auto">Notifications show</span><div class="seg" role="group"><button type="button" data-set="pushtext" data-v="1" aria-pressed="${S.push.showText !== false}">The reminder</button><button type="button" data-set="pushtext" data-v="0" aria-pressed="${S.push.showText === false}">Just “Open Catchall”</button></div></div>
     <div class="row"><button type="button" class="btn" data-set="pushtest">Send test</button>
-      <button type="button" class="btn" data-set="pushtext">Reminder text in notification: ${S.push.showText ? 'shown' : 'hidden'}</button>
+
       <button type="button" class="btn danger" data-set="pushoff">Turn off</button></div>
-    <div class="row set-row"><span class="set-lbl" style="width:auto">Weekly review</span><div class="seg" role="group">${[['sun18','Sunday 6 PM'],['sun20','Sunday 8 PM'],['mon8','Monday 8 AM'],['off','Off']].map(([v, l]) => `<button type="button" data-set="review" data-v="${v}" aria-pressed="${(S.push.review || 'sun18') === v}">${l}</button>`).join('')}</div></div>
-    <p class="small">${(S.push.review || 'sun18') === 'off' ? 'No weekly summary.' : `Every ${REVIEW_TIMES[S.push.review || 'sun18'][2]} your phone gets a short summary, like “${esc(reviewSummary(liveNotes(), Date.now()).text)}”`} <button type="button" class="linkbtn" data-set="reviewnow">Send a sample now</button></p>
     <p class="small">Each reminder is handed to ntfy in the 45 minutes before it's due, by a background job that runs every 15 minutes even when no device has Catchall open (or sooner, by any open copy of Catchall). If you change or delete a reminder in those last 45 minutes, the original may still arrive. Treat the topic name like a password: anyone who has it can see these notifications.</p>
     ${gist.id ? '' : '<p class="small"><b>Turn on Sync across devices too.</b> The background job reads your reminders from the synced copy.</p>'}</div>`;
 }
@@ -1817,6 +1843,7 @@ function filtersHTML(){
     </div>`;
 }
 /* On a phone the filters open as a sheet from the bottom, so the notes stay where they were. */
+document.addEventListener('toggle', e => { const d = e.target; if (d.matches && d.matches('details.sgroup')){ const set = S.ui.setOpen || (S.ui.setOpen = new Set()); d.open ? set.add(d.dataset.g) : set.delete(d.dataset.g); } }, true);
 const isPhoneWidth = () => matchMedia('(max-width:640px)').matches;
 function fsheetHTML(){
   const u = S.ui;
@@ -2418,44 +2445,50 @@ function openNewTag(afterFn){
 }
 
 /* ---------- settings ---------- */
-function openSettings(){
+function openSettings(only){
   const s = S.settings;
   const seg = (key, opts) => `<div class="seg" role="group">${opts.map(([v, l]) => `<button type="button" data-seg="${key}" data-v="${v}" aria-pressed="${s[key] === v}">${l}</button>`).join('')}</div>`;
   const total = liveNotes().length;
+  const groups = S.ui.setOpen || (S.ui.setOpen = new Set());
+  if (typeof only === 'string') groups.add(only);
+  const g = (id, title, summary, body) => body.trim() ? `<details class="sgroup" data-g="${id}" ${groups.has(id) ? 'open' : ''}><summary><span class="sg-t">${title}</span><span class="sg-s">${summary}</span>${icon('down')}</summary><div class="sg-body">${body}</div></details>` : '';
+  const lbl = (opts, v) => (opts.find(o => o[0] === v) || opts[0])[1];
+  const pick = S.push.review || 'sun18';
+  const syncWord = { synced:'Synced', local: IN_ARTIFACT ? 'This device only' : 'Not set up', connecting:'Connecting', error:'Paused', offline:'Offline', autherr:'Needs reconnecting', noscope:"Can't save", readonly:'Read-only' }[sync.state] || '';
+  // keep the place and the focused control across the redraw
+  const dlg = $('#setDlg'), keepTop = dlg.scrollTop, act = document.activeElement && $('#setBody').contains(document.activeElement) ? document.activeElement : null;
+  const focusSel = act ? ['data-set', 'data-v', 'data-seg', 'data-exp', 'id', 'data-tf'].filter(k => act.hasAttribute(k)).map(k => `[${k}="${CSS.escape(act.getAttribute(k))}"]`).join('') : '';
   $('#setBody').innerHTML = `<h2 id="setH">Settings <button type="button" class="btn dlg-close" data-set="close">${icon('check')}Done</button></h2>
-    <div class="set-sec"><h3>Look</h3>
+    ${g('look', 'Look', [lbl([['system','Matches your device'],['light','Light'],['dark','Dark']], s.theme), lbl([['legible','Standard type'],['grotesk','Hyperlegible type'],['mono','Typewriter type']], s.font)].join(' · '), `<div class="set-sec">
       <div class="row set-row"><span class="set-lbl">Theme</span>${seg('theme', [['system','Match device'],['light','Light'],['dark','Dark']])}</div>
       <div class="row set-row"><span class="set-lbl">Font</span>${seg('font', [['legible','Standard'],['grotesk','Hyperlegible'],['mono','Typewriter']])}</div>
-      <div class="row set-row"><span class="set-lbl">Spacing</span>${seg('density', [['comfy','Comfortable'],['compact','Compact']])}</div>
-    </div>
-    <div class="set-sec"><h3>Reminders</h3>
-      <div class="row">${seg('sound', [[true,'Chime on'],[false,'Chime off']])}
-      ${(!IN_ARTIFACT && 'Notification' in window) ? `<button type="button" class="btn" data-set="notif">${Notification.permission === 'granted' ? 'System alerts on' : 'Turn on system alerts'}</button>` : ''}</div>
-      <p class="small">Alerts pop up in Catchall while it's open in a tab.</p>
-      <div class="row set-row"><span class="set-lbl" style="width:auto">After a reminder is done</span>${seg('sentRem', [['keep','Keep it, crossed off'],['clear','Remove it']])}</div>
-    </div>
-    <div class="set-sec"><h3>Lists and sorting</h3>
-      <div class="row set-row"><span class="set-lbl" style="width:auto">Checked list items</span>${seg('listClear', [['keep','Keep in Completed'],['clear','Remove them']])}</div>
-      <div class="row set-row"><span class="set-lbl" style="width:auto">In Sort, swiping left</span>${seg('swipeLeft', [['archive','Archives the note'],['delete','Deletes the note']])}</div>
-    </div>
-    <div class="set-sec"><h3>Tags</h3>
+      <div class="row set-row"><span class="set-lbl">Spacing</span>${seg('density', [['comfy','Comfortable'],['compact','Compact']])}</div></div>`)}
+    ${g('notes', 'Tags, lists and sorting', `${S.tags.length} ${plural(S.tags.length, 'tag', 'tags')}`, `<div class="set-sec"><h3>Tags</h3>
       <p class="small">A keyword files notes for you: start a note with it, like “GROCERY oat milk”, and it's saved under that tag.</p>
       <div id="tagRows" style="display:flex;flex-direction:column;gap:6px"></div>
-      <div class="row"><button type="button" class="btn" data-set="newtag">${icon('plus')}New tag</button></div>
-    </div>
-    <div class="set-sec"><h3>On your phone</h3>
+      <div class="row"><button type="button" class="btn" data-set="newtag">${icon('plus')}New tag</button></div></div>
+    <div class="set-sec"><h3>Lists and sorting</h3>
+      <div class="row set-row"><span class="set-lbl" style="width:auto">Checked list items</span>${seg('listClear', [['keep','Keep in Completed'],['clear','Remove them']])}</div>
+      <div class="row set-row"><span class="set-lbl" style="width:auto">In Sort, swiping left</span>${seg('swipeLeft', [['archive','Archives the note'],['delete','Deletes the note']])}</div></div>`)}
+    ${g('capture', 'Save by email or from iPhone', S.inbox.enabled ? 'On' : 'Off', inboxSectionHTML())}
+    ${g('remind', 'Reminders and notifications', IN_ARTIFACT ? (s.sound ? 'Chime on' : 'Chime off') : [S.push.enabled ? 'Phone notifications on' : 'Phone notifications off', S.push.enabled && pick !== 'off' ? 'weekly review ' + REVIEW_TIMES[pick][2] : ''].filter(Boolean).join(' · '), `<div class="set-sec"><h3>While Catchall is open</h3>
+      <div class="row">${seg('sound', [[true,'Chime on'],[false,'Chime off']])}
+      ${(!IN_ARTIFACT && 'Notification' in window) ? `<button type="button" class="btn" data-set="notif">${Notification.permission === 'granted' ? 'System alerts on' : 'Turn on system alerts'}</button>` : ''}</div>
+      <div class="row set-row"><span class="set-lbl" style="width:auto">After a reminder is done</span>${seg('sentRem', [['keep','Keep it, crossed off'],['clear','Remove it']])}</div></div>
+      ${pushSectionHTML()}${weeklyHTML()}`)}
+    ${g('sync', 'Phone, computer and sync', [syncWord, !IN_ARTIFACT && window.__appVersion ? 'version ' + window.__appVersion : ''].filter(Boolean).join(' · '), `${syncSectionHTML()}
+      <div class="set-sec"><h3>On your phone</h3>
       <p class="small">Open <b>krackenc.github.io/catchall</b> on your phone, or scan a code from this screen with the phone's camera.</p>
       <div class="row"><button type="button" class="btn" data-set="phoneqr">Show QR code</button></div><div id="phoneQr"></div></div>
-    ${syncSectionHTML()}
-    ${inboxSectionHTML()}
-    ${pushSectionHTML()}
-    ${!IN_ARTIFACT && window.__appVersion ? `<div class="set-sec"><h3>App version</h3><div class="row"><span class="small">You're on version ${esc(window.__appVersion)}.</span><button type="button" class="btn" data-set="checkupd">Check for updates</button></div></div>` : ''}
-    <div class="set-sec"><h3>Your data · ${total} note${total === 1 ? '' : 's'}</h3>
+      ${!IN_ARTIFACT && window.__appVersion ? `<div class="set-sec"><h3>App version</h3><div class="row"><span class="small">You're on version ${esc(window.__appVersion)}.</span><button type="button" class="btn" data-set="checkupd">Check for updates</button></div></div>` : ''}`)}
+    ${g('data', 'Your data', `${total} ${plural(total, 'note', 'notes')}`, `<div class="set-sec">
       <p class="small">${sync.state === 'synced' ? (IN_ARTIFACT ? 'Synced to your Claude account. Only you can see these notes.' : 'Saved on this device and in your private gist.') : 'Saved on this device.'} Export a backup now and then.</p>
       <div class="row"><label class="sr" for="expScope">Which notes</label><select id="expScope" class="fsel"><option value="all">All notes</option><option value="view">Only what the feed is showing</option><option value="pinned">Pinned notes</option></select>
       <button type="button" class="btn" data-exp="md">${icon('download')}Markdown</button><button type="button" class="btn" data-exp="csv">CSV</button><button type="button" class="btn" data-exp="json">JSON backup</button></div>
-      <div class="row"><button type="button" class="btn" data-set="import">Restore from JSON backup</button><button type="button" class="btn danger" data-set="wipe" id="wipeBtn">Erase everything</button></div>
-    </div>`;
+      <div class="row"><button type="button" class="btn" data-set="import">Restore from JSON backup</button><button type="button" class="btn danger" data-set="wipe" id="wipeBtn">Erase everything</button></div></div>`)}
+    <p class="small set-help"><button type="button" class="linkbtn" data-act="shortcuts">${icon('bolt')}Typing shortcuts and keys</button></p>`;
+  if (focusSel){ const el = $('#setBody').querySelector(focusSel); if (el) el.focus({ preventScroll: true }); }
+  if (dlg.open) dlg.scrollTop = keepTop;
   renderTagRows();
   if (!$('#setDlg').open) $('#setDlg').showModal();
 }
@@ -2742,7 +2775,7 @@ function setAction(a, t){
       .catch(() => toast('Could not reach ntfy.sh. Check your connection.'));
     return;
   }
-  if (a === 'pushtext'){ setPush({ showText: !S.push.showText }); notifyAll(); openSettings(); return; }
+  if (a === 'pushtext'){ setPush({ showText: t.dataset.v === '1' }); notifyAll(); openSettings(); return; }
   if (a === 'pushcopy'){
     navigator.clipboard?.writeText(S.push.topic).then(() => toast('Topic copied'), () => { const r = document.createRange(); r.selectNodeContents($('#pushTopic')); getSelection().removeAllRanges(); getSelection().addRange(r); });
     return;
@@ -2975,7 +3008,7 @@ $('#brandmark').innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><g tran
 $('#openSettings').innerHTML = icon('gear') + '<span>Settings</span>';
 if (!IN_ARTIFACT) $('#fileImg').removeAttribute('accept'); // photos and any other file
 $('#openSettings').addEventListener('click', openSettings);
-$('#sync').addEventListener('click', openSettings);
+$('#sync').addEventListener('click', () => openSettings('sync'));
 window.addEventListener('resize', autosize);
 render();
 clearInterval(window.__catchallTick); window.__catchallTick = setInterval(tick, 15000); setTimeout(tick, 800);
