@@ -27,7 +27,8 @@ Catchall is one notebook that follows its owner between phone and Mac, through t
 
 ## Capabilities and Constraints
 - **Views:** Feed (the default), Board (tags as columns), Calendar, Reminders.
-- **Note features:** pin, archive, color (9 colors), a tag dropdown on every note, checklists, up to 4 images per note, links, search and filters.
+- **Note features:** pin, archive, color (9 colors), a tag dropdown on every note, checklists, up to 4 images and 4 files or voice memos (5 MB each) per note, links, search and filters.
+- **Capture from outside the app:** the iPhone Share sheet / Siri shortcut and email, both through a private ntfy inbox.
 - **Reminders:** repeating reminders are supported.
 - **Data:** export to Markdown, CSV and JSON, and restore from a JSON backup.
 - **Single file:** the whole app is one HTML file (`src/catchall.html`), shared by the GitHub Pages copy (built by `build_catchall.py` into `index.html`) and a Claude artifact copy.

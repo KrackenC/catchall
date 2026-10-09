@@ -690,6 +690,8 @@ html{scrollbar-gutter:stable}
 /* Arrange: order, layout and (on phones) Select sit apart from the "Show only" filters */
 .arrange{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
 .sel-phone{display:none}
+/* the rail spans the capture and feed rows; give its extra height to the feed row, not the gap under capture */
+@media (min-width:1024px){ .desk{grid-template-rows:auto auto 1fr} }
 @media (min-width:1024px){
   .rail .arrange{flex-direction:column;align-items:stretch;gap:6px;margin-top:12px;padding:12px 16px 0;border-top:1px solid var(--line)}
   .rail .arrange::before{content:"Arrange";font:700 16px/1 var(--font-display);padding:2px 0 4px;color:var(--fg)}
@@ -756,6 +758,26 @@ html{scrollbar-gutter:stable}
   .cbox::after,.item-x::after{content:"";position:absolute;inset:-12px}
   .item-x{padding:4px}
 }
+
+/* Files and voice memos: each sits on its own ruled line inside the sheet, labeled in words */
+.n-files{display:flex;flex-direction:column;gap:6px;width:100%}
+.voice,.filerow{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:color-mix(in srgb,var(--surface-2) 70%,transparent)}
+.voice > .i{color:var(--blue)}
+.vname{font:600 14px/1.2 var(--font-display);font-variant-numeric:tabular-nums;color:var(--fg)}
+.voice audio{flex:1 1 220px;min-width:0;height:36px}
+.filechip{display:inline-flex;align-items:center;gap:8px;min-width:0;flex:1 1 auto;color:var(--fg);text-decoration:none;font:500 14px/1.2 var(--font-body)}
+.filechip .fname{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-decoration:underline;text-underline-offset:2px;text-decoration-color:var(--line)}
+.filechip .fsize{flex:none;font:500 13px var(--font-display);color:var(--muted);font-variant-numeric:tabular-nums}
+.filechip:hover .fname{text-decoration-color:currentColor}
+.filechip.loading{pointer-events:none;opacity:.7}
+.thumbs .n-files{flex-basis:100%}
+.act.rec[aria-pressed="true"]{background:var(--red);border-color:var(--red);color:var(--red-fg);font-variant-numeric:tabular-nums}
+@media (max-width:640px){
+  .comp-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .comp-row .preview{grid-column:1/-1}
+  .comp-row .act{justify-content:center;padding-inline:4px}
+  .comp-row #saveBtn{grid-column:1/-1;justify-content:center;min-height:48px;font-size:16px}
+}
 </style>
 
 <header class="top">
@@ -794,6 +816,10 @@ const P = {
   check:'<path d="M20 6 9 17l-5-5"/>',
   x:'<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
   left:'<path d="m15 18-6-6 6-6"/>', right:'<path d="m9 18 6-6-6-6"/>',
+  clip:'<path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/>',
+  file:'<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/>',
+  rec:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4" fill="currentColor"/>',
+  stop:'<rect width="12" height="12" x="6" y="6" rx="2" fill="currentColor"/>',
   link:'<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>',
   list:'<path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/>',
   cal:'<rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/>',
@@ -844,7 +870,7 @@ const S = {
   settings: Object.assign({}, DEFAULT_SETTINGS, LS.get('settings', {})),
   ui: { tag:'all', q:'', link:false, image:false, list:false, archived:false, range:'all', limit:60,
         calMonth: (() => { const d = new Date(); d.setDate(1); d.setHours(0,0,0,0); return d; })(), calDay: null,
-        pending: [], drag: null }
+        pending: [], pendingFiles: [], drag: null }
 };
 for (const n of LS.get('notes', [])) if (n && n.id) S.notes.set(n.id, n);
 S.tags = LS.get('tags', []); S.tagsUpdatedAt = LS.get('tagsUpdatedAt', 0); fixTagColors();
@@ -1089,6 +1115,9 @@ const IMG_DESC = 'Catchall photos (sync data, edited by the app)';
 const BLANK_IMG = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
 const isRef = v => typeof v === 'string' && v.startsWith('img:');
 const imgFile = ref => ref.slice(4) + '.txt';
+/* Files and voice memos use the same store and the same photos gist as photos: a note's
+   files are { ref, name, type, size, dur } and ref is an "img:" key like a photo's. */
+const blobRefs = n => [...(n.images || []), ...(n.files || []).map(f => f.ref)];
 let imgDBp = null;
 function imgDB(){
   return imgDBp || (imgDBp = new Promise((res, rej) => {
@@ -1120,6 +1149,10 @@ function loadImg(ref){
   return imgLoading.get(ref);
 }
 function hydrateImgs(root = document){
+  root.querySelectorAll('[data-fref]').forEach(async el => {
+    const ref = el.dataset.fref, u = await loadImg(ref); if (!u || el.dataset.fref !== ref) return;
+    if (el.tagName === 'AUDIO'){ if (el.src !== u) el.src = u; } else { el.href = u; el.classList.remove('loading'); }
+  });
   root.querySelectorAll('img[data-ref]').forEach(async el => {
     const ref = el.dataset.ref; if (imgURL.has(ref)){ el.src = imgURL.get(ref); return; }
     el.classList.add('loading');
@@ -1133,7 +1166,7 @@ async function storePhoto(dataUrl){ const ref = uid('img:'); await imgPut(ref, d
 const imgSync = { uploaded: new Set(LS.get('imgUploaded', [])), trash: new Set(LS.get('imgTrash', [])) };
 function markUploaded(ref){ if (!imgSync.uploaded.has(ref)){ imgSync.uploaded.add(ref); LS.set('imgUploaded', [...imgSync.uploaded]); } }
 function trashImages(refs){
-  const live = new Set(); for (const n of S.notes.values()) for (const v of n.images || []) live.add(v);
+  const live = new Set(); for (const n of S.notes.values()) for (const v of blobRefs(n)) live.add(v);
   for (const r of refs) if (isRef(r) && !live.has(r)){ imgSync.trash.add(r); imgDel(r); }
   LS.set('imgTrash', [...imgSync.trash]);
 }
@@ -1143,7 +1176,7 @@ async function fetchRemoteImg(ref){
     const r = await fetch(`https://gist.githubusercontent.com/${encodeURIComponent(gist.owner)}/${gist.imgId}/raw/${encodeURIComponent(imgFile(ref))}`, { cache:'no-store' });
     if (!r.ok) return null;
     const d = (await r.text()).trim();
-    if (!d.startsWith('data:image/')) return null;
+    if (!d.startsWith('data:')) return null;
     await imgPut(ref, d); markUploaded(ref);
     return d;
   } catch(e){ return null; }
@@ -1163,7 +1196,7 @@ async function ensureImgGist(){
 // Upload any photo a note uses that this device hasn't sent yet, and remove photos no note uses.
 async function syncImages(){
   const todo = new Set();
-  for (const n of S.notes.values()) if (!n.deleted) for (const v of n.images || []) if (isRef(v) && !imgSync.uploaded.has(v)) todo.add(v);
+  for (const n of S.notes.values()) if (!n.deleted) for (const v of blobRefs(n)) if (isRef(v) && !imgSync.uploaded.has(v)) todo.add(v);
   if (!todo.size && !imgSync.trash.size) return;
   await ensureImgGist();
   for (const ref of todo){
@@ -1180,7 +1213,7 @@ async function syncImages(){
 
 /* ---------- mutations ---------- */
 function putNote(n){ const prev = S.notes.get(n.id); n.updatedAt = Date.now(); S.notes.set(n.id, n); saveLocal(); push(n.id); notifyChange(prev, n); }
-function delNote(id){ const prev = S.notes.get(id); S.notes.set(id, { id, deleted:true, updatedAt: Date.now(), images: (prev && prev.images || []).filter(isRef) }); saveLocal(); push(id); notifyChange(prev, S.notes.get(id)); }
+function delNote(id){ const prev = S.notes.get(id); S.notes.set(id, { id, deleted:true, updatedAt: Date.now(), images: prev ? blobRefs(prev).filter(isRef) : [] }); saveLocal(); push(id); notifyChange(prev, S.notes.get(id)); }
 
 /* ---------- phone push notifications (standalone copy, via the ntfy app) ----------
    ntfy.sh can't take back a queued message, so a reminder is only queued in the
@@ -1492,6 +1525,7 @@ function matches(n){
   if (u.tag !== 'all' && u.tag !== 'pinned' && u.tag !== 'untagged' && !(n.tags || []).includes(u.tag)) return false;
   if (u.link && !hasLink(n)) return false;
   if (u.image && !(n.images || []).length) return false;
+  if (u.file && !(n.files || []).length) return false;
   if (u.list && n.kind !== 'list') return false;
   if (u.range !== 'all' && n.createdAt < Date.now() - +u.range * 864e5) return false;
   if (u.q){
@@ -1523,8 +1557,18 @@ function noteBody(n){
     if (done.length) h += `<div class="done-group"><div class="done-head"><span>Completed · ${done.length}</span><button type="button" class="linkbtn" data-act="cleardone" data-id="${n.id}">Remove checked items</button></div><ul class="items">${done.map(([it, i]) => row(it, i)).join('')}</ul></div>`;
   } else if (n.text) h += `<div class="n-body">${rich(n.text)}</div>`;
   const v = videoLink(n); if (v) h += `<div>${v}</div>`;
+  if ((n.files || []).length) h += filesHTML(n.files);
   if ((n.images || []).length) h += `<div class="n-imgs">${n.images.map((src, i) => `<button type="button" data-act="zoom" data-id="${n.id}" data-i="${i}" aria-label="Open image">${imgTag(src, 'alt=""')}</button>`).join('')}</div>`;
   return h;
+}
+const fSize = b => b >= 1e6 ? (b / 1e6).toFixed(1) + ' MB' : Math.max(1, Math.round(b / 1e3)) + ' KB';
+const fDur = s => Math.floor(s / 60) + ':' + String(Math.round(s % 60)).padStart(2, '0');
+const isAudio = f => /^audio\//.test(f.type || '');
+/* A voice memo plays in place; any other file is a labeled link that opens or downloads it. */
+function filesHTML(files, rmAttr){
+  return `<div class="n-files">${files.map((f, i) => isAudio(f)
+    ? `<div class="voice">${icon('rec')}<span class="vname">${esc(f.name || 'Voice memo')}${f.dur ? ` · ${fDur(f.dur)}` : ''}</span><audio controls preload="metadata" data-fref="${esc(f.ref)}"></audio>${rmAttr ? `<button type="button" class="act" ${rmAttr} data-i="${i}">${icon('x')}<span>Remove</span></button>` : ''}</div>`
+    : `<div class="filerow"><a class="filechip loading" data-fref="${esc(f.ref)}" download="${esc(f.name)}" target="_blank" rel="noopener">${icon('file')}<span class="fname">${esc(f.name)}</span><span class="fsize">${fSize(f.size || 0)}</span></a>${rmAttr ? `<button type="button" class="act" ${rmAttr} data-i="${i}">${icon('x')}<span>Remove</span></button>` : ''}</div>`).join('')}</div>`;
 }
 const actBtn = (n, act, ic, label, extra = '') => `<button type="button" class="act ${act === 'del' ? 'del' : ''}" data-act="${act}" data-id="${n.id}" ${extra}>${icon(ic)}<span>${label}</span></button>`;
 /* The Tag dropdown swaps the note's main tag (the one it shows here) for another; any other tags stay. */
@@ -1587,7 +1631,9 @@ function composerHTML(){
     <div class="thumbs" id="thumbs"></div>
     <div class="comp-row">
       <div class="preview" id="preview"></div>
-      <button type="button" class="act" data-act="attach" title="Attach an image (you can also paste or drop one)">${icon('image')}<span>Photo</span></button>
+      ${IN_ARTIFACT ? `<button type="button" class="act" data-act="attach" title="Attach an image (you can also paste or drop one)">${icon('image')}<span>Photo</span></button>`
+        : `<button type="button" class="act" data-act="attach" title="Attach a photo or file, up to 5 MB each (you can also paste or drop one)">${icon('clip')}<span>Attach</span></button>
+      ${canRecord ? `<button type="button" class="act rec" data-act="record" id="recBtn" aria-pressed="false" title="Record a voice memo">${icon('rec')}<span>Record</span></button>` : ''}`}
       ${(!IN_ARTIFACT && (IS_IOS || window.SpeechRecognition || window.webkitSpeechRecognition)) ? `<button type="button" class="act mic" data-act="mic" id="micBtn" aria-pressed="false" title="Talk instead of typing">${icon('mic')}<span>Dictate</span></button>` : ''}
       <button type="button" class="btn primary" data-act="save" id="saveBtn">${icon('send')}Save</button>
     </div>
@@ -1606,8 +1652,8 @@ function filtersHTML(){
     </div>
     <div class="filters ${u.filtersOpen ? 'open' : ''}">
       <label class="search">${icon('search')}<span class="sr">Search notes</span><input id="q" type="search" placeholder="Search notes" title="Search notes (press / to jump here)" value="${esc(u.q)}" autocomplete="off"></label>
-      <button type="button" class="btn ftoggle" data-act="filters" aria-expanded="${!!u.filtersOpen}">${icon('sliders')}Filters${(() => { const k = ['link','image','list','archived'].filter(x => u[x]).length + (u.range !== 'all' ? 1 : 0); return k ? ` (${k})` : ''; })()}</button>
-      ${tog('link','link','Links')}${tog('image','image','Images')}${tog('list','list','Lists')}${tog('archived','archive','Archived')}
+      <button type="button" class="btn ftoggle" data-act="filters" aria-expanded="${!!u.filtersOpen}">${icon('sliders')}Filters${(() => { const k = ['link','image','file','list','archived'].filter(x => u[x]).length + (u.range !== 'all' ? 1 : 0); return k ? ` (${k})` : ''; })()}</button>
+      ${tog('link','link','Links')}${tog('image','image','Images')}${IN_ARTIFACT ? '' : tog('file','clip','Files')}${tog('list','list','Lists')}${tog('archived','archive','Archived')}
       <label class="sr" for="range">Date range</label>
       <select id="range" class="fsel">${[['all','All time'],['7','Last 7 days'],['30','Last 30 days'],['90','Last 90 days']].map(([v, l]) => `<option value="${v}" ${u.range === v ? 'selected' : ''}>${l}</option>`).join('')}</select>
     </div>
@@ -1721,7 +1767,7 @@ function sortUndo(){
   S.ui.sortStats[h.what]--; putNote(clone(h.before)); render();
   if (S.ui.sortHist.length) toast(`Put back “${noteTitle(h.before)}”`, { undoFn: sortUndo, undoLabel: 'Undo the one before' });
 }
-const noteTitle = n => { const t = (n.text || (n.items || []).map(i => i.t).join(', ') || 'Photo').split('\n')[0]; return t.length > 40 ? t.slice(0, 39) + '…' : t; };
+const noteTitle = n => { const t = (n.text || (n.items || []).map(i => i.t).join(', ') || (n.files || [])[0]?.name || 'Photo').split('\n')[0]; return t.length > 40 ? t.slice(0, 39) + '…' : t; };
 function sortTally(){
   const st = S.ui.sortStats || {};
   return Object.keys(SORT_WORDS).filter(k => st[k] > 0).map(k => `<span class="tb-cell"><b>${st[k]}</b> ${SORT_WORDS[k][0]}</span>`).join('');
@@ -1816,7 +1862,7 @@ function renderCal(main){
     const first = ns.slice().sort((a, b) => a.createdAt - b.createdAt)[0];
     cells += `<button type="button" class="cell ${d.getMonth() !== m.getMonth() ? 'out' : ''} ${sameDay(d, today) ? 'today' : ''}" data-day="${d.getTime()}" aria-pressed="${S.ui.calDay === k}" aria-label="${d.toDateString()}: ${ns.length} notes, ${rs.length} reminders">
       <span class="dnum">${d.getDate()}</span>
-      ${first ? `<span class="snip">${esc((first.text || first.items?.[0]?.t || 'Image').slice(0, 40))}</span>` : ''}
+      ${first ? `<span class="snip">${esc((first.text || first.items?.[0]?.t || first.files?.[0]?.name || 'Image').slice(0, 40))}</span>` : ''}
       <span class="marks">${ns.length ? `<span>${ns.length} ${plural(ns.length, 'note', 'notes')}</span>` : ''}${rs.length ? `<span class="bell">${rs.length} ${plural(rs.length, 'reminder', 'reminders')}</span>` : ''}</span>
     </button>`;
   }
@@ -1877,7 +1923,7 @@ function render(){
     else { try { const d = sessionStorage.getItem('catchall.draft'); if (d) cap.value = d; } catch(e){} }
     autosize(); updatePreview(); renderThumbs();
   } else stopDictation();
-  micUI();
+  micUI(); recUI();
   if (qf != null && $('#q')){ $('#q').focus(); $('#q').setSelectionRange(qf, qf); }
   hydrateImgs();
   const due = liveNotes().filter(n => n.remind && !n.remind.sent && n.remind.at <= Date.now()).length;
@@ -1909,23 +1955,25 @@ function updatePreview(){
 }
 function renderThumbs(){
   const t = $('#thumbs'); if (!t) return;
-  t.innerHTML = S.ui.pending.map((src, i) => `<div class="thumb">${imgTag(src, `alt="Attached image ${i + 1}"`)}<button type="button" data-act="unpend" data-i="${i}" aria-label="Remove image">${icon('x')}</button></div>`).join('');
+  t.innerHTML = S.ui.pending.map((src, i) => `<div class="thumb">${imgTag(src, `alt="Attached image ${i + 1}"`)}<button type="button" data-act="unpend" data-i="${i}" aria-label="Remove image">${icon('x')}</button></div>`).join('')
+    + (S.ui.pendingFiles.length ? filesHTML(S.ui.pendingFiles, 'data-act="unpendfile"') : '');
+  hydrateImgs(t);
 }
 function capture(){
   const c = $('#cap'); if (!c) return;
   stopDictation(); S.ui.dictHint = false;
   const raw = c.value.replace(/\n- \s*$/, '');
   S.ui.listMode = false;
-  if (!raw.trim() && !S.ui.pending.length) { c.focus(); return; }
+  if (!raw.trim() && !S.ui.pending.length && !S.ui.pendingFiles.length) { c.focus(); return; }
   const r = parseCapture(raw);
   const tags = [...r.tagIds];
   for (const name of r.newTags){ const t = ensureTag(name); if (t && !tags.includes(t.id)) tags.push(t.id); }
   if (S.ui.tag !== 'all' && S.ui.tag !== 'pinned' && S.ui.tag !== 'untagged' && tagById(S.ui.tag) && !tags.includes(S.ui.tag) && S.settings.view === 'feed') tags.push(S.ui.tag);
   const now = Date.now();
   const n = { id: uid('n'), kind: r.kind, text: r.text, items: r.items, tags, pinned:false, archived:false, createdAt: now, updatedAt: now, remind: r.remind, images: S.ui.pending.slice() };
-  if (!n.text && !n.items.length && n.images.length) n.text = '';
+  if (S.ui.pendingFiles.length) n.files = S.ui.pendingFiles.slice();
   putNote(n);
-  c.value = ''; S.ui.pending = [];
+  c.value = ''; S.ui.pending = []; S.ui.pendingFiles = [];
   try { sessionStorage.removeItem('catchall.draft'); } catch(e){}
   if (S.ui.archived){ S.ui.archived = false; }
   render(); $('#cap')?.focus();
@@ -1944,8 +1992,10 @@ async function compress(file, maxDim, q){
   } finally { URL.revokeObjectURL(url); }
 }
 async function addImages(files){
-  const imgs = [...files].filter(f => f.type.startsWith('image/'));
-  if (!imgs.length) return;
+  const all = [...files], imgs = all.filter(f => f.type.startsWith('image/') && !/svg|gif/.test(f.type));
+  const others = IN_ARTIFACT ? [] : all.filter(f => !imgs.includes(f));
+  for (const f of others) await addFile(f, f.name);
+  if (!imgs.length){ renderThumbs(); updatePreview(); return; }
   for (const f of imgs){
     if (S.ui.pending.length >= 4){ toast('Up to 4 images per note.'); break; }
     try {
@@ -1963,6 +2013,55 @@ async function addImages(files){
     } catch(e){ toast('That image could not be read. Try a JPEG or PNG.'); }
   }
   renderThumbs(); updatePreview(); hydrateImgs();
+}
+
+/* Files and voice memos (standalone copy): kept whole, up to 5 MB each and 4 per note. */
+const FILE_MAX = 5e6;
+const blobToData = b => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = () => rej(r.error); r.readAsDataURL(b); });
+async function addFile(blob, name, dur){
+  if (S.ui.pendingFiles.length >= 4){ toast('Up to 4 files per note.'); return; }
+  if (blob.size > FILE_MAX){ toast(`“${name}” is ${fSize(blob.size)}. Files can be up to 5 MB.`); return; }
+  try {
+    const d = await blobToData(blob);
+    const f = { ref: await storePhoto(d), name: name || 'File', type: blob.type || 'application/octet-stream', size: blob.size };
+    if (dur) f.dur = dur;
+    S.ui.pendingFiles.push(f);
+  } catch(e){ toast(`“${name}” could not be read.`); }
+}
+
+/* Voice memos: Record starts the microphone, Stop keeps the memo with the note being written.
+   iPhone records AAC (audio/mp4), which every browser plays; others fall back to WebM. */
+const canRecord = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder);
+let recM = null;
+function recUI(){
+  const b = $('#recBtn'); if (!b) return;
+  b.setAttribute('aria-pressed', recM ? 'true' : 'false');
+  b.innerHTML = recM ? `${icon('stop')}<span>Stop · ${fDur((Date.now() - recM.t0) / 1000)}</span>` : `${icon('rec')}<span>Record</span>`;
+}
+async function recordToggle(){
+  if (recM){ recM.mr.stop(); return; }
+  if (S.ui.pendingFiles.length >= 4){ toast('Up to 4 files per note.'); return; }
+  let stream;
+  try { stream = await navigator.mediaDevices.getUserMedia({ audio: true }); }
+  catch(e){ toast(e && e.name === 'NotFoundError' ? MIC_ERRORS['audio-capture'] : IS_IOS ? 'Catchall needs the microphone. On iPhone: Settings → Safari → Microphone → Allow (or Ask), then press Record again.' : MIC_ERRORS['not-allowed'], { ms: 12000 }); return; }
+  const type = ['audio/mp4', 'audio/webm;codecs=opus', 'audio/webm'].find(t => MediaRecorder.isTypeSupported(t)) || '';
+  let mr; try { mr = new MediaRecorder(stream, type ? { mimeType: type, audioBitsPerSecond: 48000 } : {}); } catch(e){ stream.getTracks().forEach(t => t.stop()); toast("This browser can't record audio."); return; }
+  const chunks = [], t0 = Date.now();
+  mr.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
+  mr.onstop = async () => {
+    stream.getTracks().forEach(t => t.stop());
+    if (recM && recM.mr === mr){ clearInterval(recM.timer); clearTimeout(recM.cap); recM = null; }
+    recUI();
+    const blob = new Blob(chunks, { type: (mr.mimeType || type || 'audio/webm').split(';')[0] });
+    const dur = Math.max(1, Math.round((Date.now() - t0) / 1000));
+    if (blob.size < 200) { toast('Nothing was recorded. Check the microphone and try again.'); return; }
+    await addFile(blob, 'Voice memo', dur);
+    renderThumbs(); updatePreview();
+    toast(`Voice memo added (${fDur(dur)}). Save to keep it.`);
+  };
+  mr.start(1000);
+  recM = { mr, t0, timer: setInterval(recUI, 500), cap: setTimeout(() => { if (recM && recM.mr === mr){ mr.stop(); toast('Recording stopped at 10 minutes.'); } }, 600e3) };
+  recUI();
 }
 
 /* ---------- reminders engine ---------- */
@@ -2034,7 +2133,7 @@ let edState = null;
 const toLocalInput = t => { const d = new Date(t); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 16); };
 function openEditor(id, opts = {}){
   const n = S.notes.get(id); if (!n) return;
-  edState = { id, tags: [...(n.tags || [])], images: [...(n.images || [])], color: n.color || '' };
+  edState = { id, tags: [...(n.tags || [])], images: [...(n.images || [])], files: [...(n.files || [])], color: n.color || '' };
   const text = n.kind === 'list' ? [n.text, ...n.items.map(i => `- [${i.done ? 'x' : ' '}] ${i.t}`)].filter(s => s !== '').join('\n') : n.text;
   const r = n.remind;
   $('#edForm').innerHTML = `<h2 id="edH">Edit note <button type="button" class="btn dlg-close" data-ed="close">${icon('x')}Close</button></h2>
@@ -2048,6 +2147,7 @@ function openEditor(id, opts = {}){
       <button type="button" class="btn" data-ed="clearrem">Clear</button></div>
       ${r && r.sent ? '<p class="small">This reminder was already sent. Pick a new time to set it again.</p>' : ''}
     </div>
+    <div class="set-sec" id="edFileWrap"><h3>Files and voice memos</h3><div id="edFiles"></div></div>
     <div class="set-sec" id="edImgWrap"><h3>Images</h3><div class="thumbs" id="edImgs"></div></div>
     <div class="dlg-foot"><button type="button" class="btn danger left" data-ed="delete">${icon('trash')}Delete</button><button type="button" class="btn" data-ed="close">Cancel</button><button type="submit" class="btn primary">Save</button></div>`;
   renderEdTags(); renderEdImgs(); hydrateImgs($('#edForm'));
@@ -2059,6 +2159,8 @@ function renderEdTags(){
     + `<button type="button" class="chip add" data-ed="newtag">${icon('plus')}New tag</button>`;
 }
 function renderEdImgs(){
+  $('#edFileWrap').hidden = !edState.files.length;
+  $('#edFiles').innerHTML = edState.files.length ? filesHTML(edState.files, 'data-ed="rmfile"') : '';
   $('#edImgWrap').hidden = !edState.images.length;
   $('#edImgs').innerHTML = edState.images.map((src, i) => `<div class="thumb">${imgTag(src, 'alt=""')}<button type="button" data-ed="rmimg" data-i="${i}" aria-label="Remove image">${icon('x')}</button></div>`).join('');
 }
@@ -2075,8 +2177,9 @@ function saveEditor(){
     const was = n.remind;
     remind = { at, repeat: rep, sent: was && was.at === at && was.sent && was.repeat === rep ? true : false };
   }
-  const dropped = (n.images || []).filter(v => !edState.images.includes(v));
-  putNote({ ...n, kind: st.kind, text: st.text, items: st.items, tags, images: edState.images, remind, color: edState.color });
+  const keep = new Set([...edState.images, ...edState.files.map(f => f.ref)]);
+  const dropped = blobRefs(n).filter(v => !keep.has(v));
+  putNote({ ...n, kind: st.kind, text: st.text, items: st.items, tags, images: edState.images, files: edState.files, remind, color: edState.color });
   if (dropped.length) trashImages(dropped);
   $('#edDlg').close(); render(); toast('Saved');
 }
@@ -2146,7 +2249,12 @@ function renderTagRows(){
     : '<p class="small">No tags yet. Add one here, or type #something in a note.</p>';
 }
 async function withPhotos(ns){
-  return Promise.all(ns.map(async n => (n.images || []).some(isRef) ? { ...n, images: (await Promise.all(n.images.map(async v => isRef(v) ? await imgData(v) : v))).filter(Boolean) } : n));
+  return Promise.all(ns.map(async n => {
+    if (!blobRefs(n).some(isRef)) return n;
+    const images = (await Promise.all((n.images || []).map(async v => isRef(v) ? await imgData(v) : v))).filter(Boolean);
+    const files = (await Promise.all((n.files || []).map(async f => { const data = isRef(f.ref) ? await imgData(f.ref) : null; return data ? { ...f, ref: undefined, data } : null; }))).filter(Boolean);
+    return { ...n, images, ...(files.length ? { files } : {}) };
+  }));
 }
 async function exportNotes(fmt){
   const scope = $('#expScope')?.value || 'all';
@@ -2199,6 +2307,7 @@ async function importFile(file){
       const cur = S.notes.get(n.id);
       if (!cur || cur.deleted || (n.updatedAt || 0) > (cur.updatedAt || 0)){
         if (!IN_ARTIFACT && (n.images || []).length) n.images = await Promise.all(n.images.map(v => typeof v === 'string' && v.startsWith('data:image/') ? storePhoto(v) : v));
+        if (!IN_ARTIFACT && (n.files || []).length) n.files = await Promise.all(n.files.map(async f => f.data ? (({ data, ...rest }) => storePhoto(data).then(ref => ({ ...rest, ref })))(f) : f));
         S.notes.set(n.id, n); push(n.id); added++;
       }
     }
@@ -2221,7 +2330,7 @@ document.addEventListener('click', e => {
     }
   }
   // On phones a tap anywhere on a note sheet shows that note's actions (and hides the others').
-  if (matchMedia('(max-width:640px)').matches && !e.target.closest('button, a, select, input, label, textarea')){
+  if (matchMedia('(max-width:640px)').matches && !e.target.closest('button, a, select, input, label, textarea, audio')){
     const sheet = e.target.closest('.note[data-id], .rrow');
     const sid = sheet && (sheet.dataset.id || sheet.querySelector('[data-id]')?.dataset.id);
     if (sid){ S.ui.openNote = S.ui.openNote === sid ? null : sid; render(); return; }
@@ -2253,6 +2362,8 @@ document.addEventListener('click', e => {
     case 'attach': $('#fileImg').click(); break;
     case 'unpend': { const [r] = S.ui.pending.splice(+d.i, 1); if (isRef(r)) imgDel(r); renderThumbs(); break; }
     case 'mic': dictate(); break;
+    case 'record': recordToggle(); break;
+    case 'unpendfile': { const [f] = S.ui.pendingFiles.splice(+d.i, 1); if (f) imgDel(f.ref); renderThumbs(); updatePreview(); break; }
     case 'dicthintx': S.ui.dictHint = false; $('.dict-hint')?.remove(); break;
     case 'more': S.ui.limit += 60; render(); break;
     case 'shortcuts': openShortcuts(); break;
@@ -2269,7 +2380,7 @@ document.addEventListener('click', e => {
     case 'tagup': case 'tagdown': break;
     case 'openacts': S.ui.openNote = S.ui.openNote === id ? null : id; render(); break;
     case 'filters': S.ui.filtersOpen = !S.ui.filtersOpen; render(); break;
-    case 'clearf': Object.assign(S.ui, { tag:'all', q:'', link:false, image:false, list:false, archived:false, range:'all' }); render(); break;
+    case 'clearf': Object.assign(S.ui, { tag:'all', q:'', link:false, image:false, file:false, list:false, archived:false, range:'all' }); render(); break;
     case 'newtag': openNewTag(); break;
     case 'pin': putNote({ ...n, pinned: !n.pinned }); render(); break;
     case 'archive': { const before = clone(n); putNote({ ...n, archived: !n.archived }); render(); toast(n.archived ? 'Moved back to the feed' : 'Archived', { undoFn: () => { putNote(clone(before)); render(); } }); break; }
@@ -2314,6 +2425,7 @@ function edAction(a, t){
   else if (a === 'color'){ edState.color = t.dataset.c === 'none' ? '' : t.dataset.c; document.querySelectorAll('#edColors .nswatch').forEach(b => b.setAttribute('aria-pressed', String(b === t))); }
   else if (a === 'clearrem'){ $('#edAt').value = ''; $('#edRep').value = ''; }
   else if (a === 'rmimg'){ edState.images.splice(+t.dataset.i, 1); renderEdImgs(); }
+  else if (a === 'rmfile'){ edState.files.splice(+t.dataset.i, 1); renderEdImgs(); hydrateImgs($('#edForm')); }
   else if (a === 'newtag'){ const name = $('#edText').value; $('#edDlg').close(); openNewTag(tag => { openEditor(edState.id); $('#edText').value = name; edState.tags.push(tag.id); renderEdTags(); }); }
   else if (a === 'delete'){
     const before = clone(S.notes.get(edState.id));
@@ -2503,7 +2615,7 @@ $('#lbDlg').addEventListener('click', e => {
 document.addEventListener('paste', e => {
   if (e.target.id !== 'cap') return;
   const files = [...(e.clipboardData?.files || [])];
-  if (files.some(f => f.type.startsWith('image/'))){ e.preventDefault(); addImages(files); }
+  if (files.length && (!IN_ARTIFACT || files.some(f => f.type.startsWith('image/')))){ e.preventDefault(); addImages(files); }
 });
 document.addEventListener('dragover', e => {
   const comp = e.target.closest?.('#composer');
@@ -2545,7 +2657,7 @@ function stopDictation(){
   if (!rec) return;
   const r = rec; rec = null; clearTimeout(recTimer);
   try { r.abort(); } catch(e){}
-  micUI();
+  micUI(); recUI();
 }
 /* iPhone and iPad give Home Screen apps no speech recognition, so there the button points
    to the keyboard's own microphone key, which works in any text box. */
@@ -2585,7 +2697,7 @@ function dictate(){
   r.onend = () => { if (rec === r){ rec = null; clearTimeout(recTimer); micUI(); $('#cap')?.focus(); } };
   rec = r;
   try { r.start(); } catch(e){ rec = null; toast('Dictation couldn\'t start. Press Dictate to try again.'); }
-  micUI();
+  micUI(); recUI();
 }
 
 /* Swipe the Sort card: right keeps it, left archives (or deletes, per Settings). */
@@ -2604,6 +2716,7 @@ function dictate(){
 /* ---------- boot ---------- */
 $('#brandmark').innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><g transform="rotate(-7 12 13)"><path d="M4 5h16v11l-5 5H4z" fill="#ffd648"/><path d="M15 21v-5h5z" fill="#e2b228"/></g><circle cx="12" cy="6.2" r="3.1" fill="#e5484d"/><circle cx="11" cy="5.2" r="1" fill="#ff9696"/></svg>';
 $('#openSettings').innerHTML = icon('sliders') + '<span>Settings</span>';
+if (!IN_ARTIFACT) $('#fileImg').removeAttribute('accept'); // photos and any other file
 $('#openSettings').addEventListener('click', openSettings);
 $('#sync').addEventListener('click', openSettings);
 window.addEventListener('resize', autosize);
@@ -2612,7 +2725,7 @@ clearInterval(window.__catchallTick); window.__catchallTick = setInterval(tick, 
 document.addEventListener('visibilitychange', () => { if (!document.hidden) tick(); });
 initSync();
 // Tells the update script when installing a new version now would interrupt something.
-window.__appBusy = () => S.ui.pending.length > 0 || !!($('#cap') && $('#cap').value.trim()) || !!document.querySelector('dialog[open]');
+window.__appBusy = () => S.ui.pending.length > 0 || S.ui.pendingFiles.length > 0 || !!recM || !!($('#cap') && $('#cap').value.trim()) || !!document.querySelector('dialog[open]');
 window.__catchallTest = { parseReminder, parseCapture, parseStructure, nextOccurrence };
 })();
 </script>
