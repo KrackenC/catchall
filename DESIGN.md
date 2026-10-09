@@ -298,7 +298,7 @@ Every color in the stylesheet is a token. Component rules reference tokens only.
 
 A single centered column (max 740px) inside a 1200px frame, with 18px top and 16px side padding and 80px of bottom room above the toasts. The header is sticky and spans the full width; its contents share the 1200px frame. Sheets stack with a 12px gap (`--gap`) and a 14px inset (`--pad`); the compact density setting sets these to 8px and 10px. Stacks of sections sit 16px apart.
 
-The Board is a horizontal track of columns at least 260px wide, 12px apart, scrolling sideways. The Calendar is a seven-column grid with 4px gaps and 88px cells (54px on phones, snippets hidden). Reminders rows put a fixed 6.5rem time column on the left so times line up.
+The Board is a horizontal track of columns at least 260px wide, 12px apart, scrolling sideways. The Calendar is one ruled sheet of seven columns. Each day's counts sit at the foot of its cell: words on wider screens ("3 notes", "2 reminders" in a teal-wash pill), and on phones just the number and a bell with its number, so they always fit the cell; snippets are hidden on phones. Reminders rows put a fixed 6.5rem time column on the left so times line up.
 
 At 640px and below, the header is one row (wordmark, sync, Settings) and the view tabs move to a sage bar fixed at the bottom of the screen, in thumb reach: five equal tabs, each an icon above its word, at least 48px tall, clearing the home indicator. Secondary filters open as a sheet from the bottom with Done at the foot; a note's extra actions (Edit, Remove reminder, Delete) open the same kind of sheet from its More button, so the buttons on a note never move. At 560px the reminder text moves above its time.
 
@@ -328,7 +328,8 @@ Plain, labeled, one shape.
 - **Secondary:** sheet fill, 1px hairline border, graphite text; hover deepens the border to graphite-soft and fills with sheet tint. No press motion.
 - **Go:** sage (Sage Shell) fill with shell ink, 600 weight. The one strong button for moving on or switching something on: Back to Feed after sorting, Connect, Turn on, Done in a sheet. Never for Save or Delete, and never more than one per view.
 - **Toggle (pressed):** blue text and border on the blue wash (Pin, filter toggles).
-- **Danger:** red text with a red-tinted border at rest, fills solid red on hover. Delete has Undo, so it is not hidden behind a menu.
+- **Danger:** clay text with a clay-tinted border, fills solid clay on hover. Used only for deleting or erasing (Delete in sheets, Sort, the select bar, Erase everything). Turning something off or disconnecting is a secondary button, never clay.
+- **Delete in a note's action row:** reads muted graphite-soft at rest so a row of notes isn't a column of clay, and turns clay on hover or keyboard focus. It always has Undo.
 - **Header buttons:** transparent, a 28% white outline, shell ink, condensed label; hover fills with deep shell green.
 
 ### Chips
@@ -350,7 +351,7 @@ Plain, labeled, one shape.
 - **Focus everywhere:** a 2px teal outline offset 2px.
 
 ### Navigation
-The shell header is a sage band: the wordmark (condensed 700 24px) with the sticky-note brand mark on a deep-sage tile, then the view tabs in a deep-sage tray (10px corners). Inactive tabs are shell-ink-soft condensed 600 15px; hover brightens to shell ink; the active tab is a sheet-colored tab with graphite text, like a page pulled forward. A clay badge on Reminders counts what's due. Sync state sits beside the tabs as a dot and words, and on phones only the dot shows while all is well.
+The shell header is a sage band: the wordmark (condensed 700 24px) with the sticky-note brand mark on a deep-sage tile, then the view tabs in a deep-sage tray (10px corners). Inactive tabs are shell-ink-soft condensed 600 15px; hover brightens to shell ink; the active tab is a sheet-colored tab with graphite text, like a page pulled forward. A clay badge on Reminders counts what's due. In dark mode the active tab is the deeper sheet tint with a 2px teal rule along its foot, since a light tab would glare on the dark shell. On phones the tabs move to a bar at the bottom (see Layout). Sync state sits beside the tabs as a dot and words, and on phones only the dot shows while all is well.
 
 ### Title Block (signature)
 The ruled heading box from a computation sheet, built by `titleBlock()`. A 1.5px rule-sage frame with 4px corners over a 70% sheet wash. The label (Title role) fills the left; to its right, cells split off by 1.5px vertical rules hold counts in condensed 500 14px with the number bold and tabular: "4 notes", "1 reminder". When anything in the group is due, that cell fills clay and reads "due now". It heads each Feed day, the Pinned sheet, the selected calendar day and each Reminders section. Board columns carry the same idea as their header: a sheet-colored strip with a 1.5px rule beneath the column name, inside a 1.5px rule-sage column frame.

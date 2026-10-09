@@ -823,6 +823,39 @@ html{scrollbar-color:color-mix(in srgb,var(--muted) 55%,transparent) transparent
 .wk-card{margin:0;padding:10px 12px;border-left:0;border:1px solid var(--line);border-radius:8px;background:var(--surface-2);display:flex;flex-direction:column;gap:2px;font-size:16px}
 .wk-card b{font:700 14px var(--font-display);color:var(--muted)}
 .set-help{margin:0}
+
+/* ---------- 13. Phone calendar counts, tap targets, sheet and settings polish ---------- */
+.cal .cell > *{max-width:100%;min-width:0}
+.cell .marks{margin-top:auto;overflow:hidden}
+.cell .m-short{display:none}
+.cell .bell{display:inline-flex;align-items:center;gap:3px;white-space:nowrap}
+.cell .bell .i{width:11px;height:11px;flex:none}
+.items li{cursor:pointer}
+.items li .item-x,.items li a{cursor:auto}
+#setH{position:sticky;top:0;z-index:3;margin:-18px -18px 0;padding:18px 18px 12px;background:var(--surface);border-bottom:1px solid var(--line)}
+.set-foot{display:none}
+body:has(.selbar) .toasts{bottom:calc(16px + var(--selh,72px) + 10px + env(safe-area-inset-bottom,0px))}
+body:has(.fsheet) .toasts{top:calc(env(safe-area-inset-top,0px) + 12px);bottom:auto}
+@media (max-width:640px){
+  .cell .m-full{display:none}
+  .cell .m-short{display:inline}
+  .cell .marks{gap:4px;font-size:12px;flex-wrap:nowrap}
+  .cell .bell{padding:1px 4px}
+  .set-foot{display:block;position:sticky;bottom:0;margin:0 -18px -18px;padding:12px 18px calc(18px + env(safe-area-inset-bottom,0px));background:var(--surface);border-top:1px solid var(--line)}
+  .set-foot .btn{width:100%;justify-content:center;min-height:48px;font-size:16px}
+  body:has(.selbar) .toasts{bottom:calc(var(--tabh) + var(--selh,118px) + 18px)}
+  .bcol .n-actions .act + .act::before{display:none}
+  .picker,.sort-file{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-mask-image:linear-gradient(90deg,#000 88%,transparent);mask-image:linear-gradient(90deg,#000 88%,transparent)}
+  .picker::-webkit-scrollbar,.sort-file::-webkit-scrollbar{display:none}
+  .picker .chip{flex:none}
+}
+@media (pointer:coarse){
+  .toast button{min-height:44px;padding:0 14px}
+  .selbar .act,.selbar .btn,.selbar .tagsel{min-height:44px}
+  .trow input{min-height:44px}
+  .swatch{position:relative}
+  .swatch::after{content:"";position:absolute;inset:-9px}
+}
 </style>
 
 <header class="top">
@@ -1158,7 +1191,7 @@ function syncSectionHTML(){
     return `<div class="set-sec"><h3>Sync across devices</h3>
       ${gist.err ? `<p class="sync-err">${esc(gist.err)}</p>` : `<p class="small">Connected to your private GitHub gist${ago == null ? '' : ago < 1 ? ' · synced just now' : ` · synced ${ago} min ago`}. Changes sync within a few seconds, and when you switch back to the app.</p>`}
       <p class="sync-diag">Last received: ${esc(agoText(gist.lastPull))} · Last sent from this device: ${esc(agoText(gist.lastPush))}</p>
-      <div class="row"><button type="button" class="btn" data-set="syncnow">Sync now</button><button type="button" class="btn" data-set="qr">Show code for phone</button><button type="button" class="btn danger" data-set="disconnect">Disconnect this device</button></div>
+      <div class="row"><button type="button" class="btn" data-set="syncnow">Sync now</button><button type="button" class="btn" data-set="qr">Show code for phone</button><button type="button" class="btn" data-set="disconnect">Disconnect this device</button></div>
       <div id="qrBox"></div></div>`;
   }
   return `<div class="set-sec"><h3>Sync across devices</h3>
@@ -1371,7 +1404,7 @@ function inboxSectionHTML(){
       <li>Tap the <b>i</b> (shortcut details), turn on <b>Show in Share Sheet</b>, and under “If there's no input” choose <b>Ask For Text</b>.</li>
     </ol>
     <p class="small">Now share a link or text to <b>Save to Catchall</b>, or say “Hey Siri, Save to Catchall” and speak your note. Typed tricks work too: “remind me to call mom in 30 minutes”, #tags, and “- ” lists.</p>
-    <div class="row"><button type="button" class="btn" data-set="inboxtest">Send a test note</button><button type="button" class="btn" data-set="inboxqr">Show address as QR code</button><button type="button" class="btn quiet-del" data-set="inboxoff">Turn off</button></div>
+    <div class="row"><button type="button" class="btn" data-set="inboxtest">Send a test note</button><button type="button" class="btn" data-set="inboxqr">Show address as QR code</button><button type="button" class="btn" data-set="inboxoff">Turn off</button></div>
     <div id="inboxQr"></div>
     <p class="small">New items show up the next time Catchall is open, or within about 15 minutes through the background job. Keep the address private: anyone who has it can add notes.</p></div>`;
 }
@@ -1401,7 +1434,7 @@ function pushSectionHTML(){
     <div class="row set-row"><span class="set-lbl" style="width:auto">Notifications show</span><div class="seg" role="group"><button type="button" data-set="pushtext" data-v="1" aria-pressed="${S.push.showText !== false}">The reminder</button><button type="button" data-set="pushtext" data-v="0" aria-pressed="${S.push.showText === false}">Just “Open Catchall”</button></div></div>
     <div class="row"><button type="button" class="btn" data-set="pushtest">Send test</button>
 
-      <button type="button" class="btn danger" data-set="pushoff">Turn off</button></div>
+      <button type="button" class="btn" data-set="pushoff">Turn off</button></div>
     <p class="small">Each reminder is handed to ntfy in the 45 minutes before it's due, by a background job that runs every 15 minutes even when no device has Catchall open (or sooner, by any open copy of Catchall). If you change or delete a reminder in those last 45 minutes, the original may still arrive. Treat the topic name like a password: anyone who has it can see these notifications.</p>
     ${gist.id ? '' : '<p class="small"><b>Turn on Sync across devices too.</b> The background job reads your reminders from the synced copy.</p>'}</div>`;
 }
@@ -1850,7 +1883,7 @@ function fsheetHTML(){
   const tog = (k, ic, label) => `<button type="button" class="ftog" data-tog="${k}" aria-pressed="${!!u[k]}">${icon(ic)}${label}</button>`;
   return `<button type="button" class="fscrim" data-act="filters" aria-label="Close filters"></button>
   <section class="fsheet" role="dialog" aria-label="Filters">
-    <header class="tblock"><h2>Filters</h2><button type="button" class="btn" data-act="filters">${icon('check')}Done</button></header>
+    <header class="tblock"><h2>Filters</h2></header>
     <h3 class="fs-h">Show only</h3>
     <div class="fs-grid">${tog('link','link','Links')}${tog('image','image','Images')}${IN_ARTIFACT ? '' : tog('file','clip','Files')}${tog('list','list','Lists')}${tog('archived','archive','Archived')}</div>
     <label class="fs-row"><span>Dates</span><select class="fsel" data-f="range">${[['all','All time'],['7','Last 7 days'],['30','Last 30 days'],['90','Last 90 days']].map(([v, l]) => `<option value="${v}" ${u.range === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
@@ -2071,7 +2104,7 @@ function renderCal(main){
     cells += `<button type="button" class="cell ${d.getMonth() !== m.getMonth() ? 'out' : ''} ${sameDay(d, today) ? 'today' : ''}" data-day="${d.getTime()}" aria-pressed="${S.ui.calDay === k}" aria-label="${d.toDateString()}: ${ns.length} notes, ${rs.length} reminders">
       <span class="dnum">${d.getDate()}</span>
       ${first ? `<span class="snip">${esc((first.text || first.items?.[0]?.t || first.files?.[0]?.name || 'Image').slice(0, 40))}</span>` : ''}
-      <span class="marks">${ns.length ? `<span>${ns.length} ${plural(ns.length, 'note', 'notes')}</span>` : ''}${rs.length ? `<span class="bell">${rs.length} ${plural(rs.length, 'reminder', 'reminders')}</span>` : ''}</span>
+      <span class="marks">${ns.length ? `<span class="mk"><span class="m-full">${ns.length} ${plural(ns.length, 'note', 'notes')}</span><span class="m-short" aria-hidden="true">${ns.length}</span></span>` : ''}${rs.length ? `<span class="bell">${icon('bell')}<span class="m-full">${rs.length} ${plural(rs.length, 'reminder', 'reminders')}</span><span class="m-short" aria-hidden="true">${rs.length}</span></span>` : ''}</span>
     </button>`;
   }
   let day = '';
@@ -2132,6 +2165,7 @@ function render(){
   } else stopDictation();
   micUI(); recUI(); memoUI();
   if (S.ui.actSheet && isPhoneWidth()) main.insertAdjacentHTML('beforeend', actSheetHTML());
+  const sb = $('.selbar'); document.body.style.setProperty('--selh', (sb ? sb.offsetHeight : 0) + 'px');
   if (qf != null && $('#q')){ $('#q').focus(); $('#q').setSelectionRange(qf, qf); }
   // keep the note chosen from the keyboard after the feed is redrawn
   if (S.ui.kbId && v === 'feed' && !document.querySelector('dialog[open]') && (!document.activeElement || document.activeElement === document.body)){
@@ -2486,7 +2520,8 @@ function openSettings(only){
       <div class="row"><label class="sr" for="expScope">Which notes</label><select id="expScope" class="fsel"><option value="all">All notes</option><option value="view">Only what the feed is showing</option><option value="pinned">Pinned notes</option></select>
       <button type="button" class="btn" data-exp="md">${icon('download')}Markdown</button><button type="button" class="btn" data-exp="csv">CSV</button><button type="button" class="btn" data-exp="json">JSON backup</button></div>
       <div class="row"><button type="button" class="btn" data-set="import">Restore from JSON backup</button><button type="button" class="btn danger" data-set="wipe" id="wipeBtn">Erase everything</button></div></div>`)}
-    <p class="small set-help"><button type="button" class="linkbtn" data-act="shortcuts">${icon('bolt')}Typing shortcuts and keys</button></p>`;
+    <p class="small set-help"><button type="button" class="linkbtn" data-act="shortcuts">${icon('bolt')}Typing shortcuts and keys</button></p>
+    <div class="set-foot"><button type="button" class="btn shell" data-set="close">Done</button></div>`;
   if (focusSel){ const el = $('#setBody').querySelector(focusSel); if (el) el.focus({ preventScroll: true }); }
   if (dlg.open) dlg.scrollTop = keepTop;
   renderTagRows();
@@ -2582,6 +2617,8 @@ document.addEventListener('click', e => {
       S.ui.selLast = id; render(); return;
     }
   }
+  // tapping anywhere on a checklist line ticks it, like a paper list
+  { const li = e.target.closest('.items li'); if (li && !e.target.closest('button, a, input, label, select') && !S.ui.selecting){ li.querySelector('.cbox')?.click(); return; } }
   // a choice in the More sheet closes the sheet, then does its job
   if (e.target.closest('.asheet [data-act]:not([data-act="openacts"])')){ S.ui.actSheet = null; document.querySelector('.asheet-wrap')?.remove(); }
   const t = e.target.closest('button, [data-day]'); if (!t) return;
