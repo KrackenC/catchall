@@ -300,7 +300,7 @@ A single centered column (max 740px) inside a 1200px frame, with 18px top and 16
 
 The Board is a horizontal track of columns at least 260px wide, 12px apart, scrolling sideways. The Calendar is a seven-column grid with 4px gaps and 88px cells (54px on phones, snippets hidden). Reminders rows put a fixed 6.5rem time column on the left so times line up.
 
-At 640px and below, the view tabs drop to their own full-width row with icons hidden and equal-width labels; header buttons keep their words; secondary filters fold behind a Filters toggle while search stays visible. At 560px the reminder text moves above its time.
+At 640px and below, the header is one row (wordmark, sync, Settings) and the view tabs move to a sage bar fixed at the bottom of the screen, in thumb reach: five equal tabs, each an icon above its word, at least 48px tall, clearing the home indicator. Secondary filters open as a sheet from the bottom with Done at the foot; a note's extra actions (Edit, Remove reminder, Delete) open the same kind of sheet from its More button, so the buttons on a note never move. At 560px the reminder text moves above its time.
 
 ## Elevation & Depth
 
@@ -326,6 +326,7 @@ Plain, labeled, one shape.
 - **Shape:** gently squared (8px), at least 36px tall, an icon beside the word.
 - **Primary:** Save only, clay fill with white bold text and a small shadow; darkens about 12% on hover.
 - **Secondary:** sheet fill, 1px hairline border, graphite text; hover deepens the border to graphite-soft and fills with sheet tint. No press motion.
+- **Go:** sage (Sage Shell) fill with shell ink, 600 weight. The one strong button for moving on or switching something on: Back to Feed after sorting, Connect, Turn on, Done in a sheet. Never for Save or Delete, and never more than one per view.
 - **Toggle (pressed):** blue text and border on the blue wash (Pin, filter toggles).
 - **Danger:** red text with a red-tinted border at rest, fills solid red on hover. Delete has Undo, so it is not hidden behind a menu.
 - **Header buttons:** transparent, a 28% white outline, shell ink, condensed label; hover fills with deep shell green.
@@ -355,7 +356,7 @@ The shell header is a sage band: the wordmark (condensed 700 24px) with the stic
 The ruled heading box from a computation sheet, built by `titleBlock()`. A 1.5px rule-sage frame with 4px corners over a 70% sheet wash. The label (Title role) fills the left; to its right, cells split off by 1.5px vertical rules hold counts in condensed 500 14px with the number bold and tabular: "4 notes", "1 reminder". When anything in the group is due, that cell fills clay and reads "due now". It heads each Feed day, the Pinned sheet, the selected calendar day and each Reminders section. Board columns carry the same idea as their header: a sheet-colored strip with a 1.5px rule beneath the column name, inside a 1.5px rule-sage column frame.
 
 ### Sort
-One note at a time on a single sheet, oldest first. Below it sit the choices: "File under" tag chips, then Keep, Pin, Archive and Delete. On a Mac each choice shows its key in a small keycap (1–9, K, P, A, ⌫; Z undoes). On a phone the choices sit in a docked sheet at the bottom of the screen, in thumb reach, with the four actions as equal stacked buttons. Swiping moves the card sideways without tilting it; a word in a ruled box ("Keep" in teal, "Archive" in graphite, "Delete" in clay) and a matching 2px ring say what letting go will do. Every choice stamps the note as sorted, so it leaves the queue on every device. The last screen is a sheet titled "All sorted" with a tally of what happened in ruled count cells.
+One note at a time on a single sheet, oldest first. Below it sit the choices: "File under" tag chips, then Keep, Pin, Archive and Delete. On a Mac each choice shows its key in a small keycap (1–9, K, P, A, ⌫; Z undoes). On a phone the choices sit in a docked sheet at the bottom of the screen, in thumb reach, with the four actions as equal stacked buttons. Swiping moves the card sideways without tilting it; a word in a ruled box ("Keep" in teal, "Archive" in graphite, "Delete" in clay) and a matching 2px ring say what letting go will do. Every choice stamps the note as sorted, so it leaves the queue on every device. The last screen is a sheet titled "All sorted"; its title block ends in a teal-inked "Done" cell (a ruled cell with a check, never a boxed button shape), followed by a ruled tally of the round that lasts until "Start over from the oldest note". On phones only the counts above zero show.
 
 ## Do's and Don'ts
 

@@ -892,6 +892,44 @@ html{scrollbar-gutter:stable}
   .tally .tb-cell:not(.zero) ~ .tb-cell:not(.zero){border-left:1.5px solid var(--rule)}
   .tally .tb-cell{border-left:0}
 }
+
+/* ---------- v33: steady phone buttons, bottom tabs, tidy button styles ---------- */
+/* Done is a ruled cell of the title block, inked in teal: a mark, not a button */
+.sort-end .tblock{align-items:stretch}
+.stamp{margin:0;padding:0 18px;border:0;border-left:1.5px solid var(--rule);border-radius:0;box-shadow:none;background:color-mix(in srgb,var(--blue-wash) 55%,transparent);color:var(--blue);font:700 16px/1 var(--font-display);gap:6px;animation:fadein .5s ease-out both .1s}
+.stamp .i{width:16px;height:16px}
+.fs-done{justify-content:center;min-height:48px;font-size:16px}
+.as-btns{display:flex;flex-direction:column;gap:8px}
+.as-btns .btn{justify-content:flex-start;min-height:48px;font-size:16px;gap:10px}
+.asheet > .tblock h2{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+@media (max-width:640px){
+  .note.open .n-actions .act:not(.prime):not(.acts-toggle),.rrow.open .n-actions .act:not(.prime):not(.acts-toggle){display:none}
+  .bcol .n-actions{flex-wrap:nowrap}
+  .bcol .n-actions .act{padding:0 6px;font-size:13px;gap:4px}
+  /* view tabs live in a bar at the bottom of the screen, in thumb reach; the top is one row */
+  :root{--tabh:calc(60px + env(safe-area-inset-bottom,0px))}
+  .top-in{flex-wrap:nowrap;padding:8px 12px}
+  .views{position:fixed;left:0;right:0;bottom:0;z-index:35;width:auto;order:0;margin:0;border-radius:0;padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px));background:var(--shell);box-shadow:0 -2px 10px -2px rgb(var(--sh-rgb)/.35);gap:4px}
+  .views button{flex-direction:column;gap:3px;padding:6px 2px;min-height:48px;font-size:12px;border-radius:8px}
+  .views button .i{display:block;width:20px;height:20px}
+  .views .badge{position:absolute;margin:-2px 0 0 22px}
+  .views button{position:relative}
+  main{padding-bottom:calc(var(--tabh) + 72px)}
+  .toasts{bottom:calc(var(--tabh) + 12px)}
+  .selbar{bottom:calc(var(--tabh) + 10px)}
+  body:has(.selbar) .toasts{bottom:calc(var(--tabh) + 90px)}
+  .sort-dock{bottom:var(--tabh);box-shadow:0 -8px 20px -12px rgb(var(--sh-rgb)/.35)}
+  body:has(.sort-dock) .toasts{bottom:calc(var(--tabh) + 200px)}
+  .sortview{padding-bottom:200px}
+  .fsheet{z-index:46}.fscrim{z-index:45}
+}
+@media (pointer:coarse){
+  .n-actions .act + .act::before{display:none}
+  .vbar{height:44px}
+  .linkbtn{min-height:44px;padding:0 8px;margin:0}
+  .qtips{gap:0 4px}
+  .done-head{min-height:44px}
+}
 </style>
 
 <header class="top">
@@ -1448,7 +1486,7 @@ function pushSectionHTML(){
   if (IN_ARTIFACT) return '';
   if (!S.push.enabled) return `<div class="set-sec"><h3>Phone notifications</h3>
     <p class="small">Get reminders as push notifications on your phone, even when Catchall is closed. This uses the free ntfy app.</p>
-    <div class="row"><button type="button" class="btn primary" data-set="pushon">${icon('bell')}Turn on</button></div></div>`;
+    <div class="row"><button type="button" class="btn shell" data-set="pushon">${icon('bell')}Turn on</button></div></div>`;
   return `<div class="set-sec"><h3>Phone notifications · on</h3>
     <ol class="small" style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px">
       <li>On your phone, install the free <b>ntfy</b> app: <a href="https://apps.apple.com/app/ntfy/id1625396347" target="_blank" rel="noopener">iPhone</a> · <a href="https://play.google.com/store/apps/details?id=io.heckel.ntfy" target="_blank" rel="noopener">Android</a>.</li>
@@ -1771,7 +1809,23 @@ function filesHTML(files, rmAttr){
    they stay on the note and the rest sit under More. On a computer a chosen note shows each one's key. */
 const ACT_KEY = { pin:'P', edit:'E', archive:'A', del:'⌫' };
 const actBtn = (n, act, ic, label, extra = '', prime) => `<button type="button" class="act ${act === 'del' ? 'del' : ''} ${prime ? 'prime' : ''}" data-act="${act}" data-id="${n.id}" ${extra}>${icon(ic)}<span>${label}</span>${ACT_KEY[act] ? `<kbd class="kc">${ACT_KEY[act]}</kbd>` : ''}</button>`;
-const moreBtn = n => `<button type="button" class="act acts-toggle" data-act="openacts" data-id="${n.id}" aria-expanded="${S.ui.openNote === n.id}">${icon('dots')}<span>${S.ui.openNote === n.id ? 'Less' : 'More'}</span></button>`;
+const moreBtn = n => `<button type="button" class="act acts-toggle" data-act="openacts" data-id="${n.id}" aria-haspopup="dialog" aria-expanded="${S.ui.actSheet === n.id}">${icon('dots')}<span>More</span></button>`;
+/* On a phone, More opens a sheet from the bottom with the rest of the note's actions, so the
+   buttons on the note never move under your thumb. */
+function actSheetHTML(){
+  const n = S.notes.get(S.ui.actSheet); if (!n || n.deleted) return '';
+  const rem = S.settings.view === 'rem' && n.remind;
+  const b = (act, ic, label, cls = '') => `<button type="button" class="btn ${cls}" data-act="${act}" data-id="${n.id}">${icon(ic)}${label}</button>`;
+  const btns = rem
+    ? b('edit', 'edit', 'Edit') + b('rclear', 'bell', 'Remove reminder') + b('del', 'trash', 'Delete', 'danger')
+    : b('edit', 'edit', 'Edit, color and reminder') + (n.remind ? b('rclear', 'bell', 'Remove reminder') : '') + b('del', 'trash', 'Delete', 'danger');
+  return `<div class="asheet-wrap"><button type="button" class="fscrim" data-act="openacts" data-id="${n.id}" aria-label="Close"></button>
+    <section class="fsheet asheet" role="dialog" aria-label="More for this note">
+      <header class="tblock"><h2>${esc(noteTitle(n))}</h2></header>
+      <div class="as-btns">${btns}</div>
+      <button type="button" class="btn fs-done" data-act="openacts" data-id="${n.id}">Close</button>
+    </section></div>`;
+}
 /* The Tag dropdown swaps the note's main tag (the one it shows here) for another; any other tags stay. */
 const mainTag = n => (n.tags || []).find(id => S.settings.boardTags.includes(id) && tagById(id)) || (n.tags || []).find(tagById) || '';
 function tagSelect(n){
@@ -1899,6 +1953,7 @@ function fsheetHTML(){
     <h3 class="fs-h">Arrange</h3>
     <label class="fs-row"><span>Order</span><select class="fsel" data-f="order"><option value="new" ${S.settings.order !== 'old' ? 'selected' : ''}>Newest first</option><option value="old" ${S.settings.order === 'old' ? 'selected' : ''}>Oldest first</option></select></label>
     <button type="button" class="btn fs-sel" data-act="selmode">${icon('check')}${S.ui.selecting ? 'Done selecting' : 'Select several notes'}</button>
+    <button type="button" class="btn shell fs-done" data-act="filters">Done</button>
   </section>`;
 }
 const TRIES = [
@@ -2024,7 +2079,7 @@ function renderSort(main){
   if (!n){
     const scope = S.ui.sortOnly === 'all' ? '' : 'untagged ';
     main.innerHTML = `<div class="col sortview">${head}<section class="sheet sort-end ${done ? 'won' : ''}">
-      <header class="tblock"><h2>${done ? 'All sorted' : `No ${scope}notes to sort`}</h2>${done ? `<span class="stamp">${icon('check')}Done</span>` : ''}</header>
+      <header class="tblock"><h2>${done ? 'All sorted' : `No ${scope}notes to sort`}</h2>${done ? `<span class="tb-cell stamp">${icon('check')}Done</span>` : ''}</header>
       ${done ? `<div class="tally">${sortTally(true)}</div>` : ''}
       <p>${done ? `Every ${scope}note has a place. New ones will wait here for you.` : `New ${scope}notes will wait here until you sort them.`}</p>
       <div class="row"><button type="button" class="btn shell" data-view="feed">${icon('feed')}Back to Feed</button>${S.ui.sortOnly !== 'all' ? `<button type="button" class="btn" data-sortonly="all">Sort everything</button>` : ''}<button type="button" class="btn" data-act="sortreset">Start over from the oldest note</button></div></section></div>`;
@@ -2172,6 +2227,7 @@ function render(){
     autosize(); updatePreview(); renderThumbs();
   } else stopDictation();
   micUI(); recUI(); memoUI();
+  if (S.ui.actSheet && isPhoneWidth()) main.insertAdjacentHTML('beforeend', actSheetHTML());
   if (qf != null && $('#q')){ $('#q').focus(); $('#q').setSelectionRange(qf, qf); }
   // keep the note chosen from the keyboard after the feed is redrawn
   if (S.ui.kbId && v === 'feed' && !document.querySelector('dialog[open]') && (!document.activeElement || document.activeElement === document.body)){
@@ -2616,12 +2672,8 @@ document.addEventListener('click', e => {
       S.ui.selLast = id; render(); return;
     }
   }
-  // On phones a tap anywhere on a note sheet shows that note's actions (and hides the others').
-  if (matchMedia('(max-width:640px)').matches && !e.target.closest('button, a, select, input, label, textarea, audio')){
-    const sheet = e.target.closest('.note[data-id], .rrow');
-    const sid = sheet && (sheet.dataset.id || sheet.querySelector('[data-id]')?.dataset.id);
-    if (sid){ S.ui.openNote = S.ui.openNote === sid ? null : sid; render(); return; }
-  }
+  // a choice in the More sheet closes the sheet, then does its job
+  if (e.target.closest('.asheet [data-act]:not([data-act="openacts"])')){ S.ui.actSheet = null; document.querySelector('.asheet-wrap')?.remove(); }
   const t = e.target.closest('button, [data-day]'); if (!t) return;
   const d = t.dataset;
   if (d.view){ S.settings.view = d.view; S.ui.selecting = false; saveSettings(); render(); window.scrollTo(0, 0); return; }
@@ -2670,7 +2722,7 @@ document.addEventListener('click', e => {
     case 'sortreset': { const prevFrom = S.settings.sortFrom, prevStats = clone(sortStats()); S.settings.sortFrom = Date.now(); saveSettings(); S.ui.sortStats = {}; saveSortStats(); S.ui.sortHist = []; render();
       toast('Starting over from the oldest note', { undoFn: () => { S.settings.sortFrom = prevFrom; saveSettings(); S.ui.sortStats = prevStats; saveSortStats(); render(); } }); break; }
     case 'tagup': case 'tagdown': break;
-    case 'openacts': S.ui.openNote = S.ui.openNote === id ? null : id; render(); break;
+    case 'openacts': S.ui.actSheet = S.ui.actSheet === id ? null : id; render(); break;
     case 'filters': S.ui.filtersOpen = !S.ui.filtersOpen; render(); break;
     case 'savesearch': { const q = S.ui.q.trim(); if (!q || S.searches.list.some(x => x.q.toLowerCase() === q.toLowerCase())) break; S.searches.list.push({ id: uid('s'), q }); commitSearches(); render(); toast(`Saved “${q}”. It's one tap away under the search box on all your devices.`); break; }
     case 'forgetsearch': { const x = S.searches.list.find(x => x.id === d.sid); if (!x) break; S.searches.list = S.searches.list.filter(y => y !== x); commitSearches(); render(); toast(`Forgot “${x.q}”`, { undoFn: () => { S.searches.list.push(x); commitSearches(); render(); } }); break; }
