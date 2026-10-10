@@ -1670,7 +1670,8 @@ function matches(n){
 }
 /* Search understands more than words: dates ("today", "yesterday", "this week", "last week",
    "this month", "last month", "last 10 days", "october", "march 2025", "2025"), #tags, and
-   "has:photo", "has:file", "has:memo", "has:link", "has:list", "has:reminder", "is:pinned".
+   "has:photo", "has:file", "has:memo", "has:link", "has:list", "has:reminder", "is:pinned", or the same in
+   plain words: "with photos", "with a voice memo", "has a file", "with a list", "with reminders", "pinned".
    Whatever is left is matched as words in the note, its list items, tags and file names. */
 const MONTHS_FULL = ['january','february','march','april','may','june','july','august','september','october','november','december'];
 let searchMemo = { q: null, at: 0, r: null };
@@ -1701,6 +1702,12 @@ function searchOf(raw){
   s = s.replace(/(?:^|\s)#([a-z][\w-]*)/g, (x, name) => { const t = S.tags.find(t => t.name.toLowerCase() === name); if (t) r.tags.push(t.id); else r.unknownTags.push(name); return ' '; });
   const HAS = { photo:'photo', photos:'photo', image:'photo', images:'photo', picture:'photo', file:'file', files:'file', pdf:'file', memo:'memo', memos:'memo', voice:'memo', audio:'memo', link:'link', links:'link', list:'list', lists:'list', reminder:'reminder', reminders:'reminder' };
   s = s.replace(/\b(?:has|with):(\w+)/g, (x, w) => { if (HAS[w]) r.has.push(HAS[w]); return ' '; }).replace(/\bis:pinned\b/g, () => { r.has.push('pinned'); return ' '; });
+  // the same filters in plain words: "with photos", "has a voice memo", "with a list", "pinned"
+  const WORD = w => /memo|voice|audio/.test(w) ? 'memo' : /photo|picture|image/.test(w) ? 'photo' : /file|pdf|attachment/.test(w) ? 'file' : /link/.test(w) ? 'link' : /list/.test(w) ? 'list' : /reminder/.test(w) ? 'reminder' : '';
+  s = s.replace(/\b(?:with|has|having|that have|that has)\s+(?:an?\s+|some\s+|any\s+)?(voice\s+memos?|memos?|audio|photos?|pictures?|images?|files?|pdfs?|attachments?|links?|check\s?lists?|lists?|reminders?)\b/g, (x, w) => { const k = WORD(w); if (k) r.has.push(k); return ' '; })
+       .replace(/\b(voice\s+memos?|photos|pictures|checklists|attachments)\b/g, (x, w) => { const k = WORD(w); if (k) r.has.push(k); return ' '; })
+       .replace(/\bpinned\b/g, () => { r.has.push('pinned'); return ' '; });
+  r.has = [...new Set(r.has)];
   r.words = r.words.concat(s.split(/\s+/).filter(Boolean));
   searchMemo = { q: raw, at: today0.getTime(), r };
   return r;
@@ -1838,7 +1845,7 @@ function searchHelpHTML(){
     const r = searchOf(q), bits = [];
     if (r.label) bits.push(`<b>${esc(r.label)}</b>`);
     for (const id of r.tags) bits.push(`tagged <b>${esc(tagById(id)?.name || '')}</b>`);
-    for (const h of r.has) bits.push(`with <b>${{ photo:'a photo', file:'a file', memo:'a voice memo', link:'a link', list:'a list', reminder:'a reminder', pinned:'a pin' }[h]}</b>`);
+    for (const h of r.has) bits.push(h === 'pinned' ? '<b>pinned</b>' : `with <b>${{ photo:'a photo', file:'a file', memo:'a voice memo', link:'a link', list:'a list', reminder:'a reminder' }[h]}</b>`);
     if (r.words.length) bits.push(`containing <b>${esc(r.words.join(' '))}</b>`);
     if (r.unknownTags.length) bits.push(`no tag called <b>#${esc(r.unknownTags[0])}</b>`);
     read = `<p class="qread small">Showing notes: ${bits.join(', ')}.${active || !S.ui.lastCount ? '' : ` <button type="button" class="linkbtn" data-act="savesearch">${icon('plus')}Save this search</button>`}${active ? ` <button type="button" class="linkbtn" data-act="forgetsearch" data-sid="${active.id}">Forget this saved search</button>` : ''}</p>`;
@@ -1846,7 +1853,7 @@ function searchHelpHTML(){
   const chips = list.length ? `<div class="saved" role="group" aria-label="Saved searches"><span class="saved-lbl">Saved</span>${list.map(x => `<button type="button" class="chip" data-saved="${x.id}" aria-pressed="${!!active && active.id === x.id}">${icon('search')}${esc(x.q)}</button>`).join('')}</div>` : '';
   // Ideas to tap, shown while the search box is chosen and empty (CSS shows them on focus)
   const firstTag = S.tags.find(t => !t.hidden);
-  const tips = q ? '' : `<div class="qtips" role="group" aria-label="Search ideas"><span class="saved-lbl">Try</span>${['last week', firstTag ? '#' + firstTag.name : '', 'has:memo', 'has:photo', 'is:pinned', 'this month'].filter(Boolean).map(x => `<button type="button" class="linkbtn" data-qtip="${esc(x)}">${esc(x)}</button>`).join('')}</div>`;
+  const tips = q ? '' : `<div class="qtips" role="group" aria-label="Search ideas"><span class="saved-lbl">Try</span>${['last week', firstTag ? '#' + firstTag.name : '', 'with a voice memo', 'with photos', 'pinned', 'this month'].filter(Boolean).map(x => `<button type="button" class="linkbtn" data-qtip="${esc(x)}">${esc(x)}</button>`).join('')}</div>`;
   return read + chips + tips;
 }
 function filtersHTML(){
@@ -1861,7 +1868,7 @@ function filtersHTML(){
       <button type="button" class="chip add" data-act="newtag">${icon('plus')}New tag</button>
     </div>
     <div class="filters ${u.filtersOpen ? 'open' : ''}">
-      <label class="search">${icon('search')}<span class="sr">Search notes</span><input id="q" type="search" placeholder="Search notes" title="Search words, #tags, or dates like “last week” (press / to jump here)" value="${esc(u.q)}" autocomplete="off" enterkeyhint="search"></label>
+      <label class="search">${icon('search')}<span class="sr">Search notes</span><input id="q" type="search" placeholder="Search notes" title="Search words, #tags, dates like “last week”, or “with photos”, “pinned” (press / to jump here)" value="${esc(u.q)}" autocomplete="off" enterkeyhint="search"></label>
       ${searchHelpHTML()}
       <button type="button" class="btn ftoggle" data-act="filters" aria-expanded="${!!u.filtersOpen}">${icon('funnel')}Filters${(() => { const k = ['link','image','file','list','archived'].filter(x => u[x]).length + (u.range !== 'all' ? 1 : 0); return k ? ` (${k})` : ''; })()}</button>
       ${tog('link','link','Links')}${tog('image','image','Images')}${IN_ARTIFACT ? '' : tog('file','clip','Files')}${tog('list','list','Lists')}${tog('archived','archive','Archived')}
@@ -1908,6 +1915,7 @@ function openShortcuts(){
     <div class="tries">${TRIES.map(([c, s]) => `<button type="button" class="try" data-try="${esc(c)}"><code>${esc(c.split('\n')[0])}${c.includes('\n') ? ' …' : ''}</code><small>${esc(s)}</small></button>`).join('')}</div>
     <div class="set-sec"><h3>Tag keywords</h3><p class="small">Give a tag a keyword in Settings, then start a note with it: “GROCERY oat milk” files “oat milk” under that tag. Typing #anything also tags a note.</p></div>
     ${touch ? '' : `<div class="set-sec"><h3>Keys</h3><p class="small"><kbd>Enter</kbd> saves · <kbd>Shift</kbd>+<kbd>Enter</kbd> starts a new line · <kbd>/</kbd> jumps to search · <kbd>N</kbd> jumps to the capture box · <kbd>Esc</kbd> leaves it</p></div>
+    <div class="set-sec"><h3>Searching</h3><p class="small">Type words, or narrow it down: <b>last week</b>, <b>this month</b>, <b>october</b>, <b>2025</b> · <b>#hobby</b> · <b>with photos</b>, <b>with a voice memo</b>, <b>with a file</b>, <b>with a list</b>, <b>with reminders</b> · <b>pinned</b>. Mix them: “pinned #hobby last month”. The line under the box says how it read your search.</p></div>
     <div class="set-sec"><h3>Moving through the Feed</h3><p class="small"><kbd>J</kbd> / <kbd>K</kbd> go to the next or previous note (then <kbd>↓</kbd> / <kbd>↑</kbd> work too) · <kbd>P</kbd> pins · <kbd>E</kbd> or <kbd>Enter</kbd> edits · <kbd>A</kbd> archives · <kbd>Delete</kbd> deletes (with Undo) · <kbd>X</kbd> picks the note in Select mode · <kbd>Esc</kbd> steps out</p></div>
     <div class="set-sec"><h3>In Sort</h3><p class="small"><kbd>1</kbd>–<kbd>9</kbd> file under a tag · <kbd>K</kbd> keeps · <kbd>P</kbd> pins · <kbd>A</kbd> archives · <kbd>Delete</kbd> deletes · <kbd>Z</kbd> undoes</p></div>`}`;
   if (!$('#setDlg').open) $('#setDlg').showModal();
@@ -2048,7 +2056,7 @@ function renderFeed(main){
   else if (!list.length){
     const onlyQ = S.ui.q.trim() && S.ui.tag === 'all' && !['link','image','file','list','archived'].some(k => S.ui[k]) && S.ui.range === 'all';
     body = `<section class="sheet noresult"><header class="tblock"><h2>Nothing matches</h2><span class="tb-cell"><b>0</b> notes</span></header>
-      <p>${S.ui.q.trim() ? `No note fits “${esc(S.ui.q.trim())}”${onlyQ ? '' : ' with the filters you picked'}.` : 'No note fits the filters you picked.'} Dates like “last week”, #tags, and words from file names all count.</p>
+      <p>${S.ui.q.trim() ? `No note fits “${esc(S.ui.q.trim())}”${onlyQ ? '' : ' with the filters you picked'}.` : 'No note fits the filters you picked.'} Dates like “last week”, #tags, “with photos” or “pinned”, and words from file names all count.</p>
       <div class="row"><button type="button" class="btn" data-act="${onlyQ ? 'clearq' : 'clearf'}">${onlyQ ? 'Clear the search' : 'Clear search and filters'}</button></div></section>`;
   }
   else {
