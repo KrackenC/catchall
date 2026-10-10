@@ -1684,7 +1684,7 @@ function matches(n){
   if (u.q){
     const q = searchOf(u.q);
     if (q.from != null && (n.createdAt < q.from || n.createdAt >= q.to)) return false;
-    if (q.tags.some(id => !(n.tags || []).includes(id))) return false;
+    if (q.unknownTags.length || q.tags.some(id => !(n.tags || []).includes(id))) return false;
     for (const h of q.has){
       const ok = { photo: (n.images || []).length, file: (n.files || []).some(f => !isAudio(f)), memo: (n.files || []).some(isAudio), link: hasLink(n), list: n.kind === 'list', reminder: !!n.remind, pinned: n.pinned }[h];
       if (!ok) return false;
@@ -1873,7 +1873,7 @@ function searchHelpHTML(){
     for (const id of r.tags) bits.push(`tagged <b>${esc(tagById(id)?.name || '')}</b>`);
     for (const h of r.has) bits.push(h === 'pinned' ? '<b>pinned</b>' : `with <b>${{ photo:'a photo', file:'a file', memo:'a voice memo', link:'a link', list:'a list', reminder:'a reminder' }[h]}</b>`);
     if (r.words.length) bits.push(`containing <b>${esc(r.words.join(' '))}</b>`);
-    if (r.unknownTags.length) bits.push(`no tag called <b>#${esc(r.unknownTags[0])}</b>`);
+    for (const t of r.unknownTags) bits.push(`tagged <b>#${esc(t)}</b>`);
     read = `<p class="qread small">Showing notes: ${bits.join(', ')}.${active || !S.ui.lastCount ? '' : ` <button type="button" class="linkbtn" data-act="savesearch">${icon('plus')}Save this search</button>`}${active ? ` <button type="button" class="linkbtn" data-act="forgetsearch" data-sid="${active.id}">Forget this saved search</button>` : ''}</p>`;
   }
   const chips = list.length ? `<div class="saved" role="group" aria-label="Saved searches"><span class="saved-lbl">Saved</span>${list.map(x => `<button type="button" class="chip" data-saved="${x.id}" aria-pressed="${!!active && active.id === x.id}">${icon('search')}${esc(x.q)}</button>`).join('')}</div>` : '';
@@ -2075,15 +2075,34 @@ function renderSort(main){
       <p class="small sort-hint">${coarse ? `Swipe the card right to keep it as it is, or left to ${leftWord} it.` : `Keep leaves the note as it is. Press Z to undo.`}</p>
     </div></div>`;
 }
+/* "Nothing matches", said in words built from the search itself. */
+function noResultText(raw, onlyQ){
+  if (!raw) return { text: 'No note fits the filters you picked.', extra: '' };
+  const q = searchOf(raw), quote = w => `“${esc(w)}”`;
+  if (q.unknownTags.length){
+    const t = q.unknownTags[0];
+    return { text: `There's no tag called <b>#${esc(t)}</b>.${S.tags.length ? ` Your tags are ${S.tags.filter(x => !x.hidden).map(x => `<b>#${esc(x.name)}</b>`).join(', ')}.` : ''}`,
+      extra: `<button type="button" class="btn" data-qtip="${esc(raw.replace('#' + t, t))}">Search for the word ${quote(t)}</button>` };
+  }
+  const HAVE = { photo:'have a photo', file:'have a file', memo:'have a voice memo', link:'have a link', list:'are lists', reminder:'have a reminder', pinned:'are pinned' };
+  const who = ['No notes', ...q.tags.map(id => 'tagged <b>' + esc(tagById(id)?.name || '') + '</b>'), q.label ? 'from <b>' + esc(/^All of /.test(q.label) ? q.label.slice(7) : /^(Today|Yesterday|This |Last |The )/.test(q.label) ? q.label[0].toLowerCase() + q.label.slice(1) : q.label) + '</b>' : ''].filter(Boolean).join(' ');
+  const verbs = q.has.map(h => HAVE[h]).concat(q.words.length ? [`mention ${q.words.map(quote).join(' and ')}`] : []);
+  let text = verbs.length ? `${who} ${verbs.join(' and ')}` : who;
+  if (!q.label && !q.words.length && q.has.length) text += ' yet';
+  text += onlyQ ? '.' : ', with the filters you picked.';
+  const hint = q.label ? ' Try a wider time, like “this month”, or remove the date.' : q.words.length > 1 ? ' Try fewer words.' : '';
+  return { text: text + hint, extra: '' };
+}
 function renderFeed(main){
   const list = liveNotes().filter(matches).sort(S.settings.order === 'old' ? (a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) || a.createdAt - b.createdAt : byNewest);
   let body = '';
   if (!liveNotes().length) body = emptyHTML();
   else if (!list.length){
     const onlyQ = S.ui.q.trim() && S.ui.tag === 'all' && !['link','image','file','list','archived'].some(k => S.ui[k]) && S.ui.range === 'all';
+    const nr = noResultText(S.ui.q.trim(), onlyQ);
     body = `<section class="sheet noresult"><header class="tblock"><h2>Nothing matches</h2><span class="tb-cell"><b>0</b> notes</span></header>
-      <p>${S.ui.q.trim() ? `No note fits “${esc(S.ui.q.trim())}”${onlyQ ? '' : ' with the filters you picked'}.` : 'No note fits the filters you picked.'} Dates like “last week”, #tags, “with photos” or “pinned”, and words from file names all count.</p>
-      <div class="row"><button type="button" class="btn" data-act="${onlyQ ? 'clearq' : 'clearf'}">${onlyQ ? 'Clear the search' : 'Clear search and filters'}</button></div></section>`;
+      <p>${nr.text}</p>
+      <div class="row">${nr.extra}<button type="button" class="btn" data-act="${onlyQ ? 'clearq' : 'clearf'}">${onlyQ ? 'Clear the search' : 'Clear search and filters'}</button></div></section>`;
   }
   else {
     const shown = list.slice(0, S.ui.limit); S.ui.shownIds = shown.map(n => n.id);
