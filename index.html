@@ -883,6 +883,32 @@ body:has(.fsheet) .toasts{top:calc(env(safe-area-inset-top,0px) + 12px);bottom:a
   .swatch{position:relative}
   .swatch::after{content:"";position:absolute;inset:-9px}
 }
+
+/* ---------- 14. Capture row, phone search, slimmer phone headers, settings summaries ---------- */
+/* In a narrow capture box the hint takes its own line, so the buttons stay on one row with Save last */
+.composer{container-type:inline-size}
+@container (max-width:860px){
+  .comp-row .preview{flex:1 1 100%;margin-right:0}
+  .comp-row{justify-content:flex-end}
+}
+/* Settings summaries: the group name, then its state on the line below, chevron on the right */
+.sgroup > summary{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:12px;row-gap:3px}
+.sgroup > summary .sg-t{grid-column:1;grid-row:1}
+.sgroup > summary .sg-s{grid-column:1;grid-row:2}
+.sgroup > summary .i{grid-column:2;grid-row:1 / span 2;align-self:center;margin-left:0}
+@media (max-width:640px){
+  /* search: Filters stays beside the box, the ideas scroll in one row */
+  .filters .search{order:-2}
+  .filters .ftoggle{order:-1}
+  .qtips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-mask-image:linear-gradient(90deg,#000 88%,transparent);mask-image:linear-gradient(90deg,#000 88%,transparent)}
+  .qtips::-webkit-scrollbar{display:none}
+  .qtips > *{flex:none}
+  /* page headers: the title and its counts share one ruled line; the view's own controls go below */
+  .pagehead h1{flex:1 1 auto;min-width:0;border-bottom:0;font-size:24px;padding:10px 12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pagehead .tb-cell{flex:none;padding:0 10px;font-size:14px;border-left:1.5px solid var(--rule)}
+  .pagehead h1 + .tb-cell{border-left:1.5px solid var(--rule)}
+  .pagehead .ph-ctl{flex:1 0 100%;border-top:1.5px solid var(--rule)}
+}
 </style>
 
 <header class="top">
@@ -2553,7 +2579,7 @@ function openSettings(only){
     ${g('data', 'Your data', `${total} ${plural(total, 'note', 'notes')}`, `<div class="set-sec">
       <p class="small">${sync.state === 'synced' ? (IN_ARTIFACT ? 'Synced to your Claude account. Only you can see these notes.' : 'Saved on this device and in your private gist.') : 'Saved on this device.'} Export a backup now and then.</p>
       <div class="row"><label class="sr" for="expScope">Which notes</label><select id="expScope" class="fsel"><option value="all">All notes</option><option value="view">Only what the feed is showing</option><option value="pinned">Pinned notes</option></select>
-      <button type="button" class="btn" data-exp="md">${icon('download')}Markdown</button><button type="button" class="btn" data-exp="csv">CSV</button><button type="button" class="btn" data-exp="json">JSON backup</button></div>
+      <button type="button" class="btn" data-exp="md">${icon('download')}Markdown</button><button type="button" class="btn" data-exp="csv">${icon('download')}CSV</button><button type="button" class="btn" data-exp="json">${icon('download')}JSON backup</button></div>
       <div class="row"><button type="button" class="btn" data-set="import">Restore from JSON backup</button><button type="button" class="btn danger" data-set="wipe" id="wipeBtn">Erase everything</button></div></div>`)}
     <p class="small set-help"><button type="button" class="linkbtn" data-act="shortcuts">${icon('bolt')}Typing shortcuts and keys</button></p>
     <div class="set-foot"><button type="button" class="btn shell" data-set="close">Done</button></div>`;
@@ -3101,7 +3127,7 @@ window.__catchallTest = { parseReminder, parseCapture, parseStructure, nextOccur
 </div>
 <script>
 (function () {
-  var CURRENT_VERSION = "36";
+  var CURRENT_VERSION = "37";
   var banner = document.getElementById('__update-banner');
   var updateBtn = document.getElementById('__update-btn');
   var dismissBtn = document.getElementById('__dismiss-btn');
