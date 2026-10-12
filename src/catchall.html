@@ -940,6 +940,23 @@ dialog{box-shadow:inset 0 1px 0 var(--hl),0 2px 4px rgb(var(--sh-rgb)/.15),0 30p
 .n-actions .act:hover,.rail .chip:hover,.rail .ftog:hover{background:color-mix(in srgb,var(--surface-2) 80%,transparent)}
 .rail .chip[aria-pressed="true"],.rail .ftog[aria-pressed="true"]{background:var(--blue-wash);box-shadow:inset 0 1px 2px rgb(var(--sh-rgb)/.14)}
 @media (max-width:640px){ .n-actions .act{background:linear-gradient(180deg,var(--surface-hi),var(--surface-2));box-shadow:inset 0 1px 0 var(--hl),0 1px 2px rgb(var(--sh-rgb)/.14)} }
+/* Raised items (v40): each note and reminder is a beveled tile. A lit top-left edge, a shaded bottom-right edge,
+   and a solid rim under it like the thickness of card stock. The rim takes the note's color when it has one. */
+.note,.rrow{--edge:color-mix(in srgb,var(--rule) 55%,var(--surface));--bev-hi:var(--hl);--bev-lo:rgb(var(--sh-rgb)/.16)}
+.note.colored,.rrow.colored{--edge:color-mix(in srgb,var(--nc) 70%,var(--fg) 12%)}
+.note:not(.sortcard),.rrow,.sortcard:not([data-dir="keep"]):not([data-dir="left"]){box-shadow:inset 1px 1px 0 var(--bev-hi),inset -1px -2px 0 var(--bev-lo),0 0 0 1px color-mix(in srgb,var(--edge) 70%,transparent),0 4px 0 var(--edge),0 5px 1px rgb(var(--sh-rgb)/.18),0 16px 26px -10px rgb(var(--sh-rgb)/.38)}
+@media (hover:hover) and (pointer:fine){
+  .note:not(.sortcard):not(.dragging):hover,.rrow:hover{transform:translateY(-2px);box-shadow:inset 1px 1px 0 var(--bev-hi),inset -1px -2px 0 var(--bev-lo),0 0 0 1px color-mix(in srgb,var(--edge) 70%,transparent),0 6px 0 var(--edge),0 7px 2px rgb(var(--sh-rgb)/.18),0 24px 34px -12px rgb(var(--sh-rgb)/.45)}
+  .note:not(.sortcard):not(.dragging):active{transform:translateY(1px);box-shadow:inset 1px 1px 0 var(--bev-hi),inset -1px -2px 0 var(--bev-lo),0 0 0 1px color-mix(in srgb,var(--edge) 70%,transparent),0 2px 0 var(--edge),0 3px 1px rgb(var(--sh-rgb)/.18),0 8px 16px -8px rgb(var(--sh-rgb)/.35)}
+}
+.selecting .note.picked{box-shadow:inset 1px 1px 0 var(--bev-hi),inset -1px -2px 0 var(--bev-lo),0 0 0 2px var(--blue),0 4px 0 var(--blue),0 16px 26px -10px rgb(var(--sh-rgb)/.38)}
+.desk-feed,.rsec,.bcol{row-gap:16px}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .note,:root:not([data-theme="light"]) .rrow{--edge:color-mix(in srgb,var(--rule) 45%,var(--bg));--bev-lo:rgb(0 0 0/.45)}
+  :root:not([data-theme="light"]) .note.colored,:root:not([data-theme="light"]) .rrow.colored{--edge:color-mix(in oklch,var(--nc) 45%,var(--bg))}
+}
+:root[data-theme="dark"] .note,:root[data-theme="dark"] .rrow{--edge:color-mix(in srgb,var(--rule) 45%,var(--bg));--bev-lo:rgb(0 0 0/.45)}
+:root[data-theme="dark"] .note.colored,:root[data-theme="dark"] .rrow.colored{--edge:color-mix(in oklch,var(--nc) 45%,var(--bg))}
 </style>
 
 <header class="top">

@@ -327,6 +327,7 @@ Light comes from above (chosen 2026-10-11 when the user asked for "a look with m
 - **Dialog** (`0 30px 70px -20px rgb(sh/.6)`), over the aubergine scrim.
 
 ### Named Rules
+**Raised tiles (v40).** Notes and reminder rows are beveled tiles: a 1px lit top-left edge (`--hl`), a shaded bottom-right edge, a 1px outline and a solid 4px rim beneath (`--edge`: Rule Mauve mixed into the sheet, or the note's own color when it has one), then the soft drop shadow. On computers a tile rises to a 6px rim on hover and sinks to 2px when pressed.
 **Quiet things stay flat.** The action lettering on each note (Pin, Edit, Archive, Delete), tag selects, and the rail's tag and filter list never get the raised control treatment on computers. On phones the note action buttons are raised, since they are real tap targets.
 **No texture.** Depth comes from light and shadow only, never from grain, noise or cork.
 
