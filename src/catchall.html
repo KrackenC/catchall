@@ -3,13 +3,13 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Barlow+Semi+Condensed:wght@500;600;700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: a linen dot-grid notebook page; a sage header; notes are light sheets; every day, sheet and Board column opens with a ruled title block.
-   Ink is graphite. Clay (--red) is spent only on Save, Delete and what's due; teal (--blue) marks pins, selection and focus. */
-:root{--bg:#eceae2;--grid:#e0ddd2;--surface:#fbfaf6;--surface-2:#f1eee6;--fg:#2c312b;--muted:#5b6258;--line:#d8d4c8;--shell:#4b6152;--shell-2:#3f5346;--shell-fg:#f5f3ec;--shell-muted:#dbe5d9;--rule:#7d917f;--red:#a85638;--red-fg:#ffffff;--blue:#376672;--blue-wash:#dbe9ed;--dot:#cdc7b6;--accent:var(--blue);--accent-fg:#ffffff;--hi:var(--blue-wash);--danger:var(--red);--ok:#4d7d52;--sh-rgb:36 60 40;--shell-ok:#7bd88f;--shell-err:#ff8a78;--shell-err-fg:#ffd0c8;--shell-line:rgb(255 255 255/.24);--scrim:rgb(20 32 22/.55);--photo-bg:#000000;--photo-scrim:rgb(0 0 0/.65);--photo-fg:#ffffff;--font-display:"Barlow Semi Condensed", "Arial Narrow", system-ui, sans-serif;--font-legible:"Barlow", "Segoe UI", system-ui, sans-serif;--font-hyper:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;--font-type:"JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;--font-body:var(--font-legible);--r:12px;--gap:12px;--pad:14px;color-scheme:light}
+/* Layout: a rose-linen dot-grid notebook page lit from above; a plum header; notes are raised sheets; every day, sheet and Board column opens with a ruled title block.
+   Ink is aubergine graphite. Rust (--red) is spent only on Save, Delete and what's due; indigo (--blue) marks pins, selection and focus. */
+:root{--bg:#ebe4e1;--grid:#e0d8d4;--surface:#fdfaf8;--surface-2:#f3edea;--bg-lit:#f7f1ee;--bg-deep:#dbd2ce;--surface-hi:#ffffff;--shell-hi:#5e3d68;--shell-lo:#3a2441;--red-hi:#bd5839;--hl:rgb(255 255 255/.9);--fg:#2e2531;--muted:#615766;--line:#dcd3d0;--shell:#4a2f52;--shell-2:#3a2441;--shell-fg:#f7f0ec;--shell-muted:#e3d3e5;--rule:#9a8296;--red:#a8452c;--red-fg:#ffffff;--blue:#56498f;--blue-wash:#e5e2f4;--dot:#d0c4c0;--accent:var(--blue);--accent-fg:#ffffff;--hi:var(--blue-wash);--danger:var(--red);--ok:#4a7a52;--sh-rgb:50 28 50;--shell-ok:#7bd88f;--shell-err:#ff8a78;--shell-err-fg:#ffd0c8;--shell-line:rgb(255 255 255/.24);--scrim:rgb(36 20 38/.55);--photo-bg:#000000;--photo-scrim:rgb(0 0 0/.65);--photo-fg:#ffffff;--font-display:"Barlow Semi Condensed", "Arial Narrow", system-ui, sans-serif;--font-legible:"Barlow", "Segoe UI", system-ui, sans-serif;--font-hyper:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;--font-type:"JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;--font-body:var(--font-legible);--r:12px;--gap:12px;--pad:14px;color-scheme:light}
 @media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){--bg:#171a17;--grid:#1f231f;--surface:#21251f;--surface-2:#2a2f28;--fg:#e8e9e1;--muted:#a8b1a5;--line:#363c34;--shell:#2f3c32;--shell-2:#26312a;--shell-fg:#e8e9e1;--shell-muted:#b3c2b4;--rule:#6f8572;--red:#e19478;--red-fg:#1d0f09;--blue:#8cc1cf;--blue-wash:#1f3238;--dot:#323830;--accent:var(--blue);--accent-fg:#0b1a21;--hi:var(--blue-wash);--danger:var(--red);--ok:#93c49a;--sh-rgb:0 0 0;--scrim:rgb(0 0 0/.62);color-scheme:dark}
+  :root:not([data-theme="light"]){--bg:#18141a;--grid:#1f1a22;--surface:#221c25;--surface-2:#2e2632;--bg-lit:#231c26;--bg-deep:#100d12;--surface-hi:#2a232e;--shell-hi:#3d2a45;--shell-lo:#231727;--red-hi:#f1ae98;--hl:rgb(255 255 255/.07);--fg:#ece6ea;--muted:#b2a7b3;--line:#3a3140;--shell:#2f2035;--shell-2:#231727;--shell-fg:#ece6ea;--shell-muted:#cbb9ce;--rule:#7c6880;--red:#eb9a80;--red-fg:#210d06;--blue:#b3aaec;--blue-wash:#2a2742;--dot:#2e2632;--accent:var(--blue);--accent-fg:#15122a;--hi:var(--blue-wash);--danger:var(--red);--ok:#93c49a;--sh-rgb:0 0 0;--scrim:rgb(0 0 0/.62);color-scheme:dark}
 }
-:root[data-theme="dark"]{--bg:#171a17;--grid:#1f231f;--surface:#21251f;--surface-2:#2a2f28;--fg:#e8e9e1;--muted:#a8b1a5;--line:#363c34;--shell:#2f3c32;--shell-2:#26312a;--shell-fg:#e8e9e1;--shell-muted:#b3c2b4;--rule:#6f8572;--red:#e19478;--red-fg:#1d0f09;--blue:#8cc1cf;--blue-wash:#1f3238;--dot:#323830;--accent:var(--blue);--accent-fg:#0b1a21;--hi:var(--blue-wash);--danger:var(--red);--ok:#93c49a;--sh-rgb:0 0 0;--scrim:rgb(0 0 0/.62);color-scheme:dark}
+:root[data-theme="dark"]{--bg:#18141a;--grid:#1f1a22;--surface:#221c25;--surface-2:#2e2632;--bg-lit:#231c26;--bg-deep:#100d12;--surface-hi:#2a232e;--shell-hi:#3d2a45;--shell-lo:#231727;--red-hi:#f1ae98;--hl:rgb(255 255 255/.07);--fg:#ece6ea;--muted:#b2a7b3;--line:#3a3140;--shell:#2f2035;--shell-2:#231727;--shell-fg:#ece6ea;--shell-muted:#cbb9ce;--rule:#7c6880;--red:#eb9a80;--red-fg:#210d06;--blue:#b3aaec;--blue-wash:#2a2742;--dot:#2e2632;--accent:var(--blue);--accent-fg:#15122a;--hi:var(--blue-wash);--danger:var(--red);--ok:#93c49a;--sh-rgb:0 0 0;--scrim:rgb(0 0 0/.62);color-scheme:dark}
 :root[data-font="grotesk"]{--font-body:var(--font-hyper)}
 :root[data-font="mono"]{--font-body:var(--font-type)}
 :root[data-density="compact"]{--gap:8px;--pad:10px}
@@ -20,7 +20,7 @@ button{cursor:pointer}
 .i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 /* How this stylesheet is laid out. Order matters: each numbered section refines the ones above it.
-   1 base components · 2 the notebook world · 3 page layout · 4–9 component details · 10–11 phone and touch.
+   1 base components · 2 the notebook world · 3 page layout · 4–9 component details · 10–14 phone and touch · 15 depth (gradients and layered shadows over everything above).
    Add a rule next to the others for the same thing, and check a change with tools/snap.mjs + tools/snapdiff.py
    (a computed-style snapshot of 32 screens, before and after), which this file was cleaned up against. */
 
@@ -447,13 +447,13 @@ button.sync:hover{background:var(--shell-2)}
 /* the tag reads as its own lettering: colour dot and name; the menu opens on click */
 .n-meta .tagsel{color:var(--fg);border:1px solid transparent;background:none;padding:0 2px 0 6px;min-height:30px;gap:6px;border-radius:6px}
 .n-meta .tagsel:hover,.n-meta .tagsel:focus-within{border-color:var(--line);background:var(--surface)}
-.n-meta .tagsel select{appearance:none;-webkit-appearance:none;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23526056' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 2px center/14px;padding:0 20px 0 0;font:600 14px/1 var(--font-display);color:var(--fg);height:28px}
+.n-meta .tagsel select{appearance:none;-webkit-appearance:none;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23615766' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 2px center/14px;padding:0 20px 0 0;font:600 14px/1 var(--font-display);color:var(--fg);height:28px}
 .n-meta .tagsel.none select{color:var(--muted);font-weight:500}
 .n-meta .tagsel .cdot{width:9px;height:9px}
 .note.colored .n-meta .tagsel,.rrow.colored .n-meta .tagsel{background:none}
 .note.colored .acts-toggle,.rrow.colored .acts-toggle{background:none}
 .note.colored .n-meta .tagsel:hover,.note.colored .n-meta .tagsel:focus-within{background:color-mix(in srgb,var(--surface) 70%,transparent)}
-.mvsel select{appearance:none;-webkit-appearance:none;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23526056' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 4px center/14px;padding-right:22px}
+.mvsel select{appearance:none;-webkit-appearance:none;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23615766' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 4px center/14px;padding-right:22px}
 .bcol .n-meta{flex-wrap:wrap}
 .bcol .n-actions{display:flex;flex-wrap:wrap;justify-content:flex-start;margin:0 -6px}
 .bcol .n-actions .act{font-size:13px}
@@ -882,6 +882,64 @@ body:has(.fsheet) .toasts{top:calc(env(safe-area-inset-top,0px) + 12px);bottom:a
   .pagehead h1 + .tb-cell{border-left:1.5px solid var(--rule)}
   .pagehead .ph-ctl{flex:1 0 100%;border-top:1.5px solid var(--rule)}
 }
+/* ---------- 15. Depth: a lit desk, raised sheets, sunken trays and wells (v39) ---------- */
+body{background-image:radial-gradient(circle at 1px 1px,var(--dot) 1px,transparent 1.4px),radial-gradient(ellipse 90% 60% at 50% -10%,var(--bg-lit),transparent 70%),linear-gradient(180deg,var(--bg) 40%,var(--bg-deep));background-size:20px 20px,100% 100%,100% 100%;background-position:9px 9px,0 0,0 0;background-attachment:scroll,fixed,fixed}
+.top{background:linear-gradient(180deg,var(--shell-hi),var(--shell) 60%,var(--shell-lo));box-shadow:inset 0 1px 0 rgb(255 255 255/.14),inset 0 -1px 0 rgb(0 0 0/.28),0 2px 4px rgb(var(--sh-rgb)/.18),0 10px 24px -8px rgb(var(--sh-rgb)/.45)}
+.brand-mark{background:linear-gradient(180deg,var(--shell-lo),var(--shell));box-shadow:inset 0 1px 3px rgb(0 0 0/.4),0 1px 0 rgb(255 255 255/.12)}
+.views{background:rgb(0 0 0/.2);box-shadow:inset 0 1px 3px rgb(0 0 0/.38),0 1px 0 rgb(255 255 255/.1)}
+.views button[aria-pressed="true"]{background:linear-gradient(180deg,var(--surface-hi),var(--surface-2));color:var(--fg);box-shadow:inset 0 1px 0 var(--hl),0 1px 1px rgb(0 0 0/.25),0 3px 8px -2px rgb(0 0 0/.35)}
+.top .icon-btn{background:linear-gradient(180deg,rgb(255 255 255/.12),rgb(255 255 255/.03));box-shadow:inset 0 1px 0 rgb(255 255 255/.16),0 1px 2px rgb(0 0 0/.22)}
+.top .icon-btn:hover{background:linear-gradient(180deg,rgb(255 255 255/.2),rgb(255 255 255/.06))}
+.views .badge{background:linear-gradient(180deg,var(--red-hi),var(--red));box-shadow:0 1px 2px rgb(0 0 0/.35)}
+/* sheets */
+.composer,.note,.rrow,dialog,.noresult,.sort-end{background:linear-gradient(180deg,var(--surface-hi),var(--surface) 70%);box-shadow:inset 0 1px 0 var(--hl),0 0 0 1px rgb(var(--sh-rgb)/.06),0 1px 1px rgb(var(--sh-rgb)/.08),0 3px 6px -2px rgb(var(--sh-rgb)/.14),0 14px 28px -12px rgb(var(--sh-rgb)/.32)}
+.note:not(.sortcard),.rrow{transition:transform .18s cubic-bezier(.2,.8,.2,1),box-shadow .18s}
+@media (hover:hover) and (pointer:fine){
+  .note:not(.sortcard):not(.dragging):hover,.rrow:hover{transform:translateY(-2px);box-shadow:inset 0 1px 0 var(--hl),0 0 0 1px rgb(var(--sh-rgb)/.07),0 2px 2px rgb(var(--sh-rgb)/.08),0 6px 12px -4px rgb(var(--sh-rgb)/.18),0 22px 36px -14px rgb(var(--sh-rgb)/.4)}
+}
+.note.colored,.rrow.colored{background-image:linear-gradient(180deg,rgb(255 255 255/.32),transparent 65%)}
+.composer:focus-within,.composer.listing{box-shadow:inset 0 1px 0 var(--hl),0 3px 6px -2px rgb(var(--sh-rgb)/.16),0 18px 34px -14px rgb(var(--sh-rgb)/.42),0 0 0 2px var(--blue)}
+dialog{box-shadow:inset 0 1px 0 var(--hl),0 2px 4px rgb(var(--sh-rgb)/.15),0 30px 70px -20px rgb(var(--sh-rgb)/.6)}
+/* title blocks: raised rulers */
+.tblock{background:linear-gradient(180deg,var(--surface-hi),var(--surface-2));box-shadow:inset 0 1px 0 var(--hl),0 1px 2px rgb(var(--sh-rgb)/.12),0 6px 12px -8px rgb(var(--sh-rgb)/.3)}
+.pagehead{background:linear-gradient(180deg,var(--surface-hi),var(--surface) 60%,var(--surface-2));box-shadow:inset 0 1px 0 var(--hl),0 2px 3px rgb(var(--sh-rgb)/.1),0 10px 20px -12px rgb(var(--sh-rgb)/.35)}
+.tb-cell.due{background:linear-gradient(180deg,var(--red-hi),var(--red));box-shadow:inset 0 1px 0 rgb(255 255 255/.2)}
+/* rail: a raised side panel */
+@media (min-width:1024px){
+  .rail{background:linear-gradient(180deg,var(--surface-hi),var(--surface));box-shadow:inset 0 1px 0 var(--hl),0 2px 3px rgb(var(--sh-rgb)/.1),0 14px 28px -14px rgb(var(--sh-rgb)/.35)}
+}
+/* board: recessed trays holding raised cards */
+.bcol{background:color-mix(in srgb,var(--bg-deep) 55%,var(--surface-2));box-shadow:inset 0 2px 8px rgb(var(--sh-rgb)/.2),inset 0 0 0 1px rgb(var(--sh-rgb)/.05),0 1px 0 var(--hl)}
+.bcol .tblock,.bhead{box-shadow:0 2px 6px -2px rgb(var(--sh-rgb)/.25)}
+/* controls: tactile */
+.act,.btn{background:linear-gradient(180deg,var(--surface-hi),var(--surface-2));box-shadow:inset 0 1px 0 var(--hl),0 1px 2px rgb(var(--sh-rgb)/.14),0 2px 4px -2px rgb(var(--sh-rgb)/.12);transition:transform .08s,box-shadow .12s}
+.act:hover,.btn:hover{background:linear-gradient(180deg,var(--surface-hi),var(--surface))}
+.act:active,.btn:active{transform:translateY(1px);box-shadow:inset 0 2px 4px rgb(var(--sh-rgb)/.2)}
+.btn.primary{background:linear-gradient(180deg,var(--red-hi),var(--red));box-shadow:inset 0 1px 0 rgb(255 255 255/.25),inset 0 -1px 0 rgb(0 0 0/.15),0 1px 2px rgb(var(--sh-rgb)/.3),0 6px 14px -6px color-mix(in srgb,var(--red) 75%,transparent)}
+.btn.primary:active{box-shadow:inset 0 2px 5px rgb(0 0 0/.3)}
+.chip{box-shadow:inset 0 1px 0 var(--hl),0 1px 2px rgb(var(--sh-rgb)/.12)}
+.chip[aria-pressed="true"]{box-shadow:inset 0 1px 3px rgb(var(--sh-rgb)/.18)}
+/* fields: inset wells */
+.search,.fsel,.ftog,input.tagin,dialog input[type="text"],dialog textarea,dialog select{box-shadow:inset 0 1px 3px rgb(var(--sh-rgb)/.15),0 1px 0 var(--hl)}
+.seg{box-shadow:inset 0 1px 3px rgb(var(--sh-rgb)/.18)}
+.seg button[aria-pressed="true"]{background:linear-gradient(180deg,var(--surface-hi),var(--surface));box-shadow:inset 0 1px 0 var(--hl),0 1px 3px rgb(var(--sh-rgb)/.25)}
+.cbox{box-shadow:inset 0 1px 2px rgb(var(--sh-rgb)/.18)}
+.cbox[aria-checked="true"]{box-shadow:inset 0 1px 0 rgb(255 255 255/.25)}
+.rem-pill{box-shadow:inset 0 1px 0 var(--hl)}
+.rem-pill.due{background:linear-gradient(180deg,var(--red-hi),var(--red))}
+.toast{box-shadow:inset 0 1px 0 rgb(255 255 255/.18),0 4px 8px rgb(var(--sh-rgb)/.2),0 18px 36px -10px rgb(var(--sh-rgb)/.5)}
+.cal{box-shadow:inset 0 1px 0 var(--hl),0 2px 3px rgb(var(--sh-rgb)/.1),0 14px 28px -14px rgb(var(--sh-rgb)/.35)}
+.cell.today .dnum{background:linear-gradient(180deg,color-mix(in srgb,var(--blue) 80%,#fff),var(--blue));box-shadow:0 1px 3px rgb(var(--sh-rgb)/.35)}
+.selbar{background:linear-gradient(180deg,var(--surface-hi),var(--surface));box-shadow:inset 0 1px 0 var(--hl),0 18px 36px -12px rgb(var(--sh-rgb)/.55)}
+@media (max-width:640px){
+  .views{background:linear-gradient(180deg,var(--shell-hi),var(--shell) 50%,var(--shell-lo));box-shadow:inset 0 1px 0 rgb(255 255 255/.14),0 -6px 18px -6px rgb(var(--sh-rgb)/.45)}
+  .fsheet{box-shadow:inset 0 1px 0 var(--hl),0 -18px 44px -12px rgb(var(--sh-rgb)/.55)}
+}
+/* keep the quiet things quiet: note actions, tag selects and the rail list stay flat lettering */
+.n-actions .act,.n-meta .act,.n-meta select,.tagsel,.rail .chip,.rail .ftog,.rail .tagbar .chip{background:none;box-shadow:none}
+.n-actions .act:hover,.rail .chip:hover,.rail .ftog:hover{background:color-mix(in srgb,var(--surface-2) 80%,transparent)}
+.rail .chip[aria-pressed="true"],.rail .ftog[aria-pressed="true"]{background:var(--blue-wash);box-shadow:inset 0 1px 2px rgb(var(--sh-rgb)/.14)}
+@media (max-width:640px){ .n-actions .act{background:linear-gradient(180deg,var(--surface-hi),var(--surface-2));box-shadow:inset 0 1px 0 var(--hl),0 1px 2px rgb(var(--sh-rgb)/.14)} }
 </style>
 
 <header class="top">

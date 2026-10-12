@@ -1,313 +1,403 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-08T23:30:00+00:00",
+  "generatedAt": "2026-10-11T00:00:00+00:00",
   "title": "Design System: Catchall",
   "extensions": {
     "colorMeta": {
-      "linen": {
+      "rose-linen": {
         "role": "neutral",
-        "displayName": "Linen",
-        "canonical": "#eceae2",
-        "oklch": "oklch(91.8% 0.031 125)",
+        "displayName": "Rose Linen",
+        "canonical": "#ebe4e1",
+        "oklch": "oklch(92.4% 0.009 45)",
         "cssVar": "--bg",
-        "dark": "#171a17",
+        "dark": "#18141a",
         "tonalRamp": [
-          "#090c05",
-          "#22271b",
-          "#3e4534",
-          "#5d6552",
-          "#7e8672",
-          "#a0a994",
-          "#c5cdb9",
-          "#ebf1e2"
+          "#110c0a",
+          "#2a2523",
+          "#47413f",
+          "#655f5c",
+          "#857f7c",
+          "#a6a09d",
+          "#c9c2bf",
+          "#f4edea"
         ]
       },
       "linen-dot": {
         "role": "neutral",
         "displayName": "Linen Dot",
-        "canonical": "#cdc7b6",
-        "oklch": "oklch(86.9% 0.045 128)",
+        "canonical": "#d0c4c0",
+        "oklch": "oklch(82.9% 0.015 39)",
         "cssVar": "--dot",
-        "dark": "#323830",
+        "dark": "#2e2632",
         "tonalRamp": [
-          "#080d03",
-          "#202817",
-          "#3b462e",
-          "#5a664b",
-          "#7a886b",
-          "#9dab8d",
-          "#c1cfb3",
-          "#e8f3dc"
+          "#130b09",
+          "#2d2421",
+          "#4a403d",
+          "#685e5a",
+          "#887d7a",
+          "#aa9f9b",
+          "#cdc1bd",
+          "#f8ebe7"
         ]
       },
       "sheet": {
         "role": "neutral",
         "displayName": "Sheet",
-        "canonical": "#fbfaf6",
-        "oklch": "oklch(98.4% 0.011 123)",
+        "canonical": "#fdfaf8",
+        "oklch": "oklch(98.7% 0.004 56)",
         "cssVar": "--surface",
-        "dark": "#21251f",
+        "dark": "#221c25",
         "tonalRamp": [
-          "#0b0c09",
-          "#242621",
-          "#41433d",
-          "#60625c",
-          "#81837c",
-          "#a3a69f",
-          "#c8cac3",
-          "#edefea"
+          "#0f0d0c",
+          "#282624",
+          "#444240",
+          "#62605e",
+          "#82807e",
+          "#a4a19f",
+          "#c6c3c1",
+          "#f1eeec"
         ]
       },
       "sheet-tint": {
         "role": "neutral",
         "displayName": "Sheet Tint",
-        "canonical": "#f1eee6",
-        "oklch": "oklch(94.5% 0.024 125)",
+        "canonical": "#f3edea",
+        "oklch": "oklch(95.0% 0.008 49)",
         "cssVar": "--surface-2",
-        "dark": "#2a2f28",
+        "dark": "#2e2632",
         "tonalRamp": [
-          "#0a0c07",
-          "#23271d",
-          "#3f4437",
-          "#5e6455",
-          "#7f8576",
-          "#a1a898",
-          "#c6ccbd",
-          "#ecf1e4"
+          "#100c0a",
+          "#2a2523",
+          "#46413f",
+          "#645f5d",
+          "#847f7c",
+          "#a6a09d",
+          "#c8c3c0",
+          "#f3edea"
         ]
       },
-      "graphite": {
+      "aubergine": {
         "role": "neutral",
-        "displayName": "Graphite",
-        "canonical": "#2c312b",
-        "oklch": "oklch(28.0% 0.015 149)",
+        "displayName": "Aubergine",
+        "canonical": "#2e2531",
+        "oklch": "oklch(28.0% 0.025 318)",
         "cssVar": "--fg",
-        "dark": "#e8e9e1",
+        "dark": "#ece6ea",
         "tonalRamp": [
-          "#090c09",
-          "#222722",
-          "#3d443e",
-          "#5c645d",
-          "#7d857e",
-          "#9fa8a0",
-          "#c3ccc4",
-          "#eaf1eb"
+          "#120a14",
+          "#2c232f",
+          "#483e4b",
+          "#665c6a",
+          "#877c8a",
+          "#a89dac",
+          "#cbbfcf",
+          "#f6eafa"
         ]
       },
-      "graphite-soft": {
+      "aubergine-soft": {
         "role": "neutral",
-        "displayName": "Graphite Soft",
-        "canonical": "#5b6258",
-        "oklch": "oklch(47.4% 0.023 154)",
+        "displayName": "Aubergine Soft",
+        "canonical": "#615766",
+        "oklch": "oklch(47.2% 0.027 315)",
         "cssVar": "--muted",
-        "dark": "#a8b1a5",
+        "dark": "#b2a7b3",
         "tonalRamp": [
-          "#070d09",
-          "#1f2821",
-          "#39463d",
-          "#57655b",
-          "#78877c",
-          "#9aaa9e",
-          "#bfcdc3",
-          "#e6f2e9"
+          "#120a15",
+          "#2b2330",
+          "#483e4c",
+          "#665c6b",
+          "#867c8c",
+          "#a89dad",
+          "#cbbfd0",
+          "#f5e9fb"
         ]
       },
       "hairline": {
         "role": "neutral",
         "displayName": "Hairline",
-        "canonical": "#d8d4c8",
-        "oklch": "oklch(84.6% 0.045 130)",
+        "canonical": "#dcd3d0",
+        "oklch": "oklch(87.3% 0.011 39)",
         "cssVar": "--line",
-        "dark": "#363c34",
+        "dark": "#3a3140",
         "tonalRamp": [
-          "#080d03",
-          "#202817",
-          "#3b472e",
-          "#59674b",
-          "#79886b",
-          "#9cab8d",
-          "#c0cfb3",
-          "#e7f3dd"
+          "#110c0a",
+          "#2b2523",
+          "#48413e",
+          "#665e5c",
+          "#867e7b",
+          "#a89f9c",
+          "#cbc2bf",
+          "#f5ece9"
         ]
       },
-      "sage-shell": {
+      "plum-shell": {
         "role": "tertiary",
-        "displayName": "Sage Shell",
-        "canonical": "#4b6152",
-        "oklch": "oklch(42.7% 0.070 152)",
+        "displayName": "Plum Shell",
+        "canonical": "#4a2f52",
+        "oklch": "oklch(35.3% 0.068 318)",
         "cssVar": "--shell",
-        "dark": "#2f3c32",
+        "dark": "#2f2035",
         "tonalRamp": [
-          "#001004",
-          "#0e2c18",
-          "#254c31",
-          "#416d4e",
-          "#628f6e",
-          "#84b290",
-          "#abd6b5",
-          "#d7f9df"
+          "#17041d",
+          "#331c39",
+          "#503857",
+          "#6f5677",
+          "#907598",
+          "#b296ba",
+          "#d5b8de",
+          "#ffe2ff"
         ]
       },
-      "sage-shell-deep": {
+      "plum-shell-deep": {
         "role": "tertiary",
-        "displayName": "Sage Shell Deep",
-        "canonical": "#3f5346",
-        "oklch": "oklch(37.7% 0.062 152)",
+        "displayName": "Plum Shell Deep",
+        "canonical": "#3a2441",
+        "oklch": "oklch(30.1% 0.058 318)",
         "cssVar": "--shell-2",
-        "dark": "#26312a",
+        "dark": "#231727",
         "tonalRamp": [
-          "#010f05",
-          "#122b1a",
-          "#294b33",
-          "#466c50",
-          "#668d70",
-          "#88b192",
-          "#afd4b8",
-          "#daf8e0"
+          "#17041d",
+          "#321c39",
+          "#4f3857",
+          "#6e5676",
+          "#8f7697",
+          "#b196ba",
+          "#d4b9dd",
+          "#ffe3ff"
         ]
       },
       "shell-ink": {
         "role": "tertiary",
         "displayName": "Shell Ink",
-        "canonical": "#f5f3ec",
-        "oklch": "oklch(96.1% 0.021 127)",
+        "canonical": "#f7f0ec",
+        "oklch": "oklch(95.9% 0.009 52)",
         "cssVar": "--shell-fg",
-        "dark": "#e8e9e1",
+        "dark": "#ece6ea",
         "tonalRamp": [
-          "#0a0c07",
-          "#23271e",
-          "#3f4439",
-          "#5e6457",
-          "#7f8577",
-          "#a1a89a",
-          "#c6ccbf",
-          "#ecf1e6"
+          "#110c0a",
+          "#2a2522",
+          "#47413e",
+          "#655f5c",
+          "#857f7b",
+          "#a6a09c",
+          "#c9c3bf",
+          "#f4ede9"
         ]
       },
       "shell-ink-soft": {
         "role": "tertiary",
         "displayName": "Shell Ink Soft",
-        "canonical": "#dbe5d9",
-        "oklch": "oklch(82.6% 0.041 139)",
+        "canonical": "#e3d3e5",
+        "oklch": "oklch(88.5% 0.030 322)",
         "cssVar": "--shell-muted",
-        "dark": "#b3c2b4",
+        "dark": "#cbb9ce",
         "tonalRamp": [
-          "#070d05",
-          "#1d291b",
-          "#384734",
-          "#556751",
-          "#768971",
-          "#98ac93",
-          "#bdcfb9",
-          "#e5f4e1"
+          "#130915",
+          "#2d222f",
+          "#4a3d4c",
+          "#695b6b",
+          "#897b8b",
+          "#ab9cad",
+          "#cebed0",
+          "#f9e8fb"
         ]
       },
-      "rule-sage": {
+      "rule-mauve": {
         "role": "tertiary",
-        "displayName": "Rule Sage",
-        "canonical": "#7d917f",
-        "oklch": "oklch(50.8% 0.081 154)",
+        "displayName": "Rule Mauve",
+        "canonical": "#9a8296",
+        "oklch": "oklch(63.5% 0.041 332)",
         "cssVar": "--rule",
-        "dark": "#6f8572",
+        "dark": "#7c6880",
         "tonalRamp": [
-          "#001004",
-          "#062d17",
-          "#1b4d2f",
-          "#396f4c",
-          "#5a916c",
-          "#7db48e",
-          "#a4d8b4",
-          "#d2fbdd"
+          "#170615",
+          "#321f2f",
+          "#4f3a4c",
+          "#6f586b",
+          "#8f788b",
+          "#b199ad",
+          "#d5bbd0",
+          "#ffe5fb"
         ]
       },
-      "clay": {
+      "rust": {
         "role": "primary",
-        "displayName": "Clay",
-        "canonical": "#a85638",
-        "oklch": "oklch(54.7% 0.176 30)",
+        "displayName": "Rust",
+        "canonical": "#a8452c",
+        "oklch": "oklch(51.8% 0.136 35)",
         "cssVar": "--red",
-        "dark": "#e19478",
+        "dark": "#eb9a80",
         "tonalRamp": [
-          "#280000",
-          "#540000",
-          "#840000",
-          "#af2518",
-          "#d74e3d",
-          "#ff735f",
-          "#ff9e8a",
-          "#ffcebc"
+          "#210200",
+          "#3f1a11",
+          "#5e362c",
+          "#7f5449",
+          "#a17468",
+          "#c49588",
+          "#e8b7aa",
+          "#ffe1d4"
         ]
       },
-      "clay-ink": {
+      "rust-ink": {
         "role": "primary",
-        "displayName": "Clay Ink",
+        "displayName": "Rust Ink",
         "canonical": "#ffffff",
         "oklch": "oklch(100.0% 0.000 90)",
         "cssVar": "--red-fg",
-        "dark": "#1d0f09",
+        "dark": "#210d06",
         "tonalRamp": [
-          "#0b0b0b",
-          "#252525",
+          "#0d0d0d",
+          "#262626",
           "#424242",
-          "#616161",
-          "#828282",
-          "#a5a5a5",
-          "#c9c9c9",
+          "#606060",
+          "#808080",
+          "#a1a1a1",
+          "#c4c4c4",
           "#eeeeee"
         ]
       },
-      "teal": {
+      "indigo": {
         "role": "secondary",
-        "displayName": "Teal",
-        "canonical": "#376672",
-        "oklch": "oklch(53.2% 0.107 239)",
+        "displayName": "Indigo",
+        "canonical": "#56498f",
+        "oklch": "oklch(45.3% 0.111 290)",
         "cssVar": "--blue",
-        "dark": "#8cc1cf",
+        "dark": "#b3aaec",
         "tonalRamp": [
-          "#000d21",
-          "#002846",
-          "#004770",
-          "#0b6897",
-          "#3a8bbb",
-          "#5faee0",
-          "#8cd3ff",
-          "#bff7ff"
+          "#0e0625",
+          "#262141",
+          "#423d60",
+          "#5f5b81",
+          "#7f7ba2",
+          "#a09cc5",
+          "#c3bee9",
+          "#ede9ff"
         ]
       },
-      "teal-wash": {
+      "indigo-wash": {
         "role": "secondary",
-        "displayName": "Teal Wash",
-        "canonical": "#dbe9ed",
-        "oklch": "oklch(92.8% 0.030 226)",
+        "displayName": "Indigo Wash",
+        "canonical": "#e5e2f4",
+        "oklch": "oklch(92.0% 0.024 294)",
         "cssVar": "--blue-wash",
-        "dark": "#1f3238",
+        "dark": "#2a2742",
         "tonalRamp": [
-          "#040d11",
-          "#19272d",
-          "#32454e",
-          "#4f656f",
-          "#708690",
-          "#92a9b4",
-          "#b7cdd7",
-          "#e0f2fa"
+          "#0e0b17",
+          "#272431",
+          "#43404e",
+          "#615e6d",
+          "#807e8e",
+          "#a29fb0",
+          "#c4c1d3",
+          "#efecfe"
         ]
       },
       "ok-green": {
         "role": "tertiary",
         "displayName": "OK Green",
-        "canonical": "#4d7d52",
-        "oklch": "oklch(52.9% 0.106 155)",
+        "canonical": "#4a7a52",
+        "oklch": "oklch(53.4% 0.081 148)",
         "cssVar": "--ok",
         "dark": "#93c49a",
         "tonalRamp": [
-          "#001102",
-          "#002f12",
-          "#005129",
-          "#217245",
-          "#489565",
-          "#6cb987",
-          "#96dcad",
-          "#c7fed8"
+          "#001301",
+          "#0d2e15",
+          "#2b4b30",
+          "#486a4d",
+          "#688b6c",
+          "#88ac8d",
+          "#aacfaf",
+          "#d4fad9"
+        ]
+      },
+      "rose-linen-lit": {
+        "role": "neutral",
+        "displayName": "Rose Linen Lit",
+        "canonical": "#f7f1ee",
+        "oklch": "oklch(96.2% 0.008 49)",
+        "cssVar": "--bg-lit",
+        "dark": "#231c26",
+        "tonalRamp": [
+          "#100c0a",
+          "#2a2523",
+          "#46413f",
+          "#645f5d",
+          "#847f7c",
+          "#a6a09d",
+          "#c8c3c0",
+          "#f3edea"
+        ]
+      },
+      "rose-linen-deep": {
+        "role": "neutral",
+        "displayName": "Rose Linen Deep",
+        "canonical": "#dbd2ce",
+        "oklch": "oklch(87.0% 0.011 46)",
+        "cssVar": "--bg-deep",
+        "dark": "#100d12",
+        "tonalRamp": [
+          "#120c09",
+          "#2b2522",
+          "#48413d",
+          "#665f5b",
+          "#867e7b",
+          "#a89f9c",
+          "#cbc2be",
+          "#f5ece8"
+        ]
+      },
+      "sheet-lit": {
+        "role": "neutral",
+        "displayName": "Sheet Lit",
+        "canonical": "#ffffff",
+        "oklch": "oklch(100.0% 0.000 90)",
+        "cssVar": "--surface-hi",
+        "dark": "#2a232e",
+        "tonalRamp": [
+          "#0d0d0d",
+          "#262626",
+          "#424242",
+          "#606060",
+          "#808080",
+          "#a1a1a1",
+          "#c4c4c4",
+          "#eeeeee"
+        ]
+      },
+      "plum-shell-lit": {
+        "role": "tertiary",
+        "displayName": "Plum Shell Lit",
+        "canonical": "#5e3d68",
+        "oklch": "oklch(41.6% 0.080 318)",
+        "cssVar": "--shell-hi",
+        "dark": "#3d2a45",
+        "tonalRamp": [
+          "#17041d",
+          "#321c39",
+          "#503857",
+          "#6f5677",
+          "#907598",
+          "#b296ba",
+          "#d5b8de",
+          "#ffe3ff"
+        ]
+      },
+      "rust-lit": {
+        "role": "primary",
+        "displayName": "Rust Lit",
+        "canonical": "#bd5839",
+        "oklch": "oklch(58.0% 0.138 38)",
+        "cssVar": "--red-hi",
+        "dark": "#f1ae98",
+        "tonalRamp": [
+          "#210200",
+          "#3f1a0f",
+          "#5e372b",
+          "#7e5448",
+          "#a07466",
+          "#c39587",
+          "#e8b7a9",
+          "#ffe1d2"
         ]
       }
     },
@@ -376,27 +466,27 @@
     "shadows": [
       {
         "name": "sheet",
-        "value": "0 1px 2px rgb(36 60 40/.14), 0 6px 16px -8px rgb(36 60 40/.30)",
+        "value": "0 1px 2px rgb(50 28 50/.14), 0 6px 16px -8px rgb(50 28 50/.30)",
         "purpose": "Every sheet: notes, capture, reminder rows, calendar cells."
       },
       {
         "name": "sheet-focus",
-        "value": "0 1px 2px rgb(36 60 40/.14), 0 10px 24px -10px rgb(36 60 40/.38), 0 0 0 2px #376672",
+        "value": "0 1px 2px rgb(50 28 50/.14), 0 10px 24px -10px rgb(50 28 50/.38), 0 0 0 2px #56498f",
         "purpose": "Capture sheet while typing."
       },
       {
         "name": "shell",
-        "value": "0 2px 8px -2px rgb(36 60 40/.35)",
+        "value": "0 2px 8px -2px rgb(50 28 50/.35)",
         "purpose": "Under the header band."
       },
       {
         "name": "dialog",
-        "value": "0 24px 60px -20px rgb(36 60 40/.55)",
+        "value": "0 24px 60px -20px rgb(50 28 50/.55)",
         "purpose": "Dialogs, over a rgb(20 32 22/.55) scrim."
       },
       {
         "name": "focus-ring",
-        "value": "outline: 2px solid #376672; outline-offset: 2px",
+        "value": "outline: 2px solid #56498f; outline-offset: 2px",
         "purpose": "Keyboard focus on every control."
       }
     ],
@@ -446,9 +536,9 @@
       "name": "Save Button",
       "kind": "button",
       "refersTo": "button-primary",
-      "description": "The one clay button: Save on the capture sheet and in dialogs.",
+      "description": "The one rust button: Save on the capture sheet and in dialogs.",
       "html": "<button class=\"ds-btn-primary\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 19V5M5 12l7-7 7 7\"/></svg>Save</button>",
-      "css": ".ds-btn-primary{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:7px 12px;background:var(--red,#a85638);border:1px solid var(--red,#a85638);color:var(--red-fg,#fff);border-radius:8px;font-family:var(--font-body,'Barlow','Segoe UI',sans-serif);font-weight:700;font-size:14px;line-height:1;box-shadow:0 1px 2px rgb(36 60 40/.25);cursor:pointer} .ds-btn-primary:hover{background:color-mix(in srgb,var(--red,#a85638) 88%,#000);border-color:transparent} .ds-btn-primary:focus-visible{outline:2px solid var(--blue,#376672);outline-offset:2px}"
+      "css": ".ds-btn-primary{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:7px 12px;background:var(--red,#a8452c);border:1px solid var(--red,#a8452c);color:var(--red-fg,#fff);border-radius:8px;font-family:var(--font-body,'Barlow','Segoe UI',sans-serif);font-weight:700;font-size:14px;line-height:1;box-shadow:0 1px 2px rgb(50 28 50/.25);cursor:pointer} .ds-btn-primary:hover{background:color-mix(in srgb,var(--red,#a8452c) 88%,#000);border-color:transparent} .ds-btn-primary:focus-visible{outline:2px solid var(--blue,#56498f);outline-offset:2px}"
     },
     {
       "name": "Labeled Action",
@@ -456,7 +546,7 @@
       "refersTo": "button-secondary",
       "description": "Every note action: a word with an optional icon beside it. Pressed toggles turn blue.",
       "html": "<div style=\"display:flex;gap:6px;flex-wrap:wrap\"><button class=\"ds-act\"><svg width=\"15\" height=\"15\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M9 4h6l-1 6 3 3H7l3-3zM12 13v7\"/></svg>Pin</button><button class=\"ds-act\" aria-pressed=\"true\"><svg width=\"15\" height=\"15\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M9 4h6l-1 6 3 3H7l3-3zM12 13v7\"/></svg>Unpin</button><button class=\"ds-act ds-act-del\"><svg width=\"15\" height=\"15\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14\"/></svg>Delete</button></div>",
-      "css": ".ds-act{display:inline-flex;align-items:center;gap:5px;min-height:36px;padding:7px 10px;background:var(--surface,#fbfaf6);border:1px solid var(--line,#d8d4c8);color:var(--fg,#2c312b);border-radius:8px;font-family:var(--font-body,'Barlow','Segoe UI',sans-serif);font-weight:500;font-size:14px;line-height:1;cursor:pointer} .ds-act:hover{border-color:var(--muted,#5b6258);background:var(--surface-2,#f1eee6)} .ds-act:focus-visible{outline:2px solid var(--blue,#376672);outline-offset:2px} .ds-act[aria-pressed=\"true\"]{color:var(--blue,#376672);border-color:var(--blue,#376672);background:var(--blue-wash,#dbe9ed)} .ds-act-del{color:var(--red,#a85638);border-color:color-mix(in srgb,var(--red,#a85638) 45%,var(--line,#d8d4c8))} .ds-act-del:hover{background:var(--red,#a85638);border-color:var(--red,#a85638);color:var(--red-fg,#fff)}"
+      "css": ".ds-act{display:inline-flex;align-items:center;gap:5px;min-height:36px;padding:7px 10px;background:var(--surface,#fdfaf8);border:1px solid var(--line,#dcd3d0);color:var(--fg,#2e2531);border-radius:8px;font-family:var(--font-body,'Barlow','Segoe UI',sans-serif);font-weight:500;font-size:14px;line-height:1;cursor:pointer} .ds-act:hover{border-color:var(--muted,#615766);background:var(--surface-2,#f3edea)} .ds-act:focus-visible{outline:2px solid var(--blue,#56498f);outline-offset:2px} .ds-act[aria-pressed=\"true\"]{color:var(--blue,#56498f);border-color:var(--blue,#56498f);background:var(--blue-wash,#e5e2f4)} .ds-act-del{color:var(--red,#a8452c);border-color:color-mix(in srgb,var(--red,#a8452c) 45%,var(--line,#dcd3d0))} .ds-act-del:hover{background:var(--red,#a8452c);border-color:var(--red,#a8452c);color:var(--red-fg,#fff)}"
     },
     {
       "name": "Title Block",
@@ -464,7 +554,7 @@
       "refersTo": "title-block",
       "description": "Signature: the ruled heading box that opens each day, sheet, calendar day and Reminders section.",
       "html": "<header class=\"ds-tblock\"><h2>Today</h2><span class=\"ds-tb-cell\"><b>4</b> notes</span><span class=\"ds-tb-cell ds-due\"><b>1</b> due now</span></header>",
-      "css": ".ds-tblock{display:flex;align-items:stretch;flex-wrap:wrap;border:1.5px solid var(--rule,#7d917f);border-radius:4px;background:color-mix(in srgb,var(--surface,#fbfaf6) 70%,transparent);overflow:hidden;color:var(--fg,#2c312b)} .ds-tblock h2{margin:0;padding:9px 14px;flex:1 1 auto;font:700 18px/1 'Barlow Semi Condensed','Arial Narrow',sans-serif} .ds-tb-cell{display:flex;align-items:center;gap:5px;padding:9px 14px;border-left:1.5px solid var(--rule,#7d917f);font:500 14px/1 'Barlow Semi Condensed','Arial Narrow',sans-serif;color:var(--muted,#5b6258);white-space:nowrap} .ds-tb-cell b{font-weight:700;color:var(--fg,#2c312b);font-variant-numeric:tabular-nums} .ds-due{background:var(--red,#a85638);color:var(--red-fg,#fff);border-left-color:var(--red,#a85638)} .ds-due b{color:var(--red-fg,#fff)}"
+      "css": ".ds-tblock{display:flex;align-items:stretch;flex-wrap:wrap;border:1.5px solid var(--rule,#9a8296);border-radius:4px;background:color-mix(in srgb,var(--surface,#fdfaf8) 70%,transparent);overflow:hidden;color:var(--fg,#2e2531)} .ds-tblock h2{margin:0;padding:9px 14px;flex:1 1 auto;font:700 18px/1 'Barlow Semi Condensed','Arial Narrow',sans-serif} .ds-tb-cell{display:flex;align-items:center;gap:5px;padding:9px 14px;border-left:1.5px solid var(--rule,#9a8296);font:500 14px/1 'Barlow Semi Condensed','Arial Narrow',sans-serif;color:var(--muted,#615766);white-space:nowrap} .ds-tb-cell b{font-weight:700;color:var(--fg,#2e2531);font-variant-numeric:tabular-nums} .ds-due{background:var(--red,#a8452c);color:var(--red-fg,#fff);border-left-color:var(--red,#a8452c)} .ds-due b{color:var(--red-fg,#fff)}"
     },
     {
       "name": "Note Sheet",
@@ -472,15 +562,15 @@
       "refersTo": "note-sheet",
       "description": "A loose sheet on the linen page: one shadow, hairline rules inside, labeled actions below.",
       "html": "<article class=\"ds-note\"><div class=\"ds-note-body\">Build clone rocket</div><div class=\"ds-note-meta\"><time>8:47 PM</time><span class=\"ds-tag\" style=\"--c:#e5484d\">hobby</span></div></article>",
-      "css": ".ds-note{background:var(--surface,#fbfaf6);color:var(--fg,#2c312b);border-radius:12px;padding:14px 14px 12px;display:flex;flex-direction:column;gap:10px;box-shadow:0 1px 2px rgb(36 60 40/.14),0 6px 16px -8px rgb(36 60 40/.30);max-width:420px} .ds-note-body{font-family:var(--font-body,'Barlow','Segoe UI',sans-serif);font-size:17px;line-height:1.45} .ds-note-meta{display:flex;gap:8px;align-items:center;border-top:1px solid var(--line,#d8d4c8);padding-top:9px} .ds-note-meta time{font:500 14px 'Barlow Semi Condensed',sans-serif;font-variant-numeric:tabular-nums;color:var(--muted,#5b6258)} .ds-tag{font:600 13px/1 'Barlow Semi Condensed',sans-serif;padding:4px 9px;border-radius:6px;border:1.5px solid color-mix(in srgb,var(--c) 70%,var(--fg,#2c312b));color:var(--fg,#2c312b)}"
+      "css": ".ds-note{background:var(--surface,#fdfaf8);color:var(--fg,#2e2531);border-radius:12px;padding:14px 14px 12px;display:flex;flex-direction:column;gap:10px;box-shadow:0 1px 2px rgb(50 28 50/.14),0 6px 16px -8px rgb(50 28 50/.30);max-width:420px} .ds-note-body{font-family:var(--font-body,'Barlow','Segoe UI',sans-serif);font-size:17px;line-height:1.45} .ds-note-meta{display:flex;gap:8px;align-items:center;border-top:1px solid var(--line,#dcd3d0);padding-top:9px} .ds-note-meta time{font:500 14px 'Barlow Semi Condensed',sans-serif;font-variant-numeric:tabular-nums;color:var(--muted,#615766)} .ds-tag{font:600 13px/1 'Barlow Semi Condensed',sans-serif;padding:4px 9px;border-radius:6px;border:1.5px solid color-mix(in srgb,var(--c) 70%,var(--fg,#2e2531));color:var(--fg,#2e2531)}"
     },
     {
       "name": "Filter Chips",
       "kind": "chip",
       "refersTo": "filter-chip",
-      "description": "Tag filters under the capture box; active is teal wash with a teal border; New tag is dashed.",
+      "description": "Tag filters under the capture box; active is indigo wash with a indigo border; New tag is dashed.",
       "html": "<div style=\"display:flex;gap:6px;flex-wrap:wrap\"><button class=\"ds-chip\" aria-pressed=\"true\">All <span class=\"ds-n\">5</span></button><button class=\"ds-chip\"><span class=\"ds-dot\" style=\"background:#30a46c\"></span>learning <span class=\"ds-n\">2</span></button><button class=\"ds-chip ds-chip-add\">New tag</button></div>",
-      "css": ".ds-chip{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:8px;background:var(--surface,#fbfaf6);border:1px solid var(--line,#d8d4c8);color:var(--fg,#2c312b);font:600 14px/1 'Barlow Semi Condensed',sans-serif;cursor:pointer} .ds-chip:hover{border-color:var(--muted,#5b6258)} .ds-chip:focus-visible{outline:2px solid var(--blue,#376672);outline-offset:2px} .ds-chip[aria-pressed=\"true\"]{background:var(--shell,#4b6152);border-color:var(--shell,#4b6152);color:var(--shell-fg,#f5f3ec)} .ds-n{font:500 12px 'Barlow Semi Condensed',sans-serif;font-variant-numeric:tabular-nums;color:var(--muted,#5b6258)} .ds-chip[aria-pressed=\"true\"] .ds-n{color:var(--shell-muted,#dbe5d9)} .ds-dot{width:8px;height:8px;border-radius:50%} .ds-chip-add{background:transparent;border-style:dashed;border-color:var(--muted,#5b6258)}"
+      "css": ".ds-chip{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:8px;background:var(--surface,#fdfaf8);border:1px solid var(--line,#dcd3d0);color:var(--fg,#2e2531);font:600 14px/1 'Barlow Semi Condensed',sans-serif;cursor:pointer} .ds-chip:hover{border-color:var(--muted,#615766)} .ds-chip:focus-visible{outline:2px solid var(--blue,#56498f);outline-offset:2px} .ds-chip[aria-pressed=\"true\"]{background:var(--shell,#4a2f52);border-color:var(--shell,#4a2f52);color:var(--shell-fg,#f7f0ec)} .ds-n{font:500 12px 'Barlow Semi Condensed',sans-serif;font-variant-numeric:tabular-nums;color:var(--muted,#615766)} .ds-chip[aria-pressed=\"true\"] .ds-n{color:var(--shell-muted,#e3d3e5)} .ds-dot{width:8px;height:8px;border-radius:50%} .ds-chip-add{background:transparent;border-style:dashed;border-color:var(--muted,#615766)}"
     },
     {
       "name": "Capture Sheet",
@@ -488,15 +578,15 @@
       "refersTo": "capture-sheet",
       "description": "The capture box as the top of a fresh sheet, with a red caret and a blue focus ring.",
       "html": "<div class=\"ds-cap\"><textarea rows=\"1\" placeholder=\"What's on your mind? Saved the moment you hit Enter.\"></textarea><div class=\"ds-cap-row\"><span>Enter saves</span></div></div>",
-      "css": ".ds-cap{background:var(--surface,#fbfaf6);border-radius:14px;padding:14px 14px 12px;box-shadow:0 1px 2px rgb(36 60 40/.14),0 6px 16px -8px rgb(36 60 40/.30)} .ds-cap:focus-within{box-shadow:0 1px 2px rgb(36 60 40/.14),0 10px 24px -10px rgb(36 60 40/.38),0 0 0 2px var(--blue,#376672)} .ds-cap textarea{width:100%;border:0;background:none;resize:none;outline:none;font-family:var(--font-body,'Barlow','Segoe UI',sans-serif);font-size:19px;line-height:1.45;color:var(--fg,#2c312b);caret-color:var(--red,#a85638)} .ds-cap textarea::placeholder{color:var(--muted,#5b6258)} .ds-cap-row{border-top:1px solid var(--line,#d8d4c8);padding-top:10px;margin-top:8px;font-size:13px;color:var(--muted,#5b6258)}"
+      "css": ".ds-cap{background:var(--surface,#fdfaf8);border-radius:14px;padding:14px 14px 12px;box-shadow:0 1px 2px rgb(50 28 50/.14),0 6px 16px -8px rgb(50 28 50/.30)} .ds-cap:focus-within{box-shadow:0 1px 2px rgb(50 28 50/.14),0 10px 24px -10px rgb(50 28 50/.38),0 0 0 2px var(--blue,#56498f)} .ds-cap textarea{width:100%;border:0;background:none;resize:none;outline:none;font-family:var(--font-body,'Barlow','Segoe UI',sans-serif);font-size:19px;line-height:1.45;color:var(--fg,#2e2531);caret-color:var(--red,#a8452c)} .ds-cap textarea::placeholder{color:var(--muted,#615766)} .ds-cap-row{border-top:1px solid var(--line,#dcd3d0);padding-top:10px;margin-top:8px;font-size:13px;color:var(--muted,#615766)}"
     },
     {
       "name": "Shell Header",
       "kind": "nav",
       "refersTo": "shell-header",
-      "description": "Sage band with wordmark, labeled view tabs in a tray, and a clay due badge.",
+      "description": "Sage band with wordmark, labeled view tabs in a tray, and a rust due badge.",
       "html": "<nav class=\"ds-top\"><span class=\"ds-brand\">Catchall</span><div class=\"ds-views\"><button aria-pressed=\"true\">Feed</button><button>Board</button><button>Calendar</button><button>Reminders <span class=\"ds-badge\">1</span></button></div></nav>",
-      "css": ".ds-top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 16px;background:var(--shell,#4b6152);color:var(--shell-fg,#f5f3ec);box-shadow:0 2px 8px -2px rgb(36 60 40/.35)} .ds-brand{font:700 24px/1 'Barlow Semi Condensed',sans-serif;letter-spacing:-.01em;margin-right:auto} .ds-views{display:flex;gap:2px;background:var(--shell-2,#3f5346);padding:3px;border-radius:10px} .ds-views button{border:0;background:none;color:var(--shell-muted,#dbe5d9);font:600 15px/1 'Barlow Semi Condensed',sans-serif;padding:8px 12px;border-radius:8px;display:flex;gap:6px;align-items:center;cursor:pointer} .ds-views button:hover{color:var(--shell-fg,#f5f3ec)} .ds-views button:focus-visible{outline:2px solid var(--blue,#376672);outline-offset:2px} .ds-views button[aria-pressed=\"true\"]{background:var(--surface,#fbfaf6);color:var(--fg,#2c312b);box-shadow:0 1px 2px rgb(0 0 0/.2)} .ds-badge{background:var(--red,#a85638);color:var(--red-fg,#fff);font:700 11px/1 'Barlow Semi Condensed',sans-serif;padding:3px 6px;border-radius:99px;font-variant-numeric:tabular-nums}"
+      "css": ".ds-top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 16px;background:var(--shell,#4a2f52);color:var(--shell-fg,#f7f0ec);box-shadow:0 2px 8px -2px rgb(50 28 50/.35)} .ds-brand{font:700 24px/1 'Barlow Semi Condensed',sans-serif;letter-spacing:-.01em;margin-right:auto} .ds-views{display:flex;gap:2px;background:var(--shell-2,#3a2441);padding:3px;border-radius:10px} .ds-views button{border:0;background:none;color:var(--shell-muted,#e3d3e5);font:600 15px/1 'Barlow Semi Condensed',sans-serif;padding:8px 12px;border-radius:8px;display:flex;gap:6px;align-items:center;cursor:pointer} .ds-views button:hover{color:var(--shell-fg,#f7f0ec)} .ds-views button:focus-visible{outline:2px solid var(--blue,#56498f);outline-offset:2px} .ds-views button[aria-pressed=\"true\"]{background:var(--surface,#fdfaf8);color:var(--fg,#2e2531);box-shadow:0 1px 2px rgb(0 0 0/.2)} .ds-badge{background:var(--red,#a8452c);color:var(--red-fg,#fff);font:700 11px/1 'Barlow Semi Condensed',sans-serif;padding:3px 6px;border-radius:99px;font-variant-numeric:tabular-nums}"
     },
     {
       "name": "Reminder Row",
@@ -504,30 +594,30 @@
       "refersTo": "reminder-pill",
       "description": "A reminder sheet with a fixed tabular time column; overdue time turns red.",
       "html": "<div class=\"ds-rrow\"><div class=\"ds-when\"><b>9:00</b>Tomorrow</div><div>Order motors</div></div>",
-      "css": ".ds-rrow{display:flex;align-items:center;gap:8px 12px;background:var(--surface,#fbfaf6);border-radius:12px;padding:12px 14px;box-shadow:0 1px 2px rgb(36 60 40/.14),0 6px 16px -8px rgb(36 60 40/.30);color:var(--fg,#2c312b);font-family:var(--font-body,'Barlow','Segoe UI',sans-serif)} .ds-when{width:6.5rem;display:flex;flex-direction:column;gap:2px;color:var(--muted,#5b6258);font:500 13px/1.2 'Barlow Semi Condensed',sans-serif} .ds-when b{font:700 20px/1 'Barlow Semi Condensed',sans-serif;font-variant-numeric:tabular-nums;color:var(--fg,#2c312b)}"
+      "css": ".ds-rrow{display:flex;align-items:center;gap:8px 12px;background:var(--surface,#fdfaf8);border-radius:12px;padding:12px 14px;box-shadow:0 1px 2px rgb(50 28 50/.14),0 6px 16px -8px rgb(50 28 50/.30);color:var(--fg,#2e2531);font-family:var(--font-body,'Barlow','Segoe UI',sans-serif)} .ds-when{width:6.5rem;display:flex;flex-direction:column;gap:2px;color:var(--muted,#615766);font:500 13px/1.2 'Barlow Semi Condensed',sans-serif} .ds-when b{font:700 20px/1 'Barlow Semi Condensed',sans-serif;font-variant-numeric:tabular-nums;color:var(--fg,#2e2531)}"
     }
   ],
   "narrative": {
     "northStar": "The Engineer's Computation Pad",
-    "overview": "**Creative North Star: \"The Linen Notebook\"**\n\nCatchall is kept in a builder's dot-grid notebook: warm linen paper with a soft dot every 20px, a sage cloth band across the top as the shell, and loose sheets of lighter paper resting on the page. Every group of notes (a day in the Feed, the Pinned sheet, a calendar day, a Reminders section, a Board column) opens with a ruled title block, the heading box carried over from the engineering pad this notebook grew out of. Ink is graphite. Two inks are kept beside it: clay for the three things that must stand out (Save, Delete, anything due), and teal for pins, selection, focus and highlights.\n\nThe world is calm, warm and workmanlike rather than cute. It turns away from both the sticky-note-on-cork convention and the cold grey notes app with a single accent. Density is moderate: sheets have 14px insets, a 12px gap between sheets, and comfortable 36px controls (44px on touch screens), with a compact setting that tightens to 8px and 10px. Labels are condensed engineering lettering (Barlow Semi Condensed), body text is Barlow, and every count and time is set in tabular figures so digits line up like a schedule.\n\nLight and dark both follow the device. Dark mode is the same notebook at night: near-black paper with a faint dot, a darker sage shell, and the two inks brightened to hold contrast (clay #e19478, teal #8cc1cf).",
+    "overview": "**Creative North Star: \"The Linen Notebook\"**\n\nCatchall is kept in a builder's dot-grid notebook: warm rose-linen paper with a soft dot every 20px, a plum cloth band, shaded like it is lit from above, across the top as the shell, and loose sheets of lighter paper resting on the page. Every group of notes (a day in the Feed, the Pinned sheet, a calendar day, a Reminders section, a Board column) opens with a ruled title block, the heading box carried over from the engineering pad this notebook grew out of. Ink is graphite. Two inks are kept beside it: rust for the three things that must stand out (Save, Delete, anything due), and indigo for pins, selection, focus and highlights.\n\nThe world is calm, warm and workmanlike rather than cute. It turns away from both the sticky-note-on-cork convention and the cold grey notes app with a single accent. Density is moderate: sheets have 14px insets, a 12px gap between sheets, and comfortable 36px controls (44px on touch screens), with a compact setting that tightens to 8px and 10px. Labels are condensed engineering lettering (Barlow Semi Condensed), body text is Barlow, and every count and time is set in tabular figures so digits line up like a schedule.\n\nLight and dark both follow the device. Dark mode is the same notebook at night: near-black paper with a faint dot, a darker plum shell, and the two inks brightened to hold contrast (rust #eb9a80, indigo #b3aaec).",
     "keyCharacteristics": [
       "Linen ground with a 20px dot grid on the page background, never on the sheets.",
       "Sage shell header with labeled view tabs and a sync state.",
       "Light sheets with one soft shadow and no outline; hairline rules divide a sheet's body, meta and actions.",
-      "The ruled title block (1.5px rule-sage border, 4px corners, count cells split by vertical rules) heads every group.",
-      "Clay only on Save, Delete and what's due; teal for pin, selection and focus.",
+      "The ruled title block (1.5px rule-mauve border, 4px corners, count cells split by vertical rules) heads every group.",
+      "Rust only on Save, Delete and what's due; indigo for pin, selection and focus.",
       "Every action is a text-labeled button; icons only ever sit beside a word.",
       "Tabular figures for every count, date and time."
     ],
     "rules": [
       {
         "name": "The Two Inks Rule",
-        "body": "Clay means act or attend: Save, Delete, due. Teal means where you are: pinned, selected, focused, the chosen tag or filter. Neither ink is decoration, and neither stands in for the other.",
+        "body": "Rust means act or attend: Save, Delete, due. Indigo means where you are: pinned, selected, focused, the chosen tag or filter. Neither ink is decoration, and neither stands in for the other.",
         "section": "colors"
       },
       {
         "name": "The Paper Is Linen Rule",
-        "body": "Grounds are warm linen and structure is sage; the only near-white is the sheet. Neutrals are warm (linen, stone, graphite), never a cool grey.",
+        "body": "Grounds are warm rose linen and structure is plum and mauve; the only near-white is the sheet. Neutrals are warm (linen, stone, graphite), never a cool grey.",
         "section": "colors"
       },
       {
@@ -549,14 +639,14 @@
     "dos": [
       "**Do** open every group of notes with the ruled title block, with tabular counts in its cells.",
       "**Do** keep the 20px dot grid on the page ground and keep sheets clean paper.",
-      "**Do** spend clay (#a85638) only on Save, Delete, and anything due or overdue.",
-      "**Do** use teal (#376672) for pinned, selected, pressed and focused states.",
+      "**Do** spend rust (#a8452c) only on Save, Delete, and anything due or overdue.",
+      "**Do** use indigo (#56498f) for pinned, selected, pressed and focused states.",
       "**Do** give every action a visible word; an icon may sit beside the word, never replace it.",
       "**Do** set counts, dates and times in Barlow Semi Condensed with tabular figures.",
       "**Do** lift sheets with the one Sheet shadow and divide their insides with 1px hairline rules."
     ],
     "donts": [
-      "**Don't** use clay or any red for decoration, emphasis, or categories. If it is not Save, Delete or due, it is not clay.",
+      "**Don't** use rust or any red for decoration, emphasis, or categories. If it is not Save, Delete or due, it is not rust.",
       "**Don't** add icon-only controls. The owner could not recognize them.",
       "**Don't** introduce cool grey neutrals or saturated UI-kit colors; neutrals are warm and tags are earth tones.",
       "**Don't** use uppercase letterspaced labels or small headings above sections. The title block is the heading.",
