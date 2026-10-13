@@ -39,7 +39,7 @@ Catchall is one notebook that follows its owner between phone and Mac, through t
 
 ## Brand Commitments
 - **Name:** Catchall.
-- **Icon:** a yellow sticky note with a red thumbtack.
+- **Icon:** a cream note and a lavender card dropping into a rust tray, on plum (`icon.svg`; `make_icon.py` renders the PNGs). The header mark is the same drawing without the plum square.
 - **Labels:** every action is a text-labeled button (Pin, Edit, Color, Archive, Delete, Tag). Icon-only controls proved unrecognizable to the owner.
 - **Voice:** plain, direct, sentence case.
 

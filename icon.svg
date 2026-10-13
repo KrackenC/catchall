@@ -1,0 +1,29 @@
+<!-- Catchall app icon: a note and a card dropping into a rust tray, on plum. make_icon.py renders the PNGs from this. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<defs>
+ <radialGradient id="bg" cx="28%" cy="18%" r="100%"><stop offset="0" stop-color="#714a7c"/><stop offset=".5" stop-color="#4a2f52"/><stop offset="1" stop-color="#2a1830"/></radialGradient>
+ <linearGradient id="note" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff4e6"/><stop offset="1" stop-color="#f9d3a6"/></linearGradient>
+ <linearGradient id="card" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c3bbf2"/><stop offset="1" stop-color="#9a8fe0"/></linearGradient>
+ <linearGradient id="tray" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e8774e"/><stop offset="1" stop-color="#b04a2e"/></linearGradient>
+ <filter id="sh" x="-30%" y="-30%" width="160%" height="170%"><feDropShadow dx="0" dy="12" stdDeviation="12" flood-color="#12061a" flood-opacity=".5"/></filter>
+</defs>
+<rect width="512" height="512" fill="url(#bg)"/>
+<g id="art">
+<g filter="url(#sh)">
+ <g transform="rotate(13 300 230)"><rect x="196" y="92" width="200" height="220" rx="28" fill="#6f62b8"/><rect x="196" y="92" width="200" height="208" rx="28" fill="url(#card)"/></g>
+ <g transform="rotate(-9 230 220)">
+  <rect x="112" y="78" width="232" height="236" rx="30" fill="#cf8650"/>
+  <rect x="112" y="78" width="232" height="222" rx="30" fill="url(#note)"/>
+  <path d="M142 81h172" stroke="#fff" stroke-opacity=".85" stroke-width="5" stroke-linecap="round"/>
+  <rect x="148" y="126" width="124" height="26" rx="13" fill="#a8452c"/>
+  <rect x="148" y="174" width="160" height="20" rx="10" fill="#e3b083"/>
+  <rect x="148" y="212" width="112" height="20" rx="10" fill="#e3b083"/>
+ </g>
+</g>
+<g filter="url(#sh)">
+ <path d="M70 282h104l28 50h108l28-50h104v104a46 46 0 0 1-46 46H116a46 46 0 0 1-46-46z" fill="#7a2c18" transform="translate(0 14)"/>
+ <path d="M70 282h104l28 50h108l28-50h104v104a46 46 0 0 1-46 46H116a46 46 0 0 1-46-46z" fill="url(#tray)"/>
+ <path d="M74 286h98l28 50h112l28-50h98" fill="none" stroke="#ffd2bd" stroke-opacity=".55" stroke-width="6" stroke-linejoin="round"/>
+</g>
+</g>
+</svg>

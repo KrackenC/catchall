@@ -395,4 +395,4 @@ Six collapsible groups, each a ruled box whose header reads like a title block: 
 - **Don't** introduce cool grey neutrals or saturated UI-kit colors; neutrals are warm and tags are earth tones.
 - **Don't** use uppercase letterspaced labels or small headings above sections. The title block is the heading.
 - **Don't** outline sheets or stack extra shadows on them.
-- **Don't** pin notes to cork, tilt them (not even while swiping in Sort), or draw them as sticky notes. The sticky note lives only in the app icon.
+- **Don't** pin notes to cork, tilt them (not even while swiping in Sort), or draw them as sticky notes. Tilted notes live only in the app icon (a note dropping into a tray).
