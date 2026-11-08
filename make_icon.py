@@ -1,4 +1,4 @@
-"""Catchall app icon: renders icon-source-cropped.png (glass layers in a glowing ribbon, user-supplied v42 art) to the PNG sizes with headless Chrome.
+"""Catchall app icon: renders icon-source-cropped.png (glass "C" ribbon around stacked layers, user-supplied v44 art) to the PNG sizes with headless Chrome.
 icon-source.png is the original 1254px art; icon-source-cropped.png is its centered 1180px crop (black outer corners trimmed) resized to 1024."""
 import os, subprocess, tempfile, shutil
 
