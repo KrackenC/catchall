@@ -18,9 +18,9 @@ head = f'''<!DOCTYPE html>
 <meta name="apple-mobile-web-app-title" content="{title}">
 <meta name="theme-color" content="#4a2f52" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#2f2035" media="(prefers-color-scheme: dark)">
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" type="image/png" href="favicon-32.png">
-<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.webmanifest?v={version}">
+<link rel="icon" type="image/png" href="favicon-32.png?v={version}">
+<link rel="apple-touch-icon" href="icon-180.png?v={version}">
 <script>
 // Keeps a copy of the app on the device so it opens with no signal. Pages still load from the
 // network first, so updates arrive exactly as before; the copy is only used when offline.
@@ -150,9 +150,9 @@ manifest = {
   'name': title, 'short_name': title, 'start_url': './', 'scope': './', 'display': 'standalone',
   'background_color': '#ebe4e1', 'theme_color': '#4a2f52',
   'icons': [
-    {'src': 'icon-192.png', 'sizes': '192x192', 'type': 'image/png'},
-    {'src': 'icon-512.png', 'sizes': '512x512', 'type': 'image/png'},
-    {'src': 'icon-maskable-512.png', 'sizes': '512x512', 'type': 'image/png', 'purpose': 'maskable'}]}
+    {'src': 'icon-192.png?v=' + version, 'sizes': '192x192', 'type': 'image/png'},
+    {'src': 'icon-512.png?v=' + version, 'sizes': '512x512', 'type': 'image/png'},
+    {'src': 'icon-maskable-512.png?v=' + version, 'sizes': '512x512', 'type': 'image/png', 'purpose': 'maskable'}]}
 json.dump(manifest, open(os.path.join(site, 'manifest.webmanifest'), 'w'), indent=2)
 print('built', title, 'v' + version)
 
